@@ -1,0 +1,175 @@
+---
+name: pathj
+title: Path Analysis
+menuGroup: SEM
+version: '0.0.1'
+jas: '1.2'
+export: true
+completeWhenFilled: false
+description:
+    main: Path Analysis
+    R:
+        dontrun: true
+formula:
+   dep:
+     custom: true
+   factors: 
+     custom: true
+   covs: 
+     custom: true
+   endogenous: 
+     custom: true
+   endogenousTerms: 
+     custom: true
+   
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+
+    - name: endogenous
+      title: endogenous
+      type: Variables
+      suggested:
+        - continuous
+        - ordinal
+      permitted:
+        - numeric
+      default:
+      description:
+          R: a vector of strings naming the mediators from `data`
+
+    - name: factors
+      title: Exogenous Factors
+      type: Variables
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      default:
+      description:
+          R: a vector of strings naming the fixed factors from `data`
+
+    - name: covs
+      title: Exogenous Covariates
+      type: Variables
+      suggested:
+        - continuous
+        - ordinal
+      permitted:
+        - numeric
+      default:
+      description:
+          R: a vector of strings naming the covariates from `data`
+
+
+
+
+    - name: ciType
+      title: Confidence Intervals
+      type: List
+      options:
+        - name: standard
+          title: Standard
+        - name: bca
+          title: Bootstrap (BC)
+        - name: perc
+          title: Bootstrap (Percent)
+        - name: norm
+          title: Bootstrap (Normal)
+        - name: none
+          title: None
+      default: standard
+      description:
+          R: >
+             Choose the confidence interval type
+
+
+    - name: ciWidth
+      title: Confidence level
+      type: Number
+      min: 50
+      max: 99.9
+      default: 95
+      description:
+          R: >
+            a number between 50 and 99.9 (default: 95) specifying the confidence
+            interval width for the parameter estimates
+
+    - name: bootN
+      title: Bootstrap Rep.
+      type: Number
+      min: 50
+      default: 1000
+      description:
+          R: >
+            number of bootstrap samples for estimating confidence intervals
+
+    - name: contrasts
+      title: Factors Coding
+      type: Array
+      items: (factors)
+      default: 
+      template:
+          type: Group
+          elements:
+              - name: var
+                type: Variable
+                content: $key
+              - name: type
+                type: List
+                options:
+                  - simple
+                  - deviation
+                  - dummy
+                  - difference
+                  - helmert
+                  - repeated
+                  - polynomial
+                default: simple
+      description:
+          R: >
+            a list of lists specifying the factor and type of contrast to use,
+            one of `'deviation'`, `'simple'`, `'difference'`, `'helmert'`,
+            `'repeated'` or `'polynomial'`
+
+
+    - name: showRealNames
+      title: Names in estimates table
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide raw names of the contrasts variables
+
+
+    - name: showContrastCode
+      title: Contrast Coefficients tables
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide contrast coefficients tables
+
+
+
+
+
+######### specs here ##########
+
+          
+    - name: modelsTerms
+      title: Models for Endogenous Vars 
+      type: Array
+      default: [[]]
+      template:
+          type: Terms
+      description:
+          R: >
+            a list of lists specifying the models for with the mediators as dependent variables.          
+
+...
+

@@ -1,0 +1,24 @@
+---
+title: Path Analysis
+name: jamm
+version: 0.0.1
+jms: '1.0'
+authors:
+  - Marcello Gallucci
+maintainer: Marcello Gallucci <mcfanda@gmail.com>
+date: 2021-1-1
+type: R
+description: >-
+   Path Analysis based on lavaan
+analyses:
+  - title: Path Analysis
+    name: pathj
+    ns: pahtj
+    menuGroup: SEM
+    menuSubgroup: pathj
+    menuTitle: Path Analysis
+    description: Path Analysis
+usesNative: true
+minApp: 1.0.8
+
+...

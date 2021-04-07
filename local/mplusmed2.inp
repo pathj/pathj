@@ -1,0 +1,29 @@
+TITLE: 1-1-1 mediation (MSEM)
+DATA: FILE IS mydata.dat; ! text file containing raw data in long format 
+VARIABLE: NAMES ARE id x m y; 
+USEVARIABLES ARE id x m y; 
+CLUSTER IS id; ! Level-2 grouping identifier 
+ANALYSIS: TYPE IS TWOLEVEL RANDOM; 
+MODEL: ! model specification follows 
+%WITHIN% ! Model for Within effects follows
+sa | m ON x; ! regress m on x, call the random slope "sa" 
+sb | y ON m; ! regress y on m, call the random slope "sb"
+sc | y ON x; ! regress y on x, call the random slope "sc" 
+%BETWEEN% ! Model for Between effects follows
+sa sb sc x m y;! estimate Level-2 (residual) variances for sa, sb, sc, x, m, and y
+sa WITH sc ; ! estimate Level-2 covariances of sa with sc, x, m, and y
+sa WITH sb(cab); ! estimate Level-2 covariance of sa and sb, call it "cab"
+sb WITH sc x m y; ! estimate Level-2 covariances of sb with sc, x, m, and y
+sc WITH x m y; ! estimate Level-2 covariances of sc with x, m, and y
+m ON x(ab); ! regress m on x, call the slope "ab"; ab = contextual effect, not the Between slope
+y ON m(bb); ! regress y on m, call the slope "bb"; bb = contextual effect, not the Betweeen slope
+y ON x; ! regress y on x 
+[sa](aw); ! estimate the mean of sa, call it "aw" 
+[sb](bw); ! estimate the mean of sb, call it "bw" 
+MODEL CONSTRAINT: ! section for computing indirect effects
+NEW(a b indb indw); ! name the indirect effects 
+a=aw+ab; ! compute Between a path
+b=bw+bb; ! compute Between b path
+indw=aw*bw+cab; ! compute the Within indirect effect 
+indb=a*b; ! compute the Between indirect effect 
+OUTPUT: TECH1 TECH8 CINTERVAL; ! request parameter specifications, starting values, ! optimization history, and confidence intervals for all effects

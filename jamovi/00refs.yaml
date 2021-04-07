@@ -1,0 +1,16 @@
+refs:
+   jamm:
+      type: 'software'
+      author: Gallucci, M.
+      year: 2020
+      title: "pathj: jamovi Path Analysis"
+      publisher: '[jamovi module]. Retrieved from https://jamovi-pathj.github.io/'
+      url: 'https://jamovi-pathj.github.io/'
+   lavaan:
+      type: 'article'
+      author: Rosseel, Y. 
+      year: 2019
+      title: 'lavaan: An R Package for Structural Equation Modeling'
+      publisher: 'Journal of Statistical Software, 48(2), 1-36' 
+      url: 'http://www.jstatsoft.org/v48/i02/'
+
