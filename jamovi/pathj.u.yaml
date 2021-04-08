@@ -2,6 +2,8 @@ title: Path Analysis
 name: pathj
 jus: '2.0'
 compilerMode: tame
+events:
+  update: './pathj.events::update'
 
 children:
   - type: VariableSupplier
@@ -28,7 +30,7 @@ children:
             height: small
             isTarget: true
             events:
-              change: './pathj.events::onChange_factors'
+              change: './pathj.events::onChange_nothing'
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
@@ -52,7 +54,7 @@ children:
             persistentItems: true
             stretchFactor: 1
             events:
-              update: './pathj.events::onUpdate_endogenousSupplier'
+              update: './pathj.events::onChange_endogenousSupplier'
               change: './pathj.events::onChange_endogenousSupplier'
             children:
               - type: TargetLayoutBox
@@ -61,9 +63,6 @@ children:
                   - type: ListBox
                     name: endogenousTerms
                     height: large
-                    events:
-                      listItemAdded: './pathj.events::onEvent_nothing'
-                      listItemRemoved: './pathj.events::onEvent_nothing'
                     selectable: true
                     templateName: linreg-block-template
                     template:
@@ -84,7 +83,7 @@ children:
                           height: auto
                           ghostText: drag variables here
                           events:
-                            change: './pathj.events::onEvent_endogenousToTerms'
+                            change: './pathj.events::onChange_endogenousTerms'
                           template:
                             type: TermLabel
   - type: CollapseBox

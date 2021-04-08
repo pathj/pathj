@@ -22,6 +22,9 @@ items:
          type: text
          title: ""
     clearWith:
+          - endogenous
+          - factors
+          - covs
     refs: pathj
 
 

@@ -181,7 +181,10 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="value", 
                         `type`="text", 
                         `title`="")),
-                clearWith=NULL,
+                clearWith=list(
+                    "endogenous",
+                    "factors",
+                    "covs"),
                 refs="pathj"))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
