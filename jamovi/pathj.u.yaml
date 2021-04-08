@@ -20,7 +20,7 @@ children:
             height: small
             isTarget: true
             events:
-              change: './jamm.events::onChange_mediators'
+              change: './pathj.events::onChange_endogenous'
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
@@ -28,7 +28,7 @@ children:
             height: small
             isTarget: true
             events:
-              change: './jamm.events::onChange_factors'
+              change: './pathj.events::onChange_factors'
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
@@ -36,7 +36,7 @@ children:
             height: small
             isTarget: true
             events:
-              change: './jamm.events::onChange_covariates'
+              change: './pathj.events::onChange_covariates'
   - type: CollapseBox
     label: Endogenous Models
     collapsed: true
@@ -52,8 +52,8 @@ children:
             persistentItems: true
             stretchFactor: 1
             events:
-              update: './jamm.events::onUpdate_mediatorsSupplier'
-              change: './jamm.events::onChange_mediatorsSupplier'
+              update: './pathj.events::onUpdate_endogenousSupplier'
+              change: './pathj.events::onChange_endogenousSupplier'
             children:
               - type: TargetLayoutBox
                 transferAction: interactions
@@ -62,8 +62,8 @@ children:
                     name: endogenousTerms
                     height: large
                     events:
-                      listItemAdded: './jamm.events::onEvent_nothing'
-                      listItemRemoved: './jamm.events::onEvent_nothing'
+                      listItemAdded: './pathj.events::onEvent_nothing'
+                      listItemRemoved: './pathj.events::onEvent_nothing'
                     selectable: true
                     templateName: linreg-block-template
                     template:
@@ -84,7 +84,7 @@ children:
                           height: auto
                           ghostText: drag variables here
                           events:
-                            change: './jamm.events::onEvent_mediatorToTerms'
+                            change: './pathj.events::onEvent_endogenousToTerms'
                           template:
                             type: TermLabel
   - type: CollapseBox
@@ -157,22 +157,4 @@ children:
               - type: TextBox
                 name: bootN
                 format: number
-          - type: Label
-            label: Display in tables
-            margin: large
-            style: list
-            children:
-              - name: tableOptions_component
-                type: CheckBox
-                optionPart: component
-                optionName: tableOptions
-              - name: tableOptions_beta
-                type: CheckBox
-                optionName: tableOptions
-                optionPart: beta
-              - name: tableOptions_regression
-                type: CheckBox
-                optionName: tableOptions
-                optionPart: regression
-
 

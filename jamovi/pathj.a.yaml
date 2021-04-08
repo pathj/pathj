@@ -161,7 +161,7 @@ options:
 ######### specs here ##########
 
           
-    - name: modelsTerms
+    - name: endogenousTerms
       title: Models for Endogenous Vars 
       type: Array
       default: [[]]

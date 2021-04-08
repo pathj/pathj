@@ -3,7 +3,7 @@ install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-
 
 jmvtools::version()
 jmvtools::check()
-
+jmvtools::install()
 installme<-function(what) {
   library(what,character.only=TRUE)
   s<-sessionInfo()
@@ -24,6 +24,6 @@ installme<-function(what) {
     warning("versions mismatch")
   
 }
-installme("jamm")
+installme("pathj")
 
   
