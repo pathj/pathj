@@ -12,6 +12,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (!goOn$ready) {
                   if(goOn$report)
                       self$results$info$addRow("info",list(info="Setup",specs=goOn$reason))
+                return()
             }
 
 
