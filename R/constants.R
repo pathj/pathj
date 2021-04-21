@@ -2,6 +2,7 @@ j_DEBUG=T
 j_INFO=T
 
 
+INTERACTION_SYMBOL="_._._._.________._._._."
 NOTES<-list()
 
 NOTES[["ci"]]<-list("standard"="Standard (Delta method)",
@@ -29,3 +30,6 @@ DP_EXAMPLES[[6]]<-list("info"="Non linear estimates",example="a2:=p1^2", com="Es
 
 CONT_NOTE<-"All the parameters labels are in the form `pN`, where `N` is a number. 
 The parameter labels can be found in the results tables. Please be sure to have the options `Show parameters labels` selected."
+
+WARNS<-list()
+WARNS[["usercov"]]<-"Variances/Covariances specified by the user. The option  `Free Parameter - Exogenous Correlations` is ignored"

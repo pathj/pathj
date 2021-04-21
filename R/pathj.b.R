@@ -23,6 +23,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             lav_machine<-Estimate$new(self$options,data)
             forms<-lav_machine$models()
             
+            
             ### fill the info table ###
             for (i in seq_along(forms)) {
                   self$results$info$addRow(rowKey=i,list(info="Model",value=as.character(forms[[i]])))
@@ -114,21 +115,27 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
     
         .run = function() {
+            ginfo("run")
             ### check that we have enough information to run ####
             if (!private$.ready$ready)
                 return()
-            
+
             ### clean the data and prepare things ###
             data<-private$.cleandata()
             lav_machine<-private$.lav_machine
             results<-lav_machine$estimate(data)
-            if (is.something(lav_machine$warnings))
-                self$results$info$setNote("ew",lav_machine$warnings)
             
+            if (is.something(lav_machine$warnings))
+                for (i in seq_along(lav_machine$warnings))
+                      self$results$info$setNote(i,lav_machine$warnings[[i]])
+
+            if (is.something(lav_machine$errors)) {
+                    stop(paste(lav_machine$errors,collapse = "\n\n"))
+            }
             ## fit indices
-             nr<-self$results$info$rowCount+1
+             nr<-self$results$info$rowCount
              for (i in seq_along(lav_machine$info)) {
-                 self$results$info$addRow(rowKey=nr+i,lav_machine$info[[i]])
+                 self$results$info$addRow(rowKey=nr+i+1,lav_machine$info[[i]])
              }
              self$results$info$addFormat(rowNo=nr, col=1,jmvcore::Cell.BEGIN_END_GROUP)
              ## fit test
@@ -165,7 +172,6 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 self$results$models$r2$setRow(rowKey=i,tab3[i,])
             
             tab<-lav_machine$definedParameters
-            mark(tab)
             if (is.something(tab)) {
                  for (i in seq_len(nrow(tab))) 
                     self$results$models$defined$setRow(rowKey=i,tab[i,])
@@ -210,6 +216,30 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 data<-cbind(data,dummies)
                 names(data)<-c(onames,paste0(factor,1:(length(levels)-1)))
             }
+            
+             #### here we do thing if cleandata is called by run (not init) ####
+             if (is.something(private$.lav_machine)) {
+                 mark(names(data))
+                 ### here we build the interactions variables                 
+                 if (private$.lav_machine$hasInteractions) {
+                     ints<-private$.lav_machine$interactions
+                     mark(ints)
+                     for (int in ints) {
+                         int<-trimws(int)
+                         mark(int)
+                         terms<-strsplit(int,INTERACTION_SYMBOL,fixed = T)[[1]]
+                         terms<-paste0("data$",trimws(terms))
+                         head<-paste0("data$",int,"<-")
+                         op<-paste(terms,collapse = " * ")
+                         synt<-paste0(head,op)
+                         eval(parse(text=synt))
+                     }
+                     
+                 
+             }
+                          
+                          
+                      }
             data<-as.data.frame(data)     
             attr(data,"warning")<-.warning
             return(data)
@@ -221,7 +251,6 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 return()
             
           labs<-self$options$diag_paths
-          labels<-gsub(".","",private$.lav_machine$model@ParTable$plabel,fixed = T)
           options<-list(object = private$.lav_machine$model,
                                   layout = "tree2",
                                   residuals = self$options$diag_resid,
