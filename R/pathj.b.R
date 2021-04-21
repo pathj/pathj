@@ -219,14 +219,11 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
              #### here we do thing if cleandata is called by run (not init) ####
              if (is.something(private$.lav_machine)) {
-                 mark(names(data))
                  ### here we build the interactions variables                 
                  if (private$.lav_machine$hasInteractions) {
                      ints<-private$.lav_machine$interactions
-                     mark(ints)
                      for (int in ints) {
                          int<-trimws(int)
-                         mark(int)
                          terms<-strsplit(int,INTERACTION_SYMBOL,fixed = T)[[1]]
                          terms<-paste0("data$",trimws(terms))
                          head<-paste0("data$",int,"<-")
@@ -251,11 +248,17 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 return()
             
           labs<-self$options$diag_paths
+          model<-private$.lav_machine$model
+          pt<-lavaan::parTable(model)
+          nodeLabels<-unique(pt$lhs)
+          nodelabels<-gsub(INTERACTION_SYMBOL,":",nodeLabels)
+          
           options<-list(object = private$.lav_machine$model,
                                   layout = "tree2",
                                   residuals = self$options$diag_resid,
                                   rotation = 2,
                                   intercepts = F
+                                  ,nodeLabels=nodelabels
                                   ,whatLabels=labs
                                   ,sizeMan = 10
                                   ,nCharNodes=10
