@@ -66,26 +66,43 @@ options:
           R: a vector of strings naming the covariates from `data`
 
 
-
-
-    - name: ciType
-      title: Confidence Intervals
+    - name: se
+      title: Standard errors
       type: List
       options:
         - name: standard
           title: Standard
-        - name: bca
-          title: Bootstrap (BC)
-        - name: perc
-          title: Bootstrap (Percent)
-        - name: norm
-          title: Bootstrap (Normal)
-        - name: none
-          title: None
+        - name: robust.sem
+          title: Robust
+        - name: robust.huber.white
+          title: Pseudo ML
+        - name: boot
+          title: Bootstrap
       default: standard
+
+
+    - name: bootci
+      title: Bootstrap C.I
+      type: List
+      options:
+        - name: perc
+          title: Percentiles
+        - name: bca.simple
+          title: Adjuseste Bias corrected
+        - name: norm
+          title: Normal
+        - name: basic
+          title: Basic
+          
+      default: perc
       description:
           R: >
              Choose the confidence interval type
+
+    - name: ci
+      title: Show
+      type: Bool
+      default: true
 
 
     - name: ciWidth
@@ -107,6 +124,8 @@ options:
       description:
           R: >
             number of bootstrap samples for estimating confidence intervals
+
+
 
     - name: contrasts
       title: Factors Coding
@@ -157,7 +176,6 @@ options:
 
 
 
-
 ######### specs here ##########
 
           
@@ -170,6 +188,77 @@ options:
       description:
           R: >
             a list of lists specifying the models for with the mediators as dependent variables.          
+
+##### diagram ####
+
+    - name: diagram
+      title: Path Diagram
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), produce a path diagram
+
+    - name: diag_paths
+      title: Paths Labels
+      type: List
+      options:
+        - name:  est
+          title: Coefficients
+        - name: stand
+          title: Betas
+        - name: name
+          title: Labels
+        - name: hide
+          title: None
+      default: est
+      description:
+          R: >
+             Choose the diagram labels
+
+    - name: diag_resid
+      title: Residuals
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), produce a path diagram
+
+    - name: cov_y
+      title: Endogenous Correlations
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), produce a path diagram
+    - name: cov_x
+      title: Exogenous Correlations
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), produce a path diagram
+
+
+    - name: constraints
+      title: Insert contraints or defined parameters
+      type: Array
+      default: []
+      template:
+          type: String
+      description:
+          R: >
+            a list of lists specifying the models random effects.          
+
+    - name: constraints_examples
+      type: Bool
+      title: Show Examples
+      default: false
+
+    - name: showlabels
+      type: Bool
+      title: Show parameters labels
+      default: false
 
 ...
 

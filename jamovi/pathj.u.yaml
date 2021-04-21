@@ -4,7 +4,6 @@ jus: '2.0'
 compilerMode: tame
 events:
   update: './pathj.events::update'
-
 children:
   - type: VariableSupplier
     name: variablesupplier
@@ -30,7 +29,7 @@ children:
             height: small
             isTarget: true
             events:
-              change: './pathj.events::onChange_nothing'
+              change: './pathj.events::onChange_factors'
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
@@ -87,6 +86,24 @@ children:
                           template:
                             type: TermLabel
   - type: CollapseBox
+    label: Model Structure
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        style: inline
+        children:
+          - type: Label
+            label: Free Parameters
+            margin: large
+            style: list
+            children:
+              - type: CheckBox
+                name: cov_y
+              - type: CheckBox
+                name: cov_x
+  - type: CollapseBox
     label: Factors Coding
     collapsed: true
     stretchFactor: 1
@@ -114,7 +131,7 @@ children:
       - type: CheckBox
         name: showContrastCode
   - type: CollapseBox
-    label: Options
+    label: Parameter Options
     collapsed: true
     stretchFactor: 1
     children:
@@ -123,37 +140,152 @@ children:
         style: inline
         children:
           - type: Label
-            label: Confidence Intervals
+            label: Standard Errors
             margin: large
             style: list
             children:
               - type: RadioButton
-                name: ciType_standard
-                optionName: ciType
+                name: se_standard
+                optionName: se
                 optionPart: standard
+              - name: se_robust.sem
+                type: RadioButton
+                optionName: se
+                optionPart: robust.sem
               - type: RadioButton
-                name: ciType_bootperc
-                optionName: ciType
-                optionPart: perc
+                name: se_robust.huber.white
+                optionName: se
+                optionPart: robust.huber.white
               - type: RadioButton
-                name: ciType_bootbca
-                optionName: ciType
-                optionPart: bca
-
-              - type: RadioButton
-                name: ciType_bootnorm
-                optionName: ciType
-                optionPart: norm
-              - type: RadioButton
-                name: ciType_none
-                optionName: ciType
-                optionPart: none
+                name: se_boot
+                optionName: se
+                optionPart: boot
+          - type: Label
+            label: Confidence Intervals
+            margin: large
+            style: list
+            children:
+              - type: CheckBox
+                name: ci
               - type: TextBox
                 name: ciWidth
                 label: Interval
                 suffix: '%'
                 format: number
+                enable: (ci)
+
+          - type: Label
+            label: Bootstrap C.I. 
+            margin: large
+            style: list
+            children:
+              - type: RadioButton
+                name: bootci_bootperc
+                optionName: bootci
+                optionPart: perc
+                enable: '(se:boot)'
+              - type: RadioButton
+                name: bootci_bootnorm
+                optionName: bootci
+                optionPart: norm
+                enable: '(se:boot)'
+              - name: bootci_bca.simple
+                type: RadioButton
+                optionName: bootci
+                optionPart: bca.simple
+                enable: '(se:boot)'
+              - type: RadioButton
+                name: bootci_basic
+                optionName: bootci
+                optionPart: basic
+                enable: '(se:boot)'
+
               - type: TextBox
                 name: bootN
                 format: number
+                enable: '(se:boot)'
 
+  - type: CollapseBox
+    label: Path Diagram
+    collapsed: true
+    stretchFactor: 1
+    style: inline
+    children:
+      - type: CheckBox
+        name: diagram
+      - type: Label
+        label: Paths
+        margin: large
+        style: list
+        children:
+          - type: RadioButton
+            name: diag_paths_est
+            optionName: diag_paths
+            optionPart: est
+            enable: (diagram)
+          - type: RadioButton
+            name: diag_paths_stand
+            optionName: diag_paths
+            optionPart: stand
+            enable: (diagram)
+          - type: RadioButton
+            name: diag_paths_name
+            optionName: diag_paths
+            optionPart: name
+            enable: (diagram)
+          - type: RadioButton
+            name: diag_paths_hide
+            optionName: diag_paths
+            optionPart: hide
+            enable: (diagram)
+      - type: Label
+        label: Show
+        margin: large
+        style: list
+        children:
+          - type: CheckBox
+            name: diag_resid
+            enable: (diagram)
+  - type: CollapseBox
+    label: Constraints
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            margin: large
+            stretchFactor: 1
+            children:
+              - type: TargetLayoutBox
+                children:
+                  - type: ListBox
+                    name: constraints
+                    height: large
+                    addButton: Add constraint
+                    selectable: true
+                    templateName: linreg-block-template
+                    template:
+                      type: LayoutBox
+                      margin: normal
+                      stretchFactor: 1
+                      children:
+                        - type: TextBox
+                          name: randblockList
+                          valueFilter: unique
+                          stretchFactor: 0.5
+                          borderless: true
+                          height: auto
+                          ghostText: drag term here
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: LayoutBox
+                margin: large
+                children:
+                  - type: CheckBox
+                    name: showlabels
+                  - type: CheckBox
+                    name: constraints_examples

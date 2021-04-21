@@ -66,7 +66,7 @@ lf.createContrasts=function(levels, type, base=1) {
         contrast[1, i] <- -1
       }
   }
-  dimnames(contrast)<-list(NULL,paste0("_._._",1:(nLevels-1)))
+  dimnames(contrast)<-list(NULL,1:(nLevels-1))
   contrast
 }
 
