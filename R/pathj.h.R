@@ -9,14 +9,24 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             endogenous = NULL,
             factors = NULL,
             covs = NULL,
-            ciType = "standard",
+            se = "standard",
+            bootci = "perc",
+            ci = TRUE,
             ciWidth = 95,
             bootN = 1000,
             contrasts = NULL,
             showRealNames = TRUE,
             showContrastCode = FALSE,
             endogenousTerms = list(
-                list()), ...) {
+                list()),
+            diagram = FALSE,
+            diag_paths = "est",
+            diag_resid = FALSE,
+            cov_y = TRUE,
+            cov_x = FALSE,
+            constraints = list(),
+            constraints_examples = FALSE,
+            showlabels = FALSE, ...) {
 
             super$initialize(
                 package="pathj",
@@ -51,16 +61,28 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 permitted=list(
                     "numeric"),
                 default=NULL)
-            private$..ciType <- jmvcore::OptionList$new(
-                "ciType",
-                ciType,
+            private$..se <- jmvcore::OptionList$new(
+                "se",
+                se,
                 options=list(
                     "standard",
-                    "bca",
-                    "perc",
-                    "norm",
-                    "none"),
+                    "robust.sem",
+                    "robust.huber.white",
+                    "boot"),
                 default="standard")
+            private$..bootci <- jmvcore::OptionList$new(
+                "bootci",
+                bootci,
+                options=list(
+                    "perc",
+                    "bca.simple",
+                    "norm",
+                    "basic"),
+                default="perc")
+            private$..ci <- jmvcore::OptionBool$new(
+                "ci",
+                ci,
+                default=TRUE)
             private$..ciWidth <- jmvcore::OptionNumber$new(
                 "ciWidth",
                 ciWidth,
@@ -113,40 +135,110 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 template=jmvcore::OptionTerms$new(
                     "endogenousTerms",
                     NULL))
+            private$..diagram <- jmvcore::OptionBool$new(
+                "diagram",
+                diagram,
+                default=FALSE)
+            private$..diag_paths <- jmvcore::OptionList$new(
+                "diag_paths",
+                diag_paths,
+                options=list(
+                    "est",
+                    "stand",
+                    "name",
+                    "hide"),
+                default="est")
+            private$..diag_resid <- jmvcore::OptionBool$new(
+                "diag_resid",
+                diag_resid,
+                default=FALSE)
+            private$..cov_y <- jmvcore::OptionBool$new(
+                "cov_y",
+                cov_y,
+                default=TRUE)
+            private$..cov_x <- jmvcore::OptionBool$new(
+                "cov_x",
+                cov_x,
+                default=FALSE)
+            private$..constraints <- jmvcore::OptionArray$new(
+                "constraints",
+                constraints,
+                default=list(),
+                template=jmvcore::OptionString$new(
+                    "constraints",
+                    NULL))
+            private$..constraints_examples <- jmvcore::OptionBool$new(
+                "constraints_examples",
+                constraints_examples,
+                default=FALSE)
+            private$..showlabels <- jmvcore::OptionBool$new(
+                "showlabels",
+                showlabels,
+                default=FALSE)
 
             self$.addOption(private$..endogenous)
             self$.addOption(private$..factors)
             self$.addOption(private$..covs)
-            self$.addOption(private$..ciType)
+            self$.addOption(private$..se)
+            self$.addOption(private$..bootci)
+            self$.addOption(private$..ci)
             self$.addOption(private$..ciWidth)
             self$.addOption(private$..bootN)
             self$.addOption(private$..contrasts)
             self$.addOption(private$..showRealNames)
             self$.addOption(private$..showContrastCode)
             self$.addOption(private$..endogenousTerms)
+            self$.addOption(private$..diagram)
+            self$.addOption(private$..diag_paths)
+            self$.addOption(private$..diag_resid)
+            self$.addOption(private$..cov_y)
+            self$.addOption(private$..cov_x)
+            self$.addOption(private$..constraints)
+            self$.addOption(private$..constraints_examples)
+            self$.addOption(private$..showlabels)
         }),
     active = list(
         endogenous = function() private$..endogenous$value,
         factors = function() private$..factors$value,
         covs = function() private$..covs$value,
-        ciType = function() private$..ciType$value,
+        se = function() private$..se$value,
+        bootci = function() private$..bootci$value,
+        ci = function() private$..ci$value,
         ciWidth = function() private$..ciWidth$value,
         bootN = function() private$..bootN$value,
         contrasts = function() private$..contrasts$value,
         showRealNames = function() private$..showRealNames$value,
         showContrastCode = function() private$..showContrastCode$value,
-        endogenousTerms = function() private$..endogenousTerms$value),
+        endogenousTerms = function() private$..endogenousTerms$value,
+        diagram = function() private$..diagram$value,
+        diag_paths = function() private$..diag_paths$value,
+        diag_resid = function() private$..diag_resid$value,
+        cov_y = function() private$..cov_y$value,
+        cov_x = function() private$..cov_x$value,
+        constraints = function() private$..constraints$value,
+        constraints_examples = function() private$..constraints_examples$value,
+        showlabels = function() private$..showlabels$value),
     private = list(
         ..endogenous = NA,
         ..factors = NA,
         ..covs = NA,
-        ..ciType = NA,
+        ..se = NA,
+        ..bootci = NA,
+        ..ci = NA,
         ..ciWidth = NA,
         ..bootN = NA,
         ..contrasts = NA,
         ..showRealNames = NA,
         ..showContrastCode = NA,
-        ..endogenousTerms = NA)
+        ..endogenousTerms = NA,
+        ..diagram = NA,
+        ..diag_paths = NA,
+        ..diag_resid = NA,
+        ..cov_y = NA,
+        ..cov_x = NA,
+        ..constraints = NA,
+        ..constraints_examples = NA,
+        ..showlabels = NA)
 )
 
 pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -154,8 +246,10 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         info = function() private$.items[["info"]],
+        fit = function() private$.items[["fit"]],
+        models = function() private$.items[["models"]],
         pathmodelgroup = function() private$.items[["pathmodelgroup"]],
-        models = function() private$.items[["models"]]),
+        contraintsnotes = function() private$.items[["contraintsnotes"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -167,6 +261,9 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="info",
                 title="Models Info",
+                clearWith=list(
+                    "endogenousTerms",
+                    "constraints"),
                 columns=list(
                     list(
                         `name`="info", 
@@ -174,54 +271,108 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="", 
                         `combineBelow`=TRUE),
                     list(
-                        `name`="specs", 
+                        `name`="value", 
                         `type`="text", 
                         `title`=""),
                     list(
-                        `name`="value", 
+                        `name`="specs", 
                         `type`="text", 
-                        `title`="")),
-                clearWith=NULL,
+                        `title`="", 
+                        `combineBelow`=TRUE)),
                 refs="pathj"))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
-                    pathmodel = function() private$.items[["pathmodel"]],
-                    pathnotes = function() private$.items[["pathnotes"]]),
+                    main = function() private$.items[["main"]],
+                    constraints = function() private$.items[["constraints"]]),
                 private = list(),
                 public=list(
                     initialize=function(options) {
                         super$initialize(
                             options=options,
-                            name="pathmodelgroup",
-                            title="Path Model",
+                            name="fit",
+                            title="Overall Tests",
                             clearWith=list(
-                    "endogenous"))
-                        self$add(jmvcore::Image$new(
-                            options=options,
-                            name="pathmodel",
-                            title="Model Diagram",
-                            width=600,
-                            height=500,
-                            renderFun=".showDiagram",
-                            clearWith=list(
-                                "endogenous"),
-                            refs="diagram"))
+                    "endogenousTerms"))
                         self$add(jmvcore::Table$new(
                             options=options,
-                            name="pathnotes",
-                            title="",
-                            visible=FALSE,
+                            name="main",
+                            title="Model Tests",
+                            clearWith=list(
+                                "endogenous",
+                                "covs",
+                                "factors",
+                                "ciType",
+                                "contrasts",
+                                "cov_y",
+                                "constraints"),
                             columns=list(
                                 list(
-                                    `name`="info", 
-                                    `type`="text", 
-                                    `title`="Model diagram notes"))))}))$new(options=options))
+                                    `name`="label", 
+                                    `title`="Label", 
+                                    `type`="text"),
+                                list(
+                                    `name`="chisq", 
+                                    `title`="X\u00B2", 
+                                    `type`="number", 
+                                    `combineBelow`=TRUE),
+                                list(
+                                    `name`="df", 
+                                    `title`="df", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="pvalue", 
+                                    `title`="p", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="constraints",
+                            title="Contraints Tests",
+                            visible=FALSE,
+                            clearWith=list(
+                                "endogenous",
+                                "covs",
+                                "factors",
+                                "ciType",
+                                "contrasts",
+                                "cov_y",
+                                "constraints"),
+                            columns=list(
+                                list(
+                                    `name`="lhs", 
+                                    `title`="Par 1", 
+                                    `type`="text"),
+                                list(
+                                    `name`="op", 
+                                    `title`="", 
+                                    `type`="text"),
+                                list(
+                                    `name`="rhs", 
+                                    `title`="Par 2", 
+                                    `type`="text"),
+                                list(
+                                    `name`="chisq", 
+                                    `title`="X\u00B2", 
+                                    `type`="number", 
+                                    `combineBelow`=TRUE),
+                                list(
+                                    `name`="df", 
+                                    `title`="df", 
+                                    `type`="integer"),
+                                list(
+                                    `name`="pvalue", 
+                                    `title`="p", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"))))}))$new(options=options))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
                     main = function() private$.items[["main"]],
-                    contrastCodeTables = function() private$.items[["contrastCodeTables"]]),
+                    r2 = function() private$.items[["r2"]],
+                    correlations = function() private$.items[["correlations"]],
+                    defined = function() private$.items[["defined"]],
+                    contrastCodeTable = function() private$.items[["contrastCodeTable"]]),
                 private = list(),
                 public=list(
                     initialize=function(options) {
@@ -230,29 +381,34 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             name="models",
                             title="Estimates",
                             clearWith=list(
-                    "endogenous"))
+                    "endogenousTerms"))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="main",
-                            title="Indirect and Total Effects",
+                            title="Parameter Estimates",
                             refs="lavaan",
                             clearWith=list(
                                 "endogenous",
-                                "ciType"),
+                                "covs",
+                                "factors",
+                                "ciType",
+                                "contrasts",
+                                "cov_y",
+                                "constraints"),
                             columns=list(
                                 list(
-                                    `name`="type", 
-                                    `title`="Type", 
+                                    `name`="label", 
+                                    `title`="Label", 
+                                    `type`="text", 
+                                    `visible`="(showlabels)"),
+                                list(
+                                    `name`="lhs", 
+                                    `title`="Dep", 
                                     `type`="text", 
                                     `combineBelow`=TRUE),
                                 list(
-                                    `name`="source", 
-                                    `title`="Effect", 
-                                    `type`="text"),
-                                list(
-                                    `name`="label", 
-                                    `title`="Contrasts", 
-                                    `visible`=FALSE, 
+                                    `name`="rhs", 
+                                    `title`="Pred", 
                                     `type`="text"),
                                 list(
                                     `name`="est", 
@@ -266,17 +422,16 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     `name`="ci.lower", 
                                     `type`="number", 
                                     `title`="Lower", 
-                                    `visible`="(ciType:standard || ciType:perc || ciType:norm || ciType:bca)"),
+                                    `visible`="(ci)"),
                                 list(
                                     `name`="ci.upper", 
                                     `type`="number", 
                                     `title`="Upper", 
-                                    `visible`="(ciType:standard || ciType:perc || ciType:norm || ciType:bca)"),
+                                    `visible`="(ci)"),
                                 list(
                                     `name`="std.all", 
                                     `type`="number", 
-                                    `title`="\u03B2", 
-                                    `visible`="(tableOptions:beta)"),
+                                    `title`="\u03B2"),
                                 list(
                                     `name`="z", 
                                     `title`="z", 
@@ -286,27 +441,227 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     `title`="p", 
                                     `type`="number", 
                                     `format`="zto,pvalue"))))
-                        self$add(jmvcore::Array$new(
+                        self$add(jmvcore::Table$new(
                             options=options,
-                            name="contrastCodeTables",
-                            title="Contrast Coefficients",
-                            visible="(showContrastCode)",
+                            name="r2",
+                            title="R-squared",
                             clearWith=list(
+                                "endogenous",
+                                "covs",
+                                "factors",
+                                "ciType",
                                 "contrasts",
-                                "showContrastCode"),
-                            template=jmvcore::Table$new(
-                                options=options,
-                                title="$key",
-                                visible="(showContrastCode)",
-                                columns=list(
-                                    list(
-                                        `name`="rnames", 
-                                        `title`="Name", 
-                                        `type`="text"),
-                                    list(
-                                        `name`="clabs", 
-                                        `title`="Contrast", 
-                                        `type`="text")))))}))$new(options=options))}))
+                                "cov_y",
+                                "constraints"),
+                            columns=list(
+                                list(
+                                    `name`="lhs", 
+                                    `title`="Variable", 
+                                    `type`="text"),
+                                list(
+                                    `name`="r2", 
+                                    `title`="R^2", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci.lower", 
+                                    `type`="number", 
+                                    `title`="Lower", 
+                                    `visible`="(ci)"),
+                                list(
+                                    `name`="ci.upper", 
+                                    `type`="number", 
+                                    `title`="Upper", 
+                                    `visible`="(ci)"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="correlations",
+                            title="Variances and Covariances",
+                            clearWith=list(
+                                "endogenous",
+                                "covs",
+                                "factors",
+                                "ciType",
+                                "contrasts",
+                                "cov_y",
+                                "constraints"),
+                            columns=list(
+                                list(
+                                    `name`="label", 
+                                    `title`="Label", 
+                                    `type`="text", 
+                                    `visible`="(showlabels)"),
+                                list(
+                                    `name`="lhs", 
+                                    `title`="Variable 1", 
+                                    `type`="text"),
+                                list(
+                                    `name`="rhs", 
+                                    `title`="Variable 2", 
+                                    `type`="text"),
+                                list(
+                                    `name`="est", 
+                                    `title`="Estimate", 
+                                    `type`="number"),
+                                list(
+                                    `name`="se", 
+                                    `title`="SE", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci.lower", 
+                                    `type`="number", 
+                                    `title`="Lower", 
+                                    `visible`="(ci)"),
+                                list(
+                                    `name`="ci.upper", 
+                                    `type`="number", 
+                                    `title`="Upper", 
+                                    `visible`="(ci)"),
+                                list(
+                                    `name`="std.all", 
+                                    `type`="number", 
+                                    `title`="\u03B2"),
+                                list(
+                                    `name`="z", 
+                                    `title`="z", 
+                                    `type`="number"),
+                                list(
+                                    `name`="pvalue", 
+                                    `title`="p", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"),
+                                list(
+                                    `name`="user", 
+                                    `title`="Method", 
+                                    `type`="text"),
+                                list(
+                                    `name`="type", 
+                                    `title`="Type", 
+                                    `type`="text"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="defined",
+                            title="Defined Parameters",
+                            visible=FALSE,
+                            clearWith=list(
+                                "endogenous",
+                                "covs",
+                                "factors",
+                                "ciType",
+                                "contrasts",
+                                "cov_y",
+                                "constraints"),
+                            columns=list(
+                                list(
+                                    `name`="lhs", 
+                                    `title`="Label", 
+                                    `type`="text", 
+                                    `combineBelow`=TRUE),
+                                list(
+                                    `name`="rhs", 
+                                    `title`="Parameter", 
+                                    `type`="text"),
+                                list(
+                                    `name`="est", 
+                                    `title`="Estimate", 
+                                    `type`="number"),
+                                list(
+                                    `name`="se", 
+                                    `title`="SE", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci.lower", 
+                                    `type`="number", 
+                                    `title`="Lower", 
+                                    `visible`="(ci)"),
+                                list(
+                                    `name`="ci.upper", 
+                                    `type`="number", 
+                                    `title`="Upper", 
+                                    `visible`="(ci)"),
+                                list(
+                                    `name`="std.all", 
+                                    `type`="number", 
+                                    `title`="\u03B2"),
+                                list(
+                                    `name`="z", 
+                                    `title`="z", 
+                                    `type`="number"),
+                                list(
+                                    `name`="pvalue", 
+                                    `title`="p", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="contrastCodeTable",
+                            title="Contrasts Definition",
+                            visible=FALSE,
+                            columns=list(
+                                list(
+                                    `name`="rname", 
+                                    `title`="Name", 
+                                    `type`="text"),
+                                list(
+                                    `name`="clab", 
+                                    `title`="Contrast", 
+                                    `type`="text"))))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    pathmodel = function() private$.items[["pathmodel"]],
+                    pathnotes = function() private$.items[["pathnotes"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="pathmodelgroup",
+                            title="Path Model",
+                            clearWith=list(
+                    "endogenous",
+                    "cov_y",
+                    "constraints"))
+                        self$add(jmvcore::Image$new(
+                            options=options,
+                            name="pathmodel",
+                            title="Path Diagram",
+                            visible="(diagram)",
+                            width=600,
+                            height=500,
+                            renderFun=".showDiagram",
+                            clearWith=list(
+                                "diag_resid",
+                                "diag_paths",
+                                "contrasts",
+                                "endogenousTerms",
+                                "cov_y",
+                                "constraints"),
+                            refs="diagram"))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="pathnotes",
+                            title="",
+                            visible=FALSE,
+                            columns=list(
+                                list(
+                                    `name`="info", 
+                                    `type`="text", 
+                                    `title`="Model diagram notes"))))}))$new(options=options))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="contraintsnotes",
+                visible="(constraints_examples)",
+                title="Constraints input examples",
+                columns=list(
+                    list(
+                        `name`="info", 
+                        `type`="text"),
+                    list(
+                        `name`="example", 
+                        `type`="text"),
+                    list(
+                        `name`="com", 
+                        `type`="text"))))}))
 
 pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "pathjBase",
@@ -336,7 +691,9 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param factors a vector of strings naming the fixed factors from
 #'   \code{data}
 #' @param covs a vector of strings naming the covariates from \code{data}
-#' @param ciType Choose the confidence interval type
+#' @param se .
+#' @param bootci Choose the confidence interval type
+#' @param ci .
 #' @param ciWidth a number between 50 and 99.9 (default: 95) specifying the
 #'   confidence interval width for the parameter estimates
 #' @param bootN number of bootstrap samples for estimating confidence
@@ -350,14 +707,30 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   contrast coefficients tables
 #' @param endogenousTerms a list of lists specifying the models for with the
 #'   mediators as dependent variables.
+#' @param diagram \code{TRUE} or \code{FALSE} (default), produce a path
+#'   diagram
+#' @param diag_paths Choose the diagram labels
+#' @param diag_resid \code{TRUE} or \code{FALSE} (default), produce a path
+#'   diagram
+#' @param cov_y \code{TRUE} or \code{FALSE} (default), produce a path diagram
+#' @param cov_x \code{TRUE} or \code{FALSE} (default), produce a path diagram
+#' @param constraints a list of lists specifying the models random effects.
+#' @param constraints_examples .
+#' @param showlabels .
 #' @param formula (optional) the formula to use, see the examples
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$info} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$fit$main} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$fit$constraints} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$models$main} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$models$r2} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$models$correlations} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$models$defined} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$models$contrastCodeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$pathmodelgroup$pathmodel} \tab \tab \tab \tab \tab a path model \cr
 #'   \code{results$pathmodelgroup$pathnotes} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$models$main} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$models$contrastCodeTables} \tab \tab \tab \tab \tab an array of contrast coefficients tables \cr
+#'   \code{results$contraintsnotes} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -372,7 +745,9 @@ pathj <- function(
     endogenous = NULL,
     factors = NULL,
     covs = NULL,
-    ciType = "standard",
+    se = "standard",
+    bootci = "perc",
+    ci = TRUE,
     ciWidth = 95,
     bootN = 1000,
     contrasts = NULL,
@@ -380,6 +755,14 @@ pathj <- function(
     showContrastCode = FALSE,
     endogenousTerms = list(
                 list()),
+    diagram = FALSE,
+    diag_paths = "est",
+    diag_resid = FALSE,
+    cov_y = TRUE,
+    cov_x = FALSE,
+    constraints = list(),
+    constraints_examples = FALSE,
+    showlabels = FALSE,
     formula) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -429,13 +812,23 @@ pathj <- function(
         endogenous = endogenous,
         factors = factors,
         covs = covs,
-        ciType = ciType,
+        se = se,
+        bootci = bootci,
+        ci = ci,
         ciWidth = ciWidth,
         bootN = bootN,
         contrasts = contrasts,
         showRealNames = showRealNames,
         showContrastCode = showContrastCode,
-        endogenousTerms = endogenousTerms)
+        endogenousTerms = endogenousTerms,
+        diagram = diagram,
+        diag_paths = diag_paths,
+        diag_resid = diag_resid,
+        cov_y = cov_y,
+        cov_x = cov_x,
+        constraints = constraints,
+        constraints_examples = constraints_examples,
+        showlabels = showlabels)
 
     analysis <- pathjClass$new(
         options = options,

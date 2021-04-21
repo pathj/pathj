@@ -128,6 +128,18 @@ sourcifyList<-function(option,def) {
 }
 
 
+#### This function run an expression and returns any warnings or errors without stopping the execution.
+#### It does not reterun the results, so the expr should assign a valut to the results
+#### something like try_hard({a<-3^2}) and not a<-try_hard(3^2)
+
+try_hard<-function(exp) {
+  problems<-list(error=FALSE,warning=FALSE)
+  tryCatch(exp,
+           warning=function(w) problems$warning<<-w$message,
+           error=function(e) problems$error<<-e$message)
+  return(problems)
+}
+
 
 ####### models and formuals #########
 

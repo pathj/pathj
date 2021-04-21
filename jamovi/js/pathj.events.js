@@ -6,17 +6,14 @@ const events = {
       initializeAll(ui, this);
     },
 
-     loaded: function(ui) {
-        let $contents = ui.view.$el;
-     },
-        
     onChange_factors: function(ui) {
          updateSuppliers(ui,this);
          updateContrasts(ui,this);
     },
 
     onChange_endogenous: function(ui) {
-        updateSuppliers(ui,this);
+       prepareEndogenousTerms(ui,this);
+       updateSuppliers(ui,this);
     },
 
     onChange_covariates: function(ui) {
@@ -27,7 +24,8 @@ const events = {
 
     onChange_endogenousSupplier: function(ui) {
        log("endogenousSupplier has changed");
-       fromSupplierToEndogenousTerms(ui, this);
+       cleanEndogenousTerms(ui, this);
+//       fromSupplierToEndogenousTerms(ui, this);
 
     },
 
@@ -40,11 +38,18 @@ const events = {
 
     },
 
+     onChange_endogenousTerms: function(ui) {
+      cleanRecursiveTerms(ui,this);
+    },
+
 
      onEvent_nothing: function(ui) {
       console.log("I did not do anything");
     },
 
+     onChange_nothing: function(ui) {
+      console.log("I did not do anything");
+    },
 
 };
 
@@ -53,16 +58,7 @@ const events = {
 var initializeAll = function(ui, context) {
     
     updateSuppliers(ui,context);
-
-    var endogenousSupplierList = context.cloneArray(context.itemsToValues(ui.endogenousSupplier.value(), []));
-    context.workspace.mediatorsSupplierList=endogenousSupplierList;
-
-    /// fix the mediatots terms 
-    var endogenous= context.cloneArray(ui.endogenous.value(), []);
-
-    var endogenousTerms= context.cloneArray(ui.endogenousTerms.value(), []);
-    context.workspace.endogenousTerms=endogenousTerms;
-
+    prepareEndogenousTerms(ui,context);
 
 };
 
@@ -71,65 +67,85 @@ var initializeAll = function(ui, context) {
 
 var updateSuppliers= function(ui,context) {
 
+   // here we transfer all variables in the supplier for the endogenous models
+   
     var factorsList = context.cloneArray(ui.factors.value(), []);
     var covariatesList = context.cloneArray(ui.covs.value(), []);
     var indList = factorsList.concat(covariatesList);
     var endogenousList = context.cloneArray(ui.endogenous.value(), []);
     var allList = factorsList.concat(covariatesList).concat(endogenousList);
-    
     ui.endogenousSupplier.setValue(context.valuesToItems(allList, FormatDef.variable));
+    context.workspace.endogenousSupplierList=allList;
+    
 
 };
 
+var prepareEndogenousTerms= function(ui,context) {
 
-var fromSupplierToEndogenousTerms= function(ui,context) {
+     // here we prepare a list of lists, one of each endogenous variable.
+     // we also want to put a label to show which dependent variable the user is working on
 
-    log("fromSupplierToEndogenousTerms");
-
-     var endogenousSupplierList = context.cloneArray(context.itemsToValues(ui.endogenousSupplier.value()),[]);
-     var diff = context.findChanges("endogenousSupplierList",endogenousSupplierList,context);
+     console.log("prepareEndogenousTerms");
      var endogenous = context.cloneArray(ui.endogenous.value(),[]);
      var endogenousTerms = context.cloneArray(ui.endogenousTerms.value(),[]);
-
-     var factors =  context.cloneArray(ui.factors.value(),[]);
-     var covs =  context.cloneArray(ui.covs.value(),[]);
-     var inds = factors.concat(covs);
-     var light = new Array(endogenous.length);
-
-     // we make sure that there are enough arrays in the array list, each for each mediator
-     // check for moderators as well     
-     // if a mediator terms are empty, we put in all independent variables, otherwise we put in
-     // the added variable in the supplier. In all cases, we combine the to be added variables
-     // with the moderators, if any
      
+ 
+     // we make sure that there are enough arrays in the array list, each for each endogeneous
+     var okList= [];
+     console.log(endogenousTerms);
+     console.log(endogenous);
      for (var i = 0; i < endogenous.length; i++) {
          var aList = endogenousTerms[i] === undefined ? [] : endogenousTerms[i] ;
-         var add = aList.length === 0 ? inds : removeFromList(endogenous,diff.added,context);
-         var add = addToList(add,aList,context);
+             okList.push(aList);
      }
-     
-     // we remove the independent variables removed from the ui, if any
-    if (diff.removed.length>0)
-        light = removeFromMultiList(diff.removed,light,context,1);
-    ui.endogenousTerms.setValue(light);    
-    labelize(ui.endogenousTerms,endogenous, "Endogenous");  
-    storeComponent("endogenousTerms",light,context);
+      console.log(okList);
+      ui.endogenousTerms.setValue(okList);    
+      
+     // we give a label for each endogeneous model
+     labelize(ui.endogenousTerms,endogenous, "Endogenous");  
+     storeComponent("endogenousTerms",endogenousTerms,context);
+  
+  
 };
 
 
-var fromEndogenousTerms= function(ui,context) {
+var cleanRecursiveTerms= function(ui,context) {
 
+    console.log("cleanRecursiveTerms");
     var endogenous = context.cloneArray(ui.endogenous.value(), []);
     var endogenousTerms = context.cloneArray(ui.endogenousTerms.value(),[]);
 
     for (var i = 0; i < endogenous.length; i++)
         endogenousTerms[i]=removeFromList(endogenous[i],endogenousTerms[i],context,1);
-    
-    var diff=findChangesMulti("endogenousTerms",endogenousTerms,context);
-    if (diff.index>-1 && diff.index<endogenousTerms.length) {
-         endogenousTerms[diff.index]=removeFromList(diff.changes[diff.index].removed,endogenousTerms[diff.index],context,1) ;
-       }
-        ui.endogenousTerms.setValue(endogenousTerms);
+        
+    ui.endogenousTerms.setValue(endogenousTerms);
+    storeComponent("endogenousTerms",endogenousTerms,context);
+
+};
+
+
+var cleanEndogenousTerms= function(ui,context) {
+
+    console.log("cleanEndogenousTerms");
+    var endogenous = context.cloneArray(ui.endogenous.value(), []);
+    var endogenousTerms = context.cloneArray(ui.endogenousTerms.value(),[]);
+
+    for (var i = 0; i < endogenous.length; i++)
+        endogenousTerms[i]=removeFromList(endogenous[i],endogenousTerms[i],context,1);
+
+    var endogenousSupplierList = context.cloneArray(context.itemsToValues(ui.endogenousSupplier.value()),[]);
+    var diff = context.findChanges("endogenousSupplierList",endogenousSupplierList,context);
+    if (diff.hasChanged) {
+      for (var i = 0; i < endogenous.length; i++) 
+           for (var j = 0; j < diff.removed.length; j++) {
+                console.log(diff.removed[j]);
+                endogenousTerms[i]=removeFromList(diff.removed[j],endogenousTerms[i],context,1);
+           }
+           
+    }
+    ui.endogenousTerms.setValue(endogenousTerms);
+    storeComponent("endogenousTerms",endogenousTerms,context);
+
 };
 
 
