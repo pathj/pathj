@@ -247,7 +247,7 @@ children:
             name: diag_resid
             enable: (diagram)
   - type: CollapseBox
-    label: Constraints
+    label: Custom Model Settings
     collapsed: true
     stretchFactor: 1
     children:
@@ -264,7 +264,7 @@ children:
                   - type: ListBox
                     name: constraints
                     height: large
-                    addButton: Add constraint
+                    addButton: Add directive
                     selectable: true
                     templateName: linreg-block-template
                     template:
