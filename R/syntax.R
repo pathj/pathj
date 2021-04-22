@@ -32,7 +32,8 @@ Syntax <- R6::R6Class(
                 self$lav_structure$label<-gsub(".","",self$lav_structure$plabel,fixed=T)
                 self$structure<-self$lav_structure[self$lav_structure$op!="==",]
                 self$structure$rhs<-gsub(INTERACTION_SYMBOL,":",self$structure$rhs,fixed=TRUE)
-              }, # here initialize ends
+
+                }, # here initialize ends
               models=function() {
                 lapply(seq_along(self$options$endogenousTerms), 
                        function(i) jmvcore::constructFormula(dep=self$options$endogenous[i],self$options$endogenousTerms[[i]]))
@@ -139,6 +140,7 @@ Estimate <- R6Class("Estimate",
                     correlations=NULL,
                     definedParameters=NULL,
                     fit=NULL,
+                    fitindices=NULL,
                     constfit=NULL,
                     info=NULL,
                     r2=NULL,
@@ -197,6 +199,7 @@ Estimate <- R6Class("Estimate",
                             list(label="User Model",chisq=ff[["chisq"]],df=ff[["df"]],pvalue=ff[["pvalue"]]),
                             list(label="Baseline Model",chisq=ff[["baseline.chisq"]],df=ff[["baseline.df"]],pvalue=ff[["baseline.pvalue"]])
                       )
+                      self$fitindices<-as.list(ff)
 
                       self$fit<-alist
                       
@@ -209,13 +212,10 @@ Estimate <- R6Class("Estimate",
                              c(info="Converged",value=self$model@Fit@converged), 
                              c(info="",value=""),
                              c(info="Loglikelihood user model",value=ff[["logl"]]), 
-                             c(info="Loglikelihood unrestricted model",value=ff[["unrestricted.logl"]]),
-                             c(info="AIC",value=ff[["aic"]]), 
-                             c(info="BIC",value=ff[["bic"]]),
-                             c(info="Sample-size adjusted BIC",value=ff[["bic2"]])
+                             c(info="Loglikelihood unrestricted model",value=ff[["unrestricted.logl"]])
                              ) 
                       self$info<-alist
-                      
+
                       if (is.something(self$constraints)) {
                         tab<-lavaan::lavTestScore(self$model)
                         names(tab$uni)<-c("lhs","op","rhs","chisq","df","pvalue")

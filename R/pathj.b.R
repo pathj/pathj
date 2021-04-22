@@ -42,6 +42,13 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             ### get the lavaan structure of the model ###
             tab<-lav_machine$structure
+            
+            #### parameter fit indices table ####
+            aTable<-self$results$fit$indices
+            aTable$getColumn('rmsea.ci.lower')$setSuperTitle(jmvcore::format('RMSEA {}% CI', self$options$ciWidth))
+            aTable$getColumn('rmsea.ci.upper')$setSuperTitle(jmvcore::format('RMSEA {}% CI', self$options$ciWidth))
+            
+            
             #### parameter estimates table ####
             aTable<-self$results$models$main
             aTable$getColumn('ci.lower')$setSuperTitle(jmvcore::format('{}% Confidence Interval', self$options$ciWidth))
@@ -137,12 +144,16 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (is.something(lav_machine$errors)) {
                     stop(paste(lav_machine$errors,collapse = "\n\n"))
             }
-            ## fit indices
+            ## fit info
              nr<-self$results$info$rowCount
              for (i in seq_along(lav_machine$info)) {
                  self$results$info$addRow(rowKey=nr+i+1,lav_machine$info[[i]])
              }
              self$results$info$addFormat(rowNo=nr, col=1,jmvcore::Cell.BEGIN_END_GROUP)
+             ## fit indices
+             mark(class(lav_machine$fitindices))
+             self$results$fit$indices$addRow(1,lav_machine$fitindices)
+             
              ## fit test
              for (i in seq_along(lav_machine$fit)) 
                  self$results$fit$main$addRow(rowKey=i,lav_machine$fit[[i]])
