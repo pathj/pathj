@@ -133,11 +133,21 @@ sourcifyList<-function(option,def) {
 #### something like try_hard({a<-3^2}) and not a<-try_hard(3^2)
 
 try_hard<-function(exp) {
-  problems<-list(error=FALSE,warning=FALSE)
-  tryCatch(exp,
-           warning=function(w) problems$warning<<-w$message,
-           error=function(e) problems$error<<-e$message)
-  return(problems)
+  results<-list(error=FALSE,warning=FALSE,message=FALSE,obj=FALSE)
+  
+  results$obj <- withCallingHandlers(
+    tryCatch(exp, error=function(e) {
+      results$error=conditionMessage(e)
+      NULL
+    }), warning=function(w) {
+      results$warning<-conditionMessage(w)
+      invokeRestart("muffleWarning")
+    }, message = function(m) {
+      results$message<-conditionMessage(m)
+      invokeRestart("muffleMessage")
+    })
+  
+  return(results)
 }
 
 

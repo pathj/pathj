@@ -28,6 +28,14 @@ DP_EXAMPLES[[5]]<-list("info"="Non linear estimates",example="ab:=p1*p2", com="E
 DP_EXAMPLES[[6]]<-list("info"="Non linear estimates",example="a2:=p1^2", com="Estimate and test the square of p1 and name it `a2`")
 
 
+SY_EXAMPLES<-list()
+SY_EXAMPLES[[1]]<-list("info"="Free structural parameters",example="",com="")
+SY_EXAMPLES[[2]]<-list("info"="Estimate residual coovariances",example="y1~~y2",com="Variables y1 and y2 covariance is set free")
+SY_EXAMPLES[[3]]<-list("info"="Estimate exogenous variables covariances",example="x1~~x2",com="Variables x1 and x2 covariance is set free")
+SY_EXAMPLES[[4]]<-list("info"="Estimate exogenous variables variances",example="x1~~x1",com="Variable x1 variance is set free")
+SY_EXAMPLES[[5]]<-list("info"="Estimate  variables covariances",example="y1~~x1",com="Variables y1 and x1 covariance is set free. Direct path should not be set")
+
+
 CONT_NOTE<-"All the parameters labels are in the form `pN`, where `N` is a number. 
 The parameter labels can be found in the results tables. Please be sure to have the options `Show parameters labels` selected."
 

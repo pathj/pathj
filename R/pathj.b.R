@@ -105,6 +105,11 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     if (j!=1)
                         self$results$contraintsnotes$addFormat(rowKey=i+j,col=1,jmvcore::Cell.INDENTED)
                 }
+                for (k in seq_along(SY_EXAMPLES)) {
+                    self$results$contraintsnotes$addRow(rowKey=i+j+k,SY_EXAMPLES[[k]])
+                    if (k!=1)
+                        self$results$contraintsnotes$addFormat(rowKey=i+j+k,col=1,jmvcore::Cell.INDENTED)
+                }
                 
 
                 self$results$contraintsnotes$setNote(1,CONT_NOTE)

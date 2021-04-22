@@ -17,14 +17,17 @@ Syntax <- R6::R6Class(
                 private$.check_constraints(options$constraints)
                 factorinfo<-sapply(self$options$factors,function(f) nlevels(data[[f]])-1 )
                 self$lavterms<-lapply(self$options$endogenousTerms, function(alist) private$.factorlist(alist,factorinfo))
-                problems<-try_hard({
-                  self$lav_structure<-lavaan::lavaanify(self$lavaan_syntax(),
+                results<-try_hard({
+                    lavaan::lavaanify(self$lavaan_syntax(),
                                                         int.ov.free = TRUE, 
                                                         auto.var = TRUE,
                                                         auto.th = TRUE, 
                                                         auto.cov.y = self$options$cov_y,
                                                         fixed.x=!self$options$cov_x)
                   })
+                self$lav_structure<-results$obj
+                private$.warnings(results$warning)
+                private$.errors(results$error)
 
                 self$lav_structure$label<-gsub(".","",self$lav_structure$plabel,fixed=T)
                 self$structure<-self$lav_structure[self$lav_structure$op!="==",]
