@@ -260,5 +260,26 @@ options:
       title: Show parameters labels
       default: false
 
+    - name: estimator
+      title: Method
+      type: List
+      options:
+        - name:  ML
+          title: Maximum Lik
+        - name: GLS 
+          title: Generalized least squares
+        - name: WLS 
+          title: Weighted LS
+        - name: DWLS
+          title: Diagonally weighted LS
+        - name: ULS
+          title: Unweighted LS
+        - name: PML
+          title: Pairwise Maximum Lik
+      default: ML
+      description:
+          R: >
+             Choose the diagram labels
+
 ...
 

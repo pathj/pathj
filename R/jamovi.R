@@ -54,7 +54,6 @@ j.init_table<-function(table,obj,ci=FALSE,ciroot="",ciformat="{}% Confidence Int
   if (square)
      for (i in seq_len(nrow(obj))) {
          table$addRow(rowKey=i,obj[i,])
-       mark("square",obj[i,])
      }
   else
     for (i in seq_along(obj)) 

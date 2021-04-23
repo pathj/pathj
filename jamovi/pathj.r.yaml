@@ -114,14 +114,16 @@ items:
 
                     - name:  aic
                       title: AIC
+                      visible: (estimator:ML)
                       type: number
                     - name:  bic
                       title: BIC
                       type: number
+                      visible: (estimator:ML)
                     - name:  bic2
                       title: "adj. BIC"
                       type: number
-
+                      visible: (estimator:ML)
                     - name:  srmr
                       title: SRMR
                       type: number

@@ -26,7 +26,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             cov_x = FALSE,
             constraints = list(),
             constraints_examples = FALSE,
-            showlabels = FALSE, ...) {
+            showlabels = FALSE,
+            estimator = "ML", ...) {
 
             super$initialize(
                 package="pathj",
@@ -175,6 +176,17 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showlabels",
                 showlabels,
                 default=FALSE)
+            private$..estimator <- jmvcore::OptionList$new(
+                "estimator",
+                estimator,
+                options=list(
+                    "ML",
+                    "GLS",
+                    "WLS",
+                    "DWLS",
+                    "ULS",
+                    "PML"),
+                default="ML")
 
             self$.addOption(private$..endogenous)
             self$.addOption(private$..factors)
@@ -196,6 +208,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..constraints)
             self$.addOption(private$..constraints_examples)
             self$.addOption(private$..showlabels)
+            self$.addOption(private$..estimator)
         }),
     active = list(
         endogenous = function() private$..endogenous$value,
@@ -217,7 +230,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         cov_x = function() private$..cov_x$value,
         constraints = function() private$..constraints$value,
         constraints_examples = function() private$..constraints_examples$value,
-        showlabels = function() private$..showlabels$value),
+        showlabels = function() private$..showlabels$value,
+        estimator = function() private$..estimator$value),
     private = list(
         ..endogenous = NA,
         ..factors = NA,
@@ -238,7 +252,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..cov_x = NA,
         ..constraints = NA,
         ..constraints_examples = NA,
-        ..showlabels = NA)
+        ..showlabels = NA,
+        ..estimator = NA)
 )
 
 pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -382,15 +397,18 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 list(
                                     `name`="aic", 
                                     `title`="AIC", 
+                                    `visible`="(estimator:ML)", 
                                     `type`="number"),
                                 list(
                                     `name`="bic", 
                                     `title`="BIC", 
-                                    `type`="number"),
+                                    `type`="number", 
+                                    `visible`="(estimator:ML)"),
                                 list(
                                     `name`="bic2", 
                                     `title`="adj. BIC", 
-                                    `type`="number"),
+                                    `type`="number", 
+                                    `visible`="(estimator:ML)"),
                                 list(
                                     `name`="srmr", 
                                     `title`="SRMR", 
@@ -767,6 +785,7 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param constraints a list of lists specifying the models random effects.
 #' @param constraints_examples .
 #' @param showlabels .
+#' @param estimator Choose the diagram labels
 #' @param formula (optional) the formula to use, see the examples
 #' @return A results object containing:
 #' \tabular{llllll}{
@@ -814,6 +833,7 @@ pathj <- function(
     constraints = list(),
     constraints_examples = FALSE,
     showlabels = FALSE,
+    estimator = "ML",
     formula) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -879,7 +899,8 @@ pathj <- function(
         cov_x = cov_x,
         constraints = constraints,
         constraints_examples = constraints_examples,
-        showlabels = showlabels)
+        showlabels = showlabels,
+        estimator = estimator)
 
     analysis <- pathjClass$new(
         options = options,
