@@ -284,7 +284,8 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
                     main = function() private$.items[["main"]],
-                    constraints = function() private$.items[["constraints"]]),
+                    constraints = function() private$.items[["constraints"]],
+                    indices = function() private$.items[["indices"]]),
                 private = list(),
                 public=list(
                     initialize=function(options) {
@@ -363,6 +364,52 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 list(
                                     `name`="pvalue", 
                                     `title`="p", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="indices",
+                            title="Fit Indices",
+                            clearWith=list(
+                                "endogenous",
+                                "covs",
+                                "factors",
+                                "ciType",
+                                "contrasts",
+                                "cov_y",
+                                "constraints"),
+                            columns=list(
+                                list(
+                                    `name`="aic", 
+                                    `title`="AIC", 
+                                    `type`="number"),
+                                list(
+                                    `name`="bic", 
+                                    `title`="BIC", 
+                                    `type`="number"),
+                                list(
+                                    `name`="bic2", 
+                                    `title`="adj. BIC", 
+                                    `type`="number"),
+                                list(
+                                    `name`="srmr", 
+                                    `title`="SRMR", 
+                                    `type`="number"),
+                                list(
+                                    `name`="rmsea", 
+                                    `title`="RMSEA", 
+                                    `type`="number"),
+                                list(
+                                    `name`="rmsea.ci.lower", 
+                                    `title`="Lower", 
+                                    `type`="number"),
+                                list(
+                                    `name`="rmsea.ci.upper", 
+                                    `title`="Upper", 
+                                    `type`="number"),
+                                list(
+                                    `name`="rmsea.pvalue", 
+                                    `title`="RMSEA p", 
                                     `type`="number", 
                                     `format`="zto,pvalue"))))}))$new(options=options))
             self$add(R6::R6Class(
@@ -655,13 +702,16 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 columns=list(
                     list(
                         `name`="info", 
-                        `type`="text"),
+                        `type`="text", 
+                        `title`="Aim"),
                     list(
                         `name`="example", 
-                        `type`="text"),
+                        `type`="text", 
+                        `title`="Example"),
                     list(
                         `name`="com", 
-                        `type`="text"))))}))
+                        `type`="text", 
+                        `title`="Outcome"))))}))
 
 pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "pathjBase",
@@ -723,6 +773,7 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$info} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$fit$main} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$fit$constraints} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$fit$indices} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$models$main} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$models$r2} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$models$correlations} \tab \tab \tab \tab \tab a table \cr

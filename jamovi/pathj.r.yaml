@@ -98,6 +98,46 @@ items:
                       type: number
                       format: zto,pvalue
 
+          - name: indices
+            title: Fit Indices
+            type: Table
+            clearWith:
+                  - endogenous
+                  - covs
+                  - factors
+                  - ciType
+                  - contrasts
+                  - cov_y
+                  - constraints
+
+            columns:
+
+                    - name:  aic
+                      title: AIC
+                      type: number
+                    - name:  bic
+                      title: BIC
+                      type: number
+                    - name:  bic2
+                      title: "adj. BIC"
+                      type: number
+
+                    - name:  srmr
+                      title: SRMR
+                      type: number
+                    - name: rmsea
+                      title:  RMSEA
+                      type: number
+                    - name:  rmsea.ci.lower
+                      title: Lower
+                      type: number
+                    - name:  rmsea.ci.upper
+                      title: Upper
+                      type: number
+                    - name: rmsea.pvalue
+                      title: 'RMSEA p'
+                      type: number
+                      format: zto,pvalue
 
 
   - name: models
@@ -346,9 +386,12 @@ items:
     columns:
                   - name: info
                     type: text
+                    title: Aim
                   - name: example
                     type: text
+                    title: Example
                   - name: com
                     type: text
+                    title: Outcome
                     
                     
