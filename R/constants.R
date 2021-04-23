@@ -2,7 +2,9 @@ j_DEBUG=T
 j_INFO=T
 
 
-INTERACTION_SYMBOL="_._._._.________._._._."
+INTERACTION_SYMBOL="__XX__XX__"
+FACTOR_SYMBOL="._._._."
+
 NOTES<-list()
 
 NOTES[["ci"]]<-list("standard"="Standard (Delta method)",

@@ -21,104 +21,52 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ### clean data and prepare the syntax ####
             data<-private$.cleandata()
             lav_machine<-Estimate$new(self$options,data)
-            forms<-lav_machine$models()
-            
-            
+
             ### fill the info table ###
-            for (i in seq_along(forms)) {
-                  self$results$info$addRow(rowKey=i,list(info="Model",value=as.character(forms[[i]])))
-            }
+            j.init_table(self$results$info,lav_machine$models())
+            j.init_table_append(self$results$info,lav_machine$constraints)
+            j.init_table_append(self$results$info,lav_machine$userestimates)
 
-            for (j in seq_along(lav_machine$constraints)) {
-                   self$results$info$addRow(rowKey=i+j,list(info="Constraint",value=lav_machine$constraints[[j]]))
-            }
-
-            for (k in seq_along(lav_machine$userestimates)) {
-                self$results$info$addRow(rowKey=i+j+k,list(info="Defined Parameters",value=lav_machine$userestimates[[k]]))
-            }
-
-            
-            
-            
             ### get the lavaan structure of the model ###
             tab<-lav_machine$structure
-            
+
             #### parameter fit indices table ####
-            aTable<-self$results$fit$indices
-            aTable$getColumn('rmsea.ci.lower')$setSuperTitle(jmvcore::format('RMSEA {}% CI', self$options$ciWidth))
-            aTable$getColumn('rmsea.ci.upper')$setSuperTitle(jmvcore::format('RMSEA {}% CI', self$options$ciWidth))
-            
-            
+            j.init_table(self$results$fit$indices,"",ci=T,ciroot="rmsea.",ciformat='RMSEA {}% CI',ciwidth=self$options$ciWidth)
             #### parameter estimates table ####
-            aTable<-self$results$models$main
-            aTable$getColumn('ci.lower')$setSuperTitle(jmvcore::format('{}% Confidence Interval', self$options$ciWidth))
-            aTable$getColumn('ci.upper')$setSuperTitle(jmvcore::format('{}% Confidence Interval', self$options$ciWidth))
-            
-            
-            ### prepare coefficients table ###
             tab1<-tab[tab$op=="~",]
-            who<-tab1$lhs[1]
-            for (i in seq_len(nrow(tab1))) {
-                aTable$addRow(i,list(lhs=tab1[i,"lhs"],rhs=tab1[i,"rhs"]))
-                if (tab$lhs[i]!=who)    aTable$addFormat(rowKey = i, col = 1, jmvcore::Cell.BEGIN_GROUP)
-                who<-tab1$lhs[i]
-            }
-            
+            j.init_table(self$results$models$main,tab1,ci=T,ciwidth=self$options$ciWidth)
+
             ### prepare var cov table ###
-            aTable<-self$results$models$correlations
-            aTable$getColumn('ci.lower')$setSuperTitle(jmvcore::format('{}% Confidence Interval', self$options$ciWidth))
-            aTable$getColumn('ci.upper')$setSuperTitle(jmvcore::format('{}% Confidence Interval', self$options$ciWidth))
-            
             tab1<-tab[tab$op=="~~",]
-            who<-tab1$lhs[1]
-            for (i in seq_len(nrow(tab1))) {
-                aTable$addRow(i,list(lhs=tab1[i,"lhs"],rhs=tab1[i,"rhs"]))
-                if (tab$lhs[i]!=who)    aTable$addFormat(rowKey = i, col = 1, jmvcore::Cell.BEGIN_GROUP)
-                who<-tab1$lhs[i]
-            }
-            aTable<-self$results$models$r2
-            aTable$getColumn('ci.lower')$setSuperTitle(jmvcore::format('{}% Confidence Interval', self$options$ciWidth))
-            aTable$getColumn('ci.upper')$setSuperTitle(jmvcore::format('{}% Confidence Interval', self$options$ciWidth))
+            j.init_table(self$results$models$correlations,tab1,ci=T,ciwidth=self$options$ciWidth)
             
-            for (i in seq_along(self$options$endogenous)) 
-                aTable$addRow(rowKey=i,list(lhs=self$options$endogenous[i]))
-            
+            ### prepare r2 table
+            tab1<-lapply(self$options$endogenous,function(e) list(lhs=e))
+            j.init_table(self$results$models$r2,tab1,ci=T,ciwidth=self$options$ciWidth)
+
+            ### prepare defined params ###
             tab1<-tab[tab$op==":=",]
-            for (i in seq_len(nrow(tab1))) 
-                self$results$models$defined$addRow(rowKey=i,list(lhs=tab1[i,"lhs"],rhs=tab1[i,"rhs"]))
+            j.init_table(self$results$models$defined,tab1,ci=T,ciwidth=self$options$ciWidth)
             
 
             #### contrast tables ####
             if (length(self$options$factors)>0) {
-            for (factor in self$options$factors) {
-                type<-attr(data[[factor]],"jcontrast")
-                clabs<-lf.contrastLabels(levels(data[[factor]]),type)
+                
+            for (factor in tob64(self$options$factors)) {
+                cont<-attr(data[[factor]],"jcontrast")
+                clabs<-lf.contrastLabels(cont$levels,cont$type)
                 for (i in seq_along(clabs)) {
                       clab<-clabs[[i]]
-                      self$results$models$contrastCodeTable$addRow(paste0(factor,i),list(rname=paste0(factor,i),clab=clab))
+                      self$results$models$contrastCodeTable$addRow(paste0(factor,i),list(rname=paste0(fromb64(factor),i),clab=clab))
                 }
             }
                 self$results$models$contrastCodeTable$setVisible(TRUE)    
             }
             
             if (self$options$constraints_examples) {
-                 for (i in seq_along(CONT_EXAMPLES)) {
-                       self$results$contraintsnotes$addRow(rowKey=i,CONT_EXAMPLES[[i]])
-                       if (i!=1)
-                          self$results$contraintsnotes$addFormat(rowKey=i,col=1,jmvcore::Cell.INDENTED)
-                 }
-                for (j in seq_along(DP_EXAMPLES)) {
-                    self$results$contraintsnotes$addRow(rowKey=i+j,DP_EXAMPLES[[j]])
-                    if (j!=1)
-                        self$results$contraintsnotes$addFormat(rowKey=i+j,col=1,jmvcore::Cell.INDENTED)
-                }
-                for (k in seq_along(SY_EXAMPLES)) {
-                    self$results$contraintsnotes$addRow(rowKey=i+j+k,SY_EXAMPLES[[k]])
-                    if (k!=1)
-                        self$results$contraintsnotes$addFormat(rowKey=i+j+k,col=1,jmvcore::Cell.INDENTED)
-                }
-                
-
+                j.init_table(self$results$contraintsnotes,CONT_EXAMPLES,indent=-1)
+                j.init_table_append(self$results$contraintsnotes,DP_EXAMPLES,indent=-1)
+                j.init_table_append(self$results$contraintsnotes,SY_EXAMPLES,indent=-1)
                 self$results$contraintsnotes$setNote(1,CONT_NOTE)
             }
 
@@ -151,7 +99,6 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
              }
              self$results$info$addFormat(rowNo=nr, col=1,jmvcore::Cell.BEGIN_END_GROUP)
              ## fit indices
-             mark(class(lav_machine$fitindices))
              self$results$fit$indices$addRow(1,lav_machine$fitindices)
              
              ## fit test
@@ -199,21 +146,25 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             .warning<-list()
             dataRaw <- jmvcore::naOmit(self$data)
+            names(dataRaw)<-tob64(names(dataRaw))
             data <- list()
-            for (endo in self$options$endogenous) {
+            endogenous<-tob64(self$options$endogenous)
+            for (endo in endogenous) {
                 if (class(dataRaw[[endo]]) == "factor")
                     .warning<-append(.warning,"Warming: An endogenous variables is defined as factor. Please make sure it is a continuous variable.")
                 data[[endo]] <- jmvcore::toNumeric(dataRaw[[endo]])
             }
             
-            for (cov in self$options$covs) {
+            covs<-tob64(self$options$covs)
+            for (cov in covs) {
                 data[[cov]] <- jmvcore::toNumeric(dataRaw[[cov]])
             }
             
             .contrasts<-sapply(self$options$contrasts,function(a) a$type)
-            .contrastsnames<-sapply(self$options$contrasts,function(a) a$var)
+            .contrastsnames<-sapply(self$options$contrasts,function(a) tob64(a$var))
             names(.contrasts)<-.contrastsnames
-            for (factor in self$options$factors) {
+            factors<-tob64(self$options$factors)
+            for (factor in factors) {
                 ### we need this for Rinterface ####
                 if (!("factor" %in% class(dataRaw[[factor]]))) {
                     info(paste("Warning, variable",factor," has been coerced to factor"))
@@ -223,14 +174,14 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 levels <- base::levels(data[[factor]])
                 .cont<-ifelse(factor %in% .contrastsnames,.contrasts[[factor]],"simple")
                 stats::contrasts(data[[factor]]) <- lf.createContrasts(levels,.cont)
-                attr(data[[factor]],"jcontrast")<-.cont
+                attr(data[[factor]],"jcontrast")<-list(type=.cont,levels=levels)
                 dummies<-model.matrix(as.formula(paste0("~",factor)),data=data)
                 dummies<-dummies[,-1]
                 dummies<-data.frame(dummies)
                 private$.factors<-c(private$.factors,names(dummies))
                 onames<-names(data)
                 data<-cbind(data,dummies)
-                names(data)<-c(onames,paste0(factor,1:(length(levels)-1)))
+                names(data)<-c(onames,paste0(factor,FACTOR_SYMBOL,1:(length(levels)-1)))
             }
             
              #### here we do thing if cleandata is called by run (not init) ####

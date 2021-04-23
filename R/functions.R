@@ -137,13 +137,13 @@ try_hard<-function(exp) {
   
   results$obj <- withCallingHandlers(
     tryCatch(exp, error=function(e) {
-      results$error=conditionMessage(e)
+      results$error<<-conditionMessage(e)
       NULL
     }), warning=function(w) {
-      results$warning<-conditionMessage(w)
+      results$warning<<-conditionMessage(w)
       invokeRestart("muffleWarning")
     }, message = function(m) {
-      results$message<-conditionMessage(m)
+      results$message<<-conditionMessage(m)
       invokeRestart("muffleMessage")
     })
   
@@ -158,6 +158,4 @@ expand.formula<-function(aform) {
             af<-as.formula(af)
             af
 }
-
-
 
