@@ -224,6 +224,81 @@ options:
           R: >
             `TRUE` or `FALSE` (default), produce a path diagram
 
+    - name: diag_labsize
+      title: Node Size
+      type: List
+      options:
+        - name:  small
+          title: Small
+        - name: medium
+          title: Medium
+        - name: large
+          title: Large
+      default: medium
+      description:
+          R: >
+             Choose the diagram labels
+
+    - name: diag_rotate
+      title: Rotate
+      type: List
+      options:
+        - name:  "1"
+          title: Exog. top
+        - name: "2"
+          title: Exog. left
+        - name: "3"
+          title: Exog. bottom
+        - name: "4"
+          title: Exog. right
+
+      default: "2"
+      description:
+          R: >
+             Choose the diagram labels
+    - name: diag_type
+      title: Type
+      type: List
+      options:
+        - name:  "tree2"
+          title: Tree-like
+        - name:  "tree"
+          title: Tree-like alt.
+        - name: "circle"
+          title: Circle
+        - name: "circle2"
+          title: Circle alt.
+        - name: "spring"
+          title: Spring
+
+      default: "tree2"
+      description:
+          R: >
+             Choose the diagram labels
+
+    - name: diag_shape
+      title: Shapes
+      type: List
+      options:
+        - name:  "square"
+          title:  Squares
+        - name:  "rectangle"
+          title:  Rectangles
+        - name: "circle"
+          title: Circles
+        - name: "ellipse"
+          title: Ellipses
+        - name: "diamond"
+          title: Diamonds
+
+      default: "square"
+      description:
+          R: >
+             Choose the diagram labels
+
+
+### end diagram ###
+
     - name: cov_y
       title: Endogenous Correlations
       type: Bool
@@ -280,6 +355,9 @@ options:
       description:
           R: >
              Choose the diagram labels
+
+
+
 
 ...
 

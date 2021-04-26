@@ -22,6 +22,10 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             diagram = FALSE,
             diag_paths = "est",
             diag_resid = FALSE,
+            diag_labsize = "medium",
+            diag_rotate = "2",
+            diag_type = "tree2",
+            diag_shape = "square",
             cov_y = TRUE,
             cov_x = FALSE,
             constraints = list(),
@@ -153,6 +157,43 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "diag_resid",
                 diag_resid,
                 default=FALSE)
+            private$..diag_labsize <- jmvcore::OptionList$new(
+                "diag_labsize",
+                diag_labsize,
+                options=list(
+                    "small",
+                    "medium",
+                    "large"),
+                default="medium")
+            private$..diag_rotate <- jmvcore::OptionList$new(
+                "diag_rotate",
+                diag_rotate,
+                options=list(
+                    "1",
+                    "2",
+                    "3",
+                    "4"),
+                default="2")
+            private$..diag_type <- jmvcore::OptionList$new(
+                "diag_type",
+                diag_type,
+                options=list(
+                    "tree2",
+                    "tree",
+                    "circle",
+                    "circle2",
+                    "spring"),
+                default="tree2")
+            private$..diag_shape <- jmvcore::OptionList$new(
+                "diag_shape",
+                diag_shape,
+                options=list(
+                    "square",
+                    "rectangle",
+                    "circle",
+                    "ellipse",
+                    "diamond"),
+                default="square")
             private$..cov_y <- jmvcore::OptionBool$new(
                 "cov_y",
                 cov_y,
@@ -203,6 +244,10 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..diagram)
             self$.addOption(private$..diag_paths)
             self$.addOption(private$..diag_resid)
+            self$.addOption(private$..diag_labsize)
+            self$.addOption(private$..diag_rotate)
+            self$.addOption(private$..diag_type)
+            self$.addOption(private$..diag_shape)
             self$.addOption(private$..cov_y)
             self$.addOption(private$..cov_x)
             self$.addOption(private$..constraints)
@@ -226,6 +271,10 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         diagram = function() private$..diagram$value,
         diag_paths = function() private$..diag_paths$value,
         diag_resid = function() private$..diag_resid$value,
+        diag_labsize = function() private$..diag_labsize$value,
+        diag_rotate = function() private$..diag_rotate$value,
+        diag_type = function() private$..diag_type$value,
+        diag_shape = function() private$..diag_shape$value,
         cov_y = function() private$..cov_y$value,
         cov_x = function() private$..cov_x$value,
         constraints = function() private$..constraints$value,
@@ -248,6 +297,10 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..diagram = NA,
         ..diag_paths = NA,
         ..diag_resid = NA,
+        ..diag_labsize = NA,
+        ..diag_rotate = NA,
+        ..diag_type = NA,
+        ..diag_shape = NA,
         ..cov_y = NA,
         ..cov_x = NA,
         ..constraints = NA,
@@ -263,7 +316,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         info = function() private$.items[["info"]],
         fit = function() private$.items[["fit"]],
         models = function() private$.items[["models"]],
-        pathmodelgroup = function() private$.items[["pathmodelgroup"]],
+        pathgroup = function() private$.items[["pathgroup"]],
         contraintsnotes = function() private$.items[["contraintsnotes"]]),
     private = list(),
     public=list(
@@ -673,14 +726,14 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
-                    pathmodel = function() private$.items[["pathmodel"]],
-                    pathnotes = function() private$.items[["pathnotes"]]),
+                    diagram = function() private$.items[["diagram"]],
+                    notes = function() private$.items[["notes"]]),
                 private = list(),
                 public=list(
                     initialize=function(options) {
                         super$initialize(
                             options=options,
-                            name="pathmodelgroup",
+                            name="pathgroup",
                             title="Path Model",
                             clearWith=list(
                     "endogenous",
@@ -688,7 +741,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "constraints"))
                         self$add(jmvcore::Image$new(
                             options=options,
-                            name="pathmodel",
+                            name="diagram",
                             title="Path Diagram",
                             visible="(diagram)",
                             width=600,
@@ -697,6 +750,10 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             clearWith=list(
                                 "diag_resid",
                                 "diag_paths",
+                                "diag_labsize",
+                                "diag_rotate",
+                                "diag_type",
+                                "diag_shape",
                                 "contrasts",
                                 "endogenousTerms",
                                 "cov_y",
@@ -704,7 +761,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             refs="diagram"))
                         self$add(jmvcore::Table$new(
                             options=options,
-                            name="pathnotes",
+                            name="notes",
                             title="",
                             visible=FALSE,
                             columns=list(
@@ -780,6 +837,10 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param diag_paths Choose the diagram labels
 #' @param diag_resid \code{TRUE} or \code{FALSE} (default), produce a path
 #'   diagram
+#' @param diag_labsize Choose the diagram labels
+#' @param diag_rotate Choose the diagram labels
+#' @param diag_type Choose the diagram labels
+#' @param diag_shape Choose the diagram labels
 #' @param cov_y \code{TRUE} or \code{FALSE} (default), produce a path diagram
 #' @param cov_x \code{TRUE} or \code{FALSE} (default), produce a path diagram
 #' @param constraints a list of lists specifying the models random effects.
@@ -798,8 +859,8 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$models$correlations} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$models$defined} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$models$contrastCodeTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$pathmodelgroup$pathmodel} \tab \tab \tab \tab \tab a path model \cr
-#'   \code{results$pathmodelgroup$pathnotes} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$pathgroup$diagram} \tab \tab \tab \tab \tab a path model \cr
+#'   \code{results$pathgroup$notes} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$contraintsnotes} \tab \tab \tab \tab \tab a table \cr
 #' }
 #'
@@ -828,6 +889,10 @@ pathj <- function(
     diagram = FALSE,
     diag_paths = "est",
     diag_resid = FALSE,
+    diag_labsize = "medium",
+    diag_rotate = "2",
+    diag_type = "tree2",
+    diag_shape = "square",
     cov_y = TRUE,
     cov_x = FALSE,
     constraints = list(),
@@ -895,6 +960,10 @@ pathj <- function(
         diagram = diagram,
         diag_paths = diag_paths,
         diag_resid = diag_resid,
+        diag_labsize = diag_labsize,
+        diag_rotate = diag_rotate,
+        diag_type = diag_type,
+        diag_shape = diag_shape,
         cov_y = cov_y,
         cov_x = cov_x,
         constraints = constraints,

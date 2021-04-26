@@ -223,43 +223,70 @@ children:
     label: Path Diagram
     collapsed: true
     stretchFactor: 1
-    style: inline
+    style: list
     children:
-      - type: CheckBox
-        name: diagram
-      - type: Label
-        label: Paths
-        margin: large
-        style: list
-        children:
-          - type: RadioButton
-            name: diag_paths_est
-            optionName: diag_paths
-            optionPart: est
-            enable: (diagram)
-          - type: RadioButton
-            name: diag_paths_stand
-            optionName: diag_paths
-            optionPart: stand
-            enable: (diagram)
-          - type: RadioButton
-            name: diag_paths_name
-            optionName: diag_paths
-            optionPart: name
-            enable: (diagram)
-          - type: RadioButton
-            name: diag_paths_hide
-            optionName: diag_paths
-            optionPart: hide
-            enable: (diagram)
-      - type: Label
-        label: Show
-        margin: large
-        style: list
-        children:
-          - type: CheckBox
-            name: diag_resid
-            enable: (diagram)
+       - type: LayoutBox
+         margin: large
+         stretchFactor: 1
+         style: inline
+         children:
+            - type: CheckBox
+              name: diagram
+            - type: Label
+              label: Paths
+              margin: large
+              style: list
+              children:
+                - type: RadioButton
+                  name: diag_paths_est
+                  optionName: diag_paths
+                  optionPart: est
+                  enable: (diagram)
+                - type: RadioButton
+                  name: diag_paths_stand
+                  optionName: diag_paths
+                  optionPart: stand
+                  enable: (diagram)
+                - type: RadioButton
+                  name: diag_paths_name
+                  optionName: diag_paths
+                  optionPart: name
+                  enable: (diagram)
+                - type: RadioButton
+                  name: diag_paths_hide
+                  optionName: diag_paths
+                  optionPart: hide
+                  enable: (diagram)
+            - type: Label
+              label: Show
+              margin: large
+              style: list
+              children:
+                - type: CheckBox
+                  name: diag_resid
+                  enable: (diagram)
+       - type: LayoutBox
+         margin: large
+         stretchFactor: 1
+         children:
+            - type: Label
+              label: Layout
+              margin: large
+              style: list
+              children:
+                - type: ComboBox
+                  name: diag_type
+                  enable: (diagram)
+                - type: ComboBox
+                  name: diag_rotate
+                  enable: (diagram)
+                - type: ComboBox
+                  name: diag_shape
+                  enable: (diagram)
+                - type: ComboBox
+                  name: diag_labsize
+                  enable: (diagram)
+
   - type: CollapseBox
     label: Custom Model Settings
     collapsed: true

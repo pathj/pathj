@@ -218,20 +218,33 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           model<-private$.lav_machine$model
           pt<-lavaan::parTable(model)
           nodeLabels<-unique(pt$lhs)
-          nodelabels<-gsub(INTERACTION_SYMBOL,":",nodeLabels)
-          
+          nodeLabels<-fromb64(nodeLabels)
+          size<-12
+          if (self$options$diag_labsize=="small") size<-8
+          if (self$options$diag_labsize=="large") size<-18
+          nNodes<-length(nodeLabels)
+          size<-size*exp(-nNodes/80)+1
           options<-list(object = private$.lav_machine$model,
-                                  layout = "tree2",
+                                  layout = self$options$diag_type,
                                   residuals = self$options$diag_resid,
-                                  rotation = 2,
+                                  rotation = as.numeric(self$options$diag_rotate),
                                   intercepts = F
-                                  ,nodeLabels=nodelabels
+                                  ,nodeLabels=nodeLabels
                                   ,whatLabels=labs
-                                  ,sizeMan = 10
+                                  ,sizeMan = size
                                   ,nCharNodes=10
+                                  ,sizeMan2=size/2
+                                  , curve=2
+                                  , shapeMan=self$options$diag_shape
                                   ,edge.label.cex =1.3)
-          diag<-do.call(semPlot::semPaths,options)
-           return(diag)
+          res<-try_hard(do.call(semPlot::semPaths,options))
+          if (is.something(res$error)) {
+             if  (length(grep("Circle layout only supported",res$error,fixed = T))>0) {
+                  self$results$pathgroup$notes$addRow(1,list(info="Circle layout requires rotation to be `Exogenous Top` or Exogenous Bottom`"))
+                  self$results$pathgroup$notes$setVisible(TRUE)
+             }
+          }
+           return(res$obj)
         }
         
         
