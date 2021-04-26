@@ -114,14 +114,16 @@ items:
 
                     - name:  aic
                       title: AIC
+                      visible: (estimator:ML)
                       type: number
                     - name:  bic
                       title: BIC
                       type: number
+                      visible: (estimator:ML)
                     - name:  bic2
                       title: "adj. BIC"
                       type: number
-
+                      visible: (estimator:ML)
                     - name:  srmr
                       title: SRMR
                       type: number
@@ -343,7 +345,7 @@ items:
 
 
 
-  - name: pathmodelgroup
+  - name: pathgroup
     type: Group
     title: Path Model
     visible: (diagram)
@@ -353,7 +355,7 @@ items:
                   - constraints
 
     items:
-            - name: pathmodel
+            - name: diagram
               title: Path Diagram
               visible: (diagram)
               type: Image
@@ -364,13 +366,17 @@ items:
               clearWith:
                       - diag_resid
                       - diag_paths
+                      - diag_labsize
+                      - diag_rotate
+                      - diag_type
+                      - diag_shape
                       - contrasts
                       - endogenousTerms
                       - cov_y
                       - constraints
 
               refs: diagram    
-            - name: pathnotes
+            - name: notes
               type: Table
               title: ""
               visible: false

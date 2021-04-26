@@ -183,7 +183,8 @@ Estimate <- R6Class("Estimate",
                                  self$model<-lavaan::lavaan(model = private$.lav_structure, 
                                                             data = data,
                                                             se=self$options$se,
-                                                            bootstrap=self$options$bootN
+                                                            bootstrap=self$options$bootN,
+                                                            estimator=self$options$estimator
                                                             )})
                       private$.warnings(problems$warning)
                       private$.errors(problems$error)
@@ -223,25 +224,24 @@ Estimate <- R6Class("Estimate",
                       #### fit tests ###
                       alist<-list()
                       ff<-lavaan::fitmeasures(self$model)
-                      alist<-list( 
-                            list(label="User Model",chisq=ff[["chisq"]],df=ff[["df"]],pvalue=ff[["pvalue"]]),
-                            list(label="Baseline Model",chisq=ff[["baseline.chisq"]],df=ff[["baseline.df"]],pvalue=ff[["baseline.pvalue"]])
-                      )
-                      self$fitindices<-as.list(ff)
+
+                      alist<-list(list(label="User Model",chisq=ff[["chisq"]],df=ff[["df"]],pvalue=ff[["pvalue"]]))
+                      try(alist[[2]]<-list(label="Baseline Model",chisq=ff[["baseline.chisq"]],df=ff[["baseline.df"]],pvalue=ff[["baseline.pvalue"]]))
+
+                     self$fitindices<-as.list(ff)
 
                       self$fit<-alist
                       
                       # fit indices
                       ff<-sapply(ff, round,3)
-                      alist<-list(
-                             c(info="Free parameters",value=self$model@Fit@npar),
-                             c(info="Estimation Method",value=self$model@Options$estimator),
-                             c(info="Number of observations",value=lavaan::lavInspect(self$model,"ntotal")), 
-                             c(info="Converged",value=self$model@Fit@converged), 
-                             c(info="",value=""),
-                             c(info="Loglikelihood user model",value=ff[["logl"]]), 
-                             c(info="Loglikelihood unrestricted model",value=ff[["unrestricted.logl"]])
-                             ) 
+                      alist<-list()
+                      alist[[length(alist)+1]]<-c(info="Free parameters",value=self$model@Fit@npar)
+                      alist[[length(alist)+1]]<-c(info="Estimation Method",value=self$model@Options$estimator)
+                      alist[[length(alist)+1]]<-c(info="Number of observations",value=lavaan::lavInspect(self$model,"ntotal")) 
+                      alist[[length(alist)+1]]<-c(info="Converged",value=self$model@Fit@converged) 
+                      alist[[length(alist)+1]]<-c(info="",value="")
+                      try(alist[[length(alist)+1]]<-c(info="Loglikelihood user model",value=ff[["logl"]]) )
+                      try(alist[[length(alist)+1]]<-c(info="Loglikelihood unrestricted model",value=ff[["unrestricted.logl"]]))
                       self$info<-alist
 
                       if (is.something(self$constraints)) {
