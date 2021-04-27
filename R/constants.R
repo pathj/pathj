@@ -43,3 +43,6 @@ The parameter labels can be found in the results tables. Please be sure to have 
 
 WARNS<-list()
 WARNS[["usercov"]]<-"Variances/Covariances specified by the user. The option  `Free Parameter - Exogenous Correlations` is ignored"
+
+ERRS<-list()
+ERRS[["nolatent"]]<-"Latent variables are not allow in pathj. Please use another the SEM module"

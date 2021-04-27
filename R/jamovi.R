@@ -22,6 +22,9 @@ fromb64<- function(x,...) UseMethod(".fromb64")
 
 .fromb64.default<-function(obj,ref=NULL) {
   
+  if (!is.something(obj))
+      return(obj)
+  
   if (length(obj)>1)
       return(unlist(sapply(obj, bogusfromb64,ref=ref,USE.NAMES = F)))
   
@@ -44,11 +47,11 @@ fromb64<- function(x,...) UseMethod(".fromb64")
   obj
 }
 
-.fromb64.list<-function(obj,ref) {
-  lapply(obj,bogusfromb64,ref)
+.fromb64.list<-function(obj,ref=NULL) {
+  lapply(obj,bogusfromb64,ref=ref)
 }
 
-bogusfromb64<-function(obj,ref=NULL) fromb64(obj,ref)
+bogusfromb64<-function(obj,ref=NULL) fromb64(obj,ref=ref)
 
 ######### tables #########
 

@@ -383,8 +383,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 list(
                                     `name`="chisq", 
                                     `title`="X\u00B2", 
-                                    `type`="number", 
-                                    `combineBelow`=TRUE),
+                                    `type`="number"),
                                 list(
                                     `name`="df", 
                                     `title`="df", 
@@ -423,8 +422,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 list(
                                     `name`="chisq", 
                                     `title`="X\u00B2", 
-                                    `type`="number", 
-                                    `combineBelow`=TRUE),
+                                    `type`="number"),
                                 list(
                                     `name`="df", 
                                     `title`="df", 
@@ -522,8 +520,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 list(
                                     `name`="lhs", 
                                     `title`="Dep", 
-                                    `type`="text", 
-                                    `combineBelow`=TRUE),
+                                    `type`="text"),
                                 list(
                                     `name`="rhs", 
                                     `title`="Pred", 

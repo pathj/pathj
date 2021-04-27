@@ -32,14 +32,15 @@ Syntax <- R6::R6Class(
                 private$.lav_structure<-results$obj
                 private$.warnings(results$warning)
                 private$.errors(results$error)
-
                 if (is.something(self$errors))
-                   stop(paste(self$errors,collapse = "\n"))
+                  stop(paste(self$errors,collapse = "\n"))
                 
+
                  private$.lav_structure$label<-gsub(".","",private$.lav_structure$plabel,fixed=T)
                 .lav_structure<-private$.lav_structure
                 .lav_structure$lhs<-fromb64(.lav_structure$lhs,private$.vars)
                 .lav_structure$rhs<-fromb64(.lav_structure$rhs,private$.vars)
+
                  self$structure<-.lav_structure[.lav_structure$op!="==",]
 
                 }, # here initialize ends
@@ -77,7 +78,7 @@ Syntax <- R6::R6Class(
               if (err==FALSE)
                   return()
               err<-fromb64(err,private$.vars)
-              self$errors[[length(self$warnings)+1]]<-err
+              self$errors[[length(self$errors)+1]]<-err
             },
             
             .lavaan_syntax=function() {
@@ -104,6 +105,7 @@ Syntax <- R6::R6Class(
               f<-paste(f,con,sep=" ; ")
               est<-paste(private$.userestimates,collapse = " ; ")
               f<-paste(f,est,sep=" ; ")
+              mark(fromb64(f,private$.vars))
               f
             },
             
@@ -111,16 +113,22 @@ Syntax <- R6::R6Class(
               realconsts<-list()
               realestims<-list()
               for (con in consts) {
+                check<-(length(grep("=~",con,fixed=T))>0)
+                if (check)
+                      stop(ERRS[["nolatent"]])
                 check<-(length(grep("==",con,fixed=T))>0) 
                 if (check)
                   realconsts[[length(realconsts)+1]]<-con
                 else
                   realestims[[length(realestims)+1]]<-con
               }
-              realestims<-lapply(realestims, function(estim) {
+              j<-0
+              realestims<-lapply(seq_along(realestims), function(j) {
+                estim<-realestims[[j]]
                 check<-grep(":=|~",estim)
-                if (length(check)==0)
-                  paste0("`",estim,"`:=",estim)
+                if (length(check)==0) {
+                     paste0("dp",j,":=",estim)
+                }
                 else
                   estim
               })

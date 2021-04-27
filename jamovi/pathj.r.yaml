@@ -54,7 +54,6 @@ items:
                     - name: chisq
                       title:  X²
                       type: number
-                      combineBelow: true
                     - name:  df
                       title: "df"
                       type: integer
@@ -89,7 +88,6 @@ items:
                     - name: chisq
                       title:  X²
                       type: number
-                      combineBelow: true
                     - name:  df
                       title: "df"
                       type: integer
@@ -171,7 +169,6 @@ items:
                     - name: lhs
                       title: "Dep"
                       type: text
-                      combineBelow: true
                     - name:  rhs
                       title: "Pred"
                       type: text

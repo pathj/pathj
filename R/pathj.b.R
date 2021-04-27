@@ -29,6 +29,8 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             ### get the lavaan structure of the model ###
             tab<-lav_machine$structure
+            
+            
 
             #### parameter fit indices table ####
             j.init_table(self$results$fit$indices,"",ci=T,ciroot="rmsea.",ciformat='RMSEA {}% CI',ciwidth=self$options$ciWidth)
@@ -213,37 +215,65 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           
           if (!private$.ready$ready)
                 return()
+          if (is.something(private$.lav_machine$errors))
+               stop(paste(private$.lav_machine$errors,collapse = "; "))
             
           labs<-self$options$diag_paths
           model<-private$.lav_machine$model
-          pt<-lavaan::parTable(model)
-          nodeLabels<-unique(pt$lhs)
+          nodeLabels<-model@pta$vnames$ov.num[[1]]
           nodeLabels<-fromb64(nodeLabels)
+
           size<-12
           if (self$options$diag_labsize=="small") size<-8
           if (self$options$diag_labsize=="large") size<-18
           nNodes<-length(nodeLabels)
           size<-size*exp(-nNodes/80)+1
           options<-list(object = private$.lav_machine$model,
-                                  layout = self$options$diag_type,
-                                  residuals = self$options$diag_resid,
-                                  rotation = as.numeric(self$options$diag_rotate),
-                                  intercepts = F
-                                  ,nodeLabels=nodeLabels
-                                  ,whatLabels=labs
-                                  ,sizeMan = size
-                                  ,nCharNodes=10
-                                  ,sizeMan2=size/2
-                                  , curve=2
-                                  , shapeMan=self$options$diag_shape
-                                  ,edge.label.cex =1.3)
+                        layout = self$options$diag_type,
+                        residuals = self$options$diag_resid,
+                        rotation = as.numeric(self$options$diag_rotate),
+                        intercepts = F
+                        ,nodeLabels=nodeLabels
+                        ,whatLabels=labs
+                        ,sizeMan = size
+                        ,nCharNodes=10
+                        ,sizeMan2=size/2
+                        , curve=2
+                        , shapeMan=self$options$diag_shape
+                        ,edge.label.cex =1.3)
+          
           res<-try_hard(do.call(semPlot::semPaths,options))
+          redo<-FALSE
           if (is.something(res$error)) {
+
              if  (length(grep("Circle layout only supported",res$error,fixed = T))>0) {
-                  self$results$pathgroup$notes$addRow(1,list(info="Circle layout requires rotation to be `Exogenous Top` or Exogenous Bottom`"))
-                  self$results$pathgroup$notes$setVisible(TRUE)
-             }
+                  self$results$pathgroup$notes$addRow(1,list(info="Rotation set to `Exogenous Top`. Circle layout requires rotation to be `Exogenous Top` or `Exogenous Bottom`"))
+                 res$error<-NULL
+                 options[["rotation"]]<-1
+                 redo<-TRUE
+                 
+             } 
+             if  (length(grep("graph_from_edgelist",res$error,fixed = T))>0) {
+                  self$results$pathgroup$notes$addRow(1,list(info="Layout has been set to Circle"))
+                   options[["layout"]]<-"circle"
+                   options[["rotation"]]<-1
+                   res$error<-NULL
+                   redo<-TRUE
+              } 
+              
+              if (redo) {
+                  res<-try_hard(do.call(semPlot::semPaths,options))
+              }   
+              if (!isFALSE(res$warning))
+                  self$results$pathgroup$notes$addRow("war",list(info=res$warning))
+              
+              if (!isFALSE(res$error))
+                  self$results$pathgroup$notes$addRow("err",list(info=res$error))
+              
           }
+          if (self$results$pathgroup$notes$rowCount>0)
+              self$results$pathgroup$notes$setVisible(TRUE)
+          
            return(res$obj)
         }
         
