@@ -17,6 +17,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             contrasts = NULL,
             showRealNames = TRUE,
             showContrastCode = FALSE,
+            scaling = NULL,
             endogenousTerms = list(
                 list()),
             diagram = FALSE,
@@ -132,6 +133,27 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showContrastCode",
                 showContrastCode,
                 default=FALSE)
+            private$..scaling <- jmvcore::OptionArray$new(
+                "scaling",
+                scaling,
+                default=NULL,
+                template=jmvcore::OptionGroup$new(
+                    "scaling",
+                    NULL,
+                    elements=list(
+                        jmvcore::OptionVariable$new(
+                            "var",
+                            NULL,
+                            content="$key"),
+                        jmvcore::OptionList$new(
+                            "type",
+                            NULL,
+                            options=list(
+                                "none",
+                                "centered",
+                                "standardized",
+                                "log"),
+                            default="none"))))
             private$..endogenousTerms <- jmvcore::OptionArray$new(
                 "endogenousTerms",
                 endogenousTerms,
@@ -240,6 +262,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..contrasts)
             self$.addOption(private$..showRealNames)
             self$.addOption(private$..showContrastCode)
+            self$.addOption(private$..scaling)
             self$.addOption(private$..endogenousTerms)
             self$.addOption(private$..diagram)
             self$.addOption(private$..diag_paths)
@@ -267,6 +290,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         contrasts = function() private$..contrasts$value,
         showRealNames = function() private$..showRealNames$value,
         showContrastCode = function() private$..showContrastCode$value,
+        scaling = function() private$..scaling$value,
         endogenousTerms = function() private$..endogenousTerms$value,
         diagram = function() private$..diagram$value,
         diag_paths = function() private$..diag_paths$value,
@@ -293,6 +317,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..contrasts = NA,
         ..showRealNames = NA,
         ..showContrastCode = NA,
+        ..scaling = NA,
         ..endogenousTerms = NA,
         ..diagram = NA,
         ..diag_paths = NA,
@@ -827,6 +852,10 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   names of the contrasts variables
 #' @param showContrastCode \code{TRUE} or \code{FALSE} (default), provide
 #'   contrast coefficients tables
+#' @param scaling a named vector of the form \code{c(var1='type',
+#'   var2='type2')} specifying the transformation to apply to covariates, one of
+#'   \code{'centered'} to the mean, \code{'standardized'},\code{'log'} or
+#'   \code{'none'}. \code{'none'} leaves the variable as it is.
 #' @param endogenousTerms a list of lists specifying the models for with the
 #'   mediators as dependent variables.
 #' @param diagram \code{TRUE} or \code{FALSE} (default), produce a path
@@ -881,6 +910,7 @@ pathj <- function(
     contrasts = NULL,
     showRealNames = TRUE,
     showContrastCode = FALSE,
+    scaling = NULL,
     endogenousTerms = list(
                 list()),
     diagram = FALSE,
@@ -953,6 +983,7 @@ pathj <- function(
         contrasts = contrasts,
         showRealNames = showRealNames,
         showContrastCode = showContrastCode,
+        scaling = scaling,
         endogenousTerms = endogenousTerms,
         diagram = diagram,
         diag_paths = diag_paths,

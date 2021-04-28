@@ -43,6 +43,11 @@ The parameter labels can be found in the results tables. Please be sure to have 
 
 WARNS<-list()
 WARNS[["usercov"]]<-"Variances/Covariances specified by the user. The option  `Free Parameter - Exogenous Correlations` is ignored"
+WARNS[["nocenterd"]]<-"Variables {vars} are not centered Consider using `Continuous Variables Scaling options` for easier interpretation of lower order effects"
+
+DATA_WARNS<-list()
+DATA_WARNS[["fac_to_cont"]]<-"Warming: continuous variable are defined as factor. Please make sure that each is a continuous variable."
+DATA_WARNS[["cont_to_fac"]]<-"Warning: variable coerced to factor"
 
 ERRS<-list()
 ERRS[["nolatent"]]<-"Latent variables are not allow in pathj. Please use another the SEM module"

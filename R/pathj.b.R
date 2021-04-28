@@ -7,6 +7,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     private = list(
         .factors=NULL,
         .lav_machine=NULL,
+        .data_machine=NULL,
         .model=NULL,
         .ready=NULL,
         .init = function() {
@@ -19,8 +20,8 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 return()
             }
             ### clean data and prepare the syntax ####
-            data<-private$.cleandata()
-            lav_machine<-Estimate$new(self$options,data)
+            data_machine<-Datamatic$new(self$options,self$data)
+            lav_machine<-Estimate$new(self$options,data_machine)
 
             ### fill the info table ###
             j.init_table(self$results$info,lav_machine$models())
@@ -49,21 +50,18 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ### prepare defined params ###
             tab1<-tab[tab$op==":=",]
             j.init_table(self$results$models$defined,tab1,ci=T,ciwidth=self$options$ciWidth)
-            
 
-            #### contrast tables ####
-            if (length(self$options$factors)>0) {
-                
-            for (factor in tob64(self$options$factors)) {
-                cont<-attr(data[[factor]],"jcontrast")
-                clabs<-lf.contrastLabels(cont$levels,cont$type)
-                for (i in seq_along(clabs)) {
-                      clab<-clabs[[i]]
-                      self$results$models$contrastCodeTable$addRow(paste0(factor,i),list(rname=paste0(fromb64(factor),i),clab=clab))
-                }
-            }
-                self$results$models$contrastCodeTable$setVisible(TRUE)    
-            }
+            # #### contrast tables ####
+             if (length(self$options$factors)>0) {
+                for (factor in self$options$factors) {
+                 clabs<-data_machine$contrasts_labels[[factor]]
+                 for (i in seq_along(clabs)) {
+                       clab<-clabs[[i]]
+                       self$results$models$contrastCodeTable$addRow(paste0(factor,i),list(rname=paste0(factor,i),clab=clab))
+                 }
+                 self$results$models$contrastCodeTable$setVisible(TRUE)    
+             }
+             }
             
             if (self$options$constraints_examples) {
                 j.init_table(self$results$contraintsnotes,CONT_EXAMPLES,indent=-1)
@@ -73,7 +71,8 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             private$.lav_machine<-lav_machine
-
+            private$.data_machine<-data_machine
+            
         },
     
         .run = function() {
@@ -83,8 +82,9 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 return()
 
             ### clean the data and prepare things ###
-            data<-private$.cleandata()
             lav_machine<-private$.lav_machine
+            data<-private$.data_machine$cleandata(self$data,lav_machine$interactions)
+
             results<-lav_machine$estimate(data)
             
             if (is.something(lav_machine$warnings))

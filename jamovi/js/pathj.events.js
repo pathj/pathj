@@ -14,10 +14,13 @@ const events = {
     onChange_endogenous: function(ui) {
        prepareEndogenousTerms(ui,this);
        updateSuppliers(ui,this);
+       updateScaling(ui,this);
+
     },
 
     onChange_covariates: function(ui) {
         updateSuppliers(ui,this);
+        updateScaling(ui,this)
         
     },
 
@@ -92,8 +95,6 @@ var prepareEndogenousTerms= function(ui,context) {
  
      // we make sure that there are enough arrays in the array list, each for each endogeneous
      var okList= [];
-     console.log(endogenousTerms);
-     console.log(endogenous);
      for (var i = 0; i < endogenous.length; i++) {
          var aList = endogenousTerms[i] === undefined ? [] : endogenousTerms[i] ;
              okList.push(aList);
@@ -156,7 +157,10 @@ var cleanEndogenousTerms= function(ui,context) {
 var updateScaling = function(ui,context) {
     log("updateScaling");
     var currentList = context.cloneArray(ui.scaling.value(), []);
-    var variableList = context.cloneArray(ui.covs.value(), [])
+    var variableList1 = context.cloneArray(ui.covs.value(), []);
+    var variableList2 = context.cloneArray(ui.endogenous.value(), []);
+    var variableList = variableList2.concat(variableList1);
+
     var list3 = [];
     for (let i = 0; i < variableList.length; i++) {
         let found = null;
@@ -167,7 +171,7 @@ var updateScaling = function(ui,context) {
             }
         }
         if (found === null)
-            list3.push({ var: variableList[i], type: "centered" });
+            list3.push({ var: variableList[i], type: "none" });
         else
             list3.push(found);
     }

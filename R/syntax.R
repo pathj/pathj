@@ -1,5 +1,8 @@
 Syntax <- R6::R6Class(
          "Syntax",
+          class=FALSE, ## this and the next 
+          cloneable=FALSE, ## should improve performance https://r6.r-lib.org/articles/Performance.html ###
+          inherit = Dispatch,
           public=list(
               endogenous=NULL,
               lav_terms=NULL,
@@ -10,17 +13,15 @@ Syntax <- R6::R6Class(
               userestimates=NULL,
               hasInteractions=FALSE,
               interactions=list(),
-              warnings=list(),
-              errors=list(),
-              initialize=function(options,data) {
+              initialize=function(options,datamatic) {
+                super$initialize(vars=unlist(c(options$endogenous,options$factors,options$covs)))
                 self$options=options
-                private$.vars<-unlist(c(self$options$endogenous,self$options$factors,self$options$covs))
                 private$.check_constraints(options$constraints)
-                factorinfo<-sapply(tob64(self$options$factors),function(f) nlevels(data[[f]])-1 )
-                private$.lav_terms<-lapply(tob64(self$options$endogenousTerms), function(alist) private$.factorlist(alist,factorinfo))
-                names(factorinfo)<-fromb64(names(factorinfo))
+                factorinfo<-sapply(self$options$factors,function(f) length(datamatic$factors_levels[[f]])-1 )
                 self$lav_terms<-lapply(self$options$endogenousTerms, function(alist) private$.factorlist(alist,factorinfo))
-                
+                names(factorinfo)<-tob64(names(factorinfo))
+                private$.lav_terms<-lapply(tob64(self$options$endogenousTerms), function(alist) private$.factorlist(alist,factorinfo))
+                private$.check_interactions()
                 results<-try_hard({
                     lavaan::lavaanify(private$.lavaan_syntax(),
                                                         int.ov.free = TRUE, 
@@ -33,19 +34,18 @@ Syntax <- R6::R6Class(
                 private$.warnings(results$warning)
                 private$.errors(results$error)
                 if (is.something(self$errors))
-                  stop(paste(self$errors,collapse = "\n"))
+                     stop(paste(self$errors,collapse = "\n"))
                 
 
                  private$.lav_structure$label<-gsub(".","",private$.lav_structure$plabel,fixed=T)
                 .lav_structure<-private$.lav_structure
                 .lav_structure$lhs<-fromb64(.lav_structure$lhs,private$.vars)
                 .lav_structure$rhs<-fromb64(.lav_structure$rhs,private$.vars)
-
                  self$structure<-.lav_structure[.lav_structure$op!="==",]
 
                 }, # here initialize ends
-              models=function() {
-                lapply(seq_along(self$options$endogenousTerms), 
+               models=function() {
+                  lapply(seq_along(self$options$endogenousTerms), 
                        function(i) list(info="Model",
                                         value=as.character(jmvcore::constructFormula(dep=self$options$endogenous[i],
                                                                                      self$options$endogenousTerms[[i]])))
@@ -57,15 +57,17 @@ Syntax <- R6::R6Class(
           private=list(
             .lav_terms=NULL,
             .lav_structure=NULL,
-            .vars=NULL,
             .constraints=NULL,
             .userestimates=NULL,
             
             .warnings=function(warn) {
+              
+                if (is.null(warn))
+                      return()
                 if (warn==FALSE)
                    return()
      
-                warn<-fromb64(warn,private$.vars)
+                warn<-fromb64(warn,self$vars)
               
                 check<-length(grep("fixed.x=FALSE",warn,fixed = T)>0) 
                 if (check) {
@@ -73,12 +75,6 @@ Syntax <- R6::R6Class(
                   }
                   self$warnings[[length(self$warnings)+1]]<-warn
                   
-            },
-            .errors=function(err) {
-              if (err==FALSE)
-                  return()
-              err<-fromb64(err,private$.vars)
-              self$errors[[length(self$errors)+1]]<-err
             },
             
             .lavaan_syntax=function() {
@@ -105,7 +101,6 @@ Syntax <- R6::R6Class(
               f<-paste(f,con,sep=" ; ")
               est<-paste(private$.userestimates,collapse = " ; ")
               f<-paste(f,est,sep=" ; ")
-              mark(fromb64(f,private$.vars))
               f
             },
             
@@ -140,7 +135,22 @@ Syntax <- R6::R6Class(
               
               
             },
-            
+            .check_interactions=function() {
+              noscale<-unlist(sapply(self$options$scaling , function(a) if (a$type=="none") return(a$var)))
+              res<-lapply(seq_along(self$options$endogenousTerms), function(i) {
+                   sapply(self$options$endogenousTerms[[1]],function(term) {
+                    if (length(term)>1)
+                           return(intersect(term,noscale))
+                    else return(NULL)
+                  })
+              })
+              res<-unique(unlist(res))
+              if (is.something(res)) {
+                   w<-glue::glue(WARNS[["nocenterd"]],vars=paste(res,collapse = ", "))
+                   private$.warnings(w)
+              }
+
+            },
             .factorlist=function(terms,factorslen) {
               .terms<-list()
               for (f in names(factorslen)) {
@@ -166,8 +176,10 @@ Syntax <- R6::R6Class(
           ) # end of private
 ) # End Rclass
 
-Estimate <- R6Class("Estimate",
+Estimate <- R6::R6Class("Estimate",
                   inherit = Syntax,
+                  cloneable=FALSE,
+                  class=FALSE,
                   list(
                     model=NULL,
                     ciwidth=NULL,
