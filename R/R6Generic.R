@@ -27,7 +27,11 @@ Dispatch <- R6::R6Class(
     .errors=function(err) {
       if (err==FALSE)
         return()
-      err<-fromb64(err,private$.vars)
+      mark(err)
+      mark(self$vars)
+      err<-fromb64(err,self$vars)
+      mark(err)
+      
       self$errors[[length(self$errors)+1]]<-err
     }
     

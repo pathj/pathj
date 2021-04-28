@@ -39,8 +39,8 @@ Syntax <- R6::R6Class(
 
                  private$.lav_structure$label<-gsub(".","",private$.lav_structure$plabel,fixed=T)
                 .lav_structure<-private$.lav_structure
-                .lav_structure$lhs<-fromb64(.lav_structure$lhs,private$.vars)
-                .lav_structure$rhs<-fromb64(.lav_structure$rhs,private$.vars)
+                .lav_structure$lhs<-fromb64(.lav_structure$lhs,self$vars)
+                .lav_structure$rhs<-fromb64(.lav_structure$rhs,self$vars)
                  self$structure<-.lav_structure[.lav_structure$op!="==",]
 
                 }, # here initialize ends
@@ -61,7 +61,7 @@ Syntax <- R6::R6Class(
             .userestimates=NULL,
             
             .warnings=function(warn) {
-              
+
                 if (is.null(warn))
                       return()
                 if (warn==FALSE)
@@ -130,8 +130,8 @@ Syntax <- R6::R6Class(
               
               self$constraints<-lapply(realconsts, function(x) list(info="Constraint",value=x))
               self$userestimates<-lapply(realestims, function(x) list(info="Defined parameter",value=x))
-              private$.constraints<-tob64(realconsts,private$.vars)
-              private$.userestimates<-tob64(realestims,private$.vars)
+              private$.constraints<-tob64(realconsts,self$vars)
+              private$.userestimates<-tob64(realestims,self$vars)
               
               
             },
@@ -219,8 +219,8 @@ Estimate <- R6::R6Class("Estimate",
                                             standardized = T,
                                             boot.ci.type = self$options$bootci
                       )
-                      self$parameters$rhs<-fromb64(self$parameters$rhs,private$.vars)
-                      self$parameters$lhs<-fromb64(self$parameters$lhs,private$.vars)
+                      self$parameters$rhs<-fromb64(self$parameters$rhs,self$vars)
+                      self$parameters$lhs<-fromb64(self$parameters$lhs,self$vars)
                       
                       self$parameters$free<-(self$structure$free>0)
                       self$parameters$endo<-FALSE

@@ -52,7 +52,6 @@ Datamatic <- R6::R6Class(
           head<-paste0("data64$",int,"<-")
           op<-paste(terms,collapse = " * ")
           synt<-paste0(head,op)
-          mark(synt)
           eval(parse(text=synt))
         }
         
