@@ -1,12 +1,18 @@
 tob64<- function(x,...) UseMethod(".tob64")
 
 .tob64.default<-function(obj,ref=NULL) {
-  
+
+
+  if (is.null(obj))
+      return(list())
+
+
   if (is.null(ref)) {
     obj<-jmvcore::toB64(obj)
   } else {
-    for (r in ref)
+    for (r in ref) {
       obj<-gsub(r,jmvcore::toB64(r),obj,fixed = T)
+    }
   }
   obj
 }
@@ -21,6 +27,9 @@ fromb64<- function(x,...) UseMethod(".fromb64")
 
 
 .fromb64.default<-function(obj,ref=NULL) {
+  
+  if (!is.something(obj))
+      return(obj)
   
   if (length(obj)>1)
       return(unlist(sapply(obj, bogusfromb64,ref=ref,USE.NAMES = F)))
@@ -44,11 +53,11 @@ fromb64<- function(x,...) UseMethod(".fromb64")
   obj
 }
 
-.fromb64.list<-function(obj,ref) {
-  lapply(obj,bogusfromb64,ref)
+.fromb64.list<-function(obj,ref=NULL) {
+  lapply(obj,bogusfromb64,ref=ref)
 }
 
-bogusfromb64<-function(obj,ref=NULL) fromb64(obj,ref)
+bogusfromb64<-function(obj,ref=NULL) fromb64(obj,ref=ref)
 
 ######### tables #########
 

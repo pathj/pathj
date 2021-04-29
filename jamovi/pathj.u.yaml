@@ -83,10 +83,41 @@ children:
                           template:
                             type: TermLabel
   - type: CollapseBox
-    label: Model Structure
+    label: Variances and Covariances
     collapsed: true
     stretchFactor: 1
     children:
+      - type: LayoutBox
+        margin: large
+        style: inline
+        stretchFactor: 1
+        children:
+
+               - type: VariableSupplier
+                 name: varcovSupplier
+                 populate: manual
+                 persistentItems: true
+                 stretchFactor: 1
+                 events:
+                     change: './pathj.events::onChange_varcovSupplier'
+                     update: './pathj.events::onUpdate_varcovSupplier'
+                 children:
+                     - type: TargetLayoutBox
+                       label: Select pairs
+                       children:
+                             - type: VariablesListBox
+                               name: varcov
+                               fullRowSelect: true
+                               isTarget: true
+                               columns:
+                                    - name: i1
+                                      stretchFactor: 1
+                                      template:
+                                           type: VariableLabel
+                                    - name: i2
+                                      stretchFactor: 1
+                                      template:
+                                           type: VariableLabel
       - type: LayoutBox
         margin: large
         style: inline
@@ -127,6 +158,32 @@ children:
         name: showRealNames
       - type: CheckBox
         name: showContrastCode
+
+  - type: CollapseBox
+    label: Continuous Variables Scaling
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: ListBox
+        name: scaling
+        stretchFactor: 1
+        showColumnHeaders: false
+        columns:
+          - name: var
+            label: null
+            selectable: false
+            stretchFactor: 1
+            maxWidth: 300
+            template:
+              type: VariableLabel
+          - name: type
+            label: null
+            selectable: false
+            stretchFactor: 0.5
+            template:
+              type: ComboBox
+
+
   - type: CollapseBox
     label: Model Options
     collapsed: true

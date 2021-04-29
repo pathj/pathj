@@ -23,7 +23,8 @@ readiness <- function(options) {
     result$report <- TRUE
     result$reason <- glue::glue("Predictors not specified for {length(options$endogenous)-check} endogenous variable")
     return(result)
-    
   }
+  
+
   return(result)
 }

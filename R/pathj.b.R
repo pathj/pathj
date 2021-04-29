@@ -7,6 +7,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     private = list(
         .factors=NULL,
         .lav_machine=NULL,
+        .data_machine=NULL,
         .model=NULL,
         .ready=NULL,
         .init = function() {
@@ -19,8 +20,8 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 return()
             }
             ### clean data and prepare the syntax ####
-            data<-private$.cleandata()
-            lav_machine<-Estimate$new(self$options,data)
+            data_machine<-Datamatic$new(self$options,self$data)
+            lav_machine<-Estimate$new(self$options,data_machine)
 
             ### fill the info table ###
             j.init_table(self$results$info,lav_machine$models())
@@ -29,7 +30,8 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             ### get the lavaan structure of the model ###
             tab<-lav_machine$structure
-
+            
+            
             #### parameter fit indices table ####
             j.init_table(self$results$fit$indices,"",ci=T,ciroot="rmsea.",ciformat='RMSEA {}% CI',ciwidth=self$options$ciWidth)
             #### parameter estimates table ####
@@ -47,21 +49,18 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ### prepare defined params ###
             tab1<-tab[tab$op==":=",]
             j.init_table(self$results$models$defined,tab1,ci=T,ciwidth=self$options$ciWidth)
-            
 
-            #### contrast tables ####
-            if (length(self$options$factors)>0) {
-                
-            for (factor in tob64(self$options$factors)) {
-                cont<-attr(data[[factor]],"jcontrast")
-                clabs<-lf.contrastLabels(cont$levels,cont$type)
-                for (i in seq_along(clabs)) {
-                      clab<-clabs[[i]]
-                      self$results$models$contrastCodeTable$addRow(paste0(factor,i),list(rname=paste0(fromb64(factor),i),clab=clab))
-                }
-            }
-                self$results$models$contrastCodeTable$setVisible(TRUE)    
-            }
+            # #### contrast tables ####
+             if (length(self$options$factors)>0) {
+                for (factor in self$options$factors) {
+                 clabs<-data_machine$contrasts_labels[[factor]]
+                 for (i in seq_along(clabs)) {
+                       clab<-clabs[[i]]
+                       self$results$models$contrastCodeTable$addRow(paste0(factor,i),list(rname=paste0(factor,i),clab=clab))
+                 }
+                 self$results$models$contrastCodeTable$setVisible(TRUE)    
+             }
+             }
             
             if (self$options$constraints_examples) {
                 j.init_table(self$results$contraintsnotes,CONT_EXAMPLES,indent=-1)
@@ -71,7 +70,8 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             private$.lav_machine<-lav_machine
-
+            private$.data_machine<-data_machine
+            
         },
     
         .run = function() {
@@ -81,13 +81,15 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 return()
 
             ### clean the data and prepare things ###
-            data<-private$.cleandata()
             lav_machine<-private$.lav_machine
-            results<-lav_machine$estimate(data)
-            
-            if (is.something(lav_machine$warnings))
-                for (i in seq_along(lav_machine$warnings))
-                      self$results$info$setNote(i,lav_machine$warnings[[i]])
+            data<-private$.data_machine$cleandata(self$data,lav_machine$interactions)
+
+            lav_machine$estimate(data)
+
+            warns<-lav_machine$warnings
+            if (is.something(warns[["main"]]))
+                for (i in seq_along(warns[["main"]]))
+                      self$results$info$setNote(i,warns[["main"]][[i]])
 
             if (is.something(lav_machine$errors)) {
                     stop(paste(lav_machine$errors,collapse = "\n\n"))
@@ -99,7 +101,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
              }
              self$results$info$addFormat(rowNo=nr, col=1,jmvcore::Cell.BEGIN_END_GROUP)
              ## fit indices
-             self$results$fit$indices$addRow(1,lav_machine$fitindices)
+             self$results$fit$indices$setRow(rowNo=1,lav_machine$fitindices)
              
              ## fit test
              for (i in seq_along(lav_machine$fit)) 
@@ -122,12 +124,10 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tab2<-lav_machine$correlations
             for (i in seq_len(nrow(tab2))) {
                 if (is.na(tab2$z[i])) {
-                    tab2$user[i]="Sample"
                     tab2$z[i]<-""
                     tab2$pvalue[i]<-""
                     tab2$se[i]<-""
                 }
-                else tab2$user[i]="Estim."
                 self$results$models$correlations$setRow(rowKey=i,tab2[i,])
             }
             tab3<-lav_machine$r2
@@ -141,109 +141,75 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                  self$results$models$defined$setVisible(TRUE)
             }
         },
-        
-        .cleandata=function() {
-
-            .warning<-list()
-            dataRaw <- jmvcore::naOmit(self$data)
-            names(dataRaw)<-tob64(names(dataRaw))
-            data <- list()
-            endogenous<-tob64(self$options$endogenous)
-            for (endo in endogenous) {
-                if (class(dataRaw[[endo]]) == "factor")
-                    .warning<-append(.warning,"Warming: An endogenous variables is defined as factor. Please make sure it is a continuous variable.")
-                data[[endo]] <- jmvcore::toNumeric(dataRaw[[endo]])
-            }
-            
-            covs<-tob64(self$options$covs)
-            for (cov in covs) {
-                data[[cov]] <- jmvcore::toNumeric(dataRaw[[cov]])
-            }
-            
-            .contrasts<-sapply(self$options$contrasts,function(a) a$type)
-            .contrastsnames<-sapply(self$options$contrasts,function(a) tob64(a$var))
-            names(.contrasts)<-.contrastsnames
-            factors<-tob64(self$options$factors)
-            for (factor in factors) {
-                ### we need this for Rinterface ####
-                if (!("factor" %in% class(dataRaw[[factor]]))) {
-                    info(paste("Warning, variable",factor," has been coerced to factor"))
-                    dataRaw[[factor]]<-factor(dataRaw[[factor]])
-                }
-                data[[factor]] <- dataRaw[[factor]]
-                levels <- base::levels(data[[factor]])
-                .cont<-ifelse(factor %in% .contrastsnames,.contrasts[[factor]],"simple")
-                stats::contrasts(data[[factor]]) <- lf.createContrasts(levels,.cont)
-                attr(data[[factor]],"jcontrast")<-list(type=.cont,levels=levels)
-                dummies<-model.matrix(as.formula(paste0("~",factor)),data=data)
-                dummies<-dummies[,-1]
-                dummies<-data.frame(dummies)
-                private$.factors<-c(private$.factors,names(dummies))
-                onames<-names(data)
-                data<-cbind(data,dummies)
-                names(data)<-c(onames,paste0(factor,FACTOR_SYMBOL,1:(length(levels)-1)))
-            }
-            
-             #### here we do thing if cleandata is called by run (not init) ####
-             if (is.something(private$.lav_machine)) {
-                 ### here we build the interactions variables                 
-                 if (private$.lav_machine$hasInteractions) {
-                     ints<-private$.lav_machine$interactions
-                     for (int in ints) {
-                         int<-trimws(int)
-                         terms<-strsplit(int,INTERACTION_SYMBOL,fixed = T)[[1]]
-                         terms<-paste0("data$",trimws(terms))
-                         head<-paste0("data$",int,"<-")
-                         op<-paste(terms,collapse = " * ")
-                         synt<-paste0(head,op)
-                         eval(parse(text=synt))
-                     }
-                     
-                 
-             }
-                          
-                          
-                      }
-            data<-as.data.frame(data)     
-            attr(data,"warning")<-.warning
-            return(data)
-            
-        },
         .showDiagram=function(image, ggtheme, theme, ...) {
           
           if (!private$.ready$ready)
                 return()
+          if (is.something(private$.lav_machine$errors))
+               return()
+#               stop(paste(private$.lav_machine$errors,collapse = "; "))
             
           labs<-self$options$diag_paths
           model<-private$.lav_machine$model
-          pt<-lavaan::parTable(model)
-          nodeLabels<-unique(pt$lhs)
+          nodeLabels<-model@pta$vnames$ov.num[[1]]
           nodeLabels<-fromb64(nodeLabels)
+
           size<-12
           if (self$options$diag_labsize=="small") size<-8
           if (self$options$diag_labsize=="large") size<-18
           nNodes<-length(nodeLabels)
           size<-size*exp(-nNodes/80)+1
           options<-list(object = private$.lav_machine$model,
-                                  layout = self$options$diag_type,
-                                  residuals = self$options$diag_resid,
-                                  rotation = as.numeric(self$options$diag_rotate),
-                                  intercepts = F
-                                  ,nodeLabels=nodeLabels
-                                  ,whatLabels=labs
-                                  ,sizeMan = size
-                                  ,nCharNodes=10
-                                  ,sizeMan2=size/2
-                                  , curve=2
-                                  , shapeMan=self$options$diag_shape
-                                  ,edge.label.cex =1.3)
+                        layout = self$options$diag_type,
+                        residuals = self$options$diag_resid,
+                        rotation = as.numeric(self$options$diag_rotate),
+                        intercepts = F
+                        ,nodeLabels=nodeLabels
+                        ,whatLabels=labs
+                        ,sizeMan = size
+                        ,nCharNodes=10
+                        ,sizeMan2=size/2
+                        , curve=2
+                        , shapeMan=self$options$diag_shape
+                        ,edge.label.cex =1.3)
+          
           res<-try_hard(do.call(semPlot::semPaths,options))
+          redo<-FALSE
           if (is.something(res$error)) {
+
              if  (length(grep("Circle layout only supported",res$error,fixed = T))>0) {
-                  self$results$pathgroup$notes$addRow(1,list(info="Circle layout requires rotation to be `Exogenous Top` or Exogenous Bottom`"))
-                  self$results$pathgroup$notes$setVisible(TRUE)
-             }
+                  self$results$pathgroup$notes$addRow(1,list(info="Rotation set to `Exogenous Top`. Circle layout requires rotation to be `Exogenous Top` or `Exogenous Bottom`"))
+                 res$error<-NULL
+                 options[["rotation"]]<-1
+                 redo<-TRUE
+                 
+             } 
+             if  (length(grep("graph_from_edgelist",res$error,fixed = T))>0) {
+                  self$results$pathgroup$notes$addRow(1,list(info="Layout has been set to Circle"))
+                   options[["layout"]]<-"circle"
+                   options[["rotation"]]<-1
+                   res$error<-NULL
+                   redo<-TRUE
+             } 
+              if  (length(grep("subscript out of",res$error,fixed = T))>0) {
+                  res$error<-"The diagram cannot be displayed. Please try a different layout type"
+                  redo<-FALSE
+              } 
+              
+              
+              if (redo) {
+                  res<-try_hard(do.call(semPlot::semPaths,options))
+              }   
+              if (!isFALSE(res$warning))
+                  self$results$pathgroup$notes$addRow("war",list(info=res$warning))
+              
+              if (!isFALSE(res$error))
+                  self$results$pathgroup$notes$addRow("err",list(info=res$error))
+              
           }
+          if (self$results$pathgroup$notes$rowCount>0)
+              self$results$pathgroup$notes$setVisible(TRUE)
+          
            return(res$obj)
         }
         

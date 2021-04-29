@@ -17,6 +17,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             contrasts = NULL,
             showRealNames = TRUE,
             showContrastCode = FALSE,
+            scaling = NULL,
             endogenousTerms = list(
                 list()),
             diagram = FALSE,
@@ -26,6 +27,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             diag_rotate = "2",
             diag_type = "tree2",
             diag_shape = "square",
+            varcov = NULL,
             cov_y = TRUE,
             cov_x = FALSE,
             constraints = list(),
@@ -132,6 +134,27 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showContrastCode",
                 showContrastCode,
                 default=FALSE)
+            private$..scaling <- jmvcore::OptionArray$new(
+                "scaling",
+                scaling,
+                default=NULL,
+                template=jmvcore::OptionGroup$new(
+                    "scaling",
+                    NULL,
+                    elements=list(
+                        jmvcore::OptionVariable$new(
+                            "var",
+                            NULL,
+                            content="$key"),
+                        jmvcore::OptionList$new(
+                            "type",
+                            NULL,
+                            options=list(
+                                "none",
+                                "centered",
+                                "standardized",
+                                "log"),
+                            default="none"))))
             private$..endogenousTerms <- jmvcore::OptionArray$new(
                 "endogenousTerms",
                 endogenousTerms,
@@ -194,6 +217,9 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ellipse",
                     "diamond"),
                 default="square")
+            private$..varcov <- jmvcore::OptionPairs$new(
+                "varcov",
+                varcov)
             private$..cov_y <- jmvcore::OptionBool$new(
                 "cov_y",
                 cov_y,
@@ -240,6 +266,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..contrasts)
             self$.addOption(private$..showRealNames)
             self$.addOption(private$..showContrastCode)
+            self$.addOption(private$..scaling)
             self$.addOption(private$..endogenousTerms)
             self$.addOption(private$..diagram)
             self$.addOption(private$..diag_paths)
@@ -248,6 +275,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..diag_rotate)
             self$.addOption(private$..diag_type)
             self$.addOption(private$..diag_shape)
+            self$.addOption(private$..varcov)
             self$.addOption(private$..cov_y)
             self$.addOption(private$..cov_x)
             self$.addOption(private$..constraints)
@@ -267,6 +295,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         contrasts = function() private$..contrasts$value,
         showRealNames = function() private$..showRealNames$value,
         showContrastCode = function() private$..showContrastCode$value,
+        scaling = function() private$..scaling$value,
         endogenousTerms = function() private$..endogenousTerms$value,
         diagram = function() private$..diagram$value,
         diag_paths = function() private$..diag_paths$value,
@@ -275,6 +304,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         diag_rotate = function() private$..diag_rotate$value,
         diag_type = function() private$..diag_type$value,
         diag_shape = function() private$..diag_shape$value,
+        varcov = function() private$..varcov$value,
         cov_y = function() private$..cov_y$value,
         cov_x = function() private$..cov_x$value,
         constraints = function() private$..constraints$value,
@@ -293,6 +323,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..contrasts = NA,
         ..showRealNames = NA,
         ..showContrastCode = NA,
+        ..scaling = NA,
         ..endogenousTerms = NA,
         ..diagram = NA,
         ..diag_paths = NA,
@@ -301,6 +332,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..diag_rotate = NA,
         ..diag_type = NA,
         ..diag_shape = NA,
+        ..varcov = NA,
         ..cov_y = NA,
         ..cov_x = NA,
         ..constraints = NA,
@@ -383,8 +415,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 list(
                                     `name`="chisq", 
                                     `title`="X\u00B2", 
-                                    `type`="number", 
-                                    `combineBelow`=TRUE),
+                                    `type`="number"),
                                 list(
                                     `name`="df", 
                                     `title`="df", 
@@ -423,8 +454,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 list(
                                     `name`="chisq", 
                                     `title`="X\u00B2", 
-                                    `type`="number", 
-                                    `combineBelow`=TRUE),
+                                    `type`="number"),
                                 list(
                                     `name`="df", 
                                     `title`="df", 
@@ -522,8 +552,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 list(
                                     `name`="lhs", 
                                     `title`="Dep", 
-                                    `type`="text", 
-                                    `combineBelow`=TRUE),
+                                    `type`="text"),
                                 list(
                                     `name`="rhs", 
                                     `title`="Pred", 
@@ -738,7 +767,8 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             clearWith=list(
                     "endogenous",
                     "cov_y",
-                    "constraints"))
+                    "constraints",
+                    "varcov"))
                         self$add(jmvcore::Image$new(
                             options=options,
                             name="diagram",
@@ -830,6 +860,10 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   names of the contrasts variables
 #' @param showContrastCode \code{TRUE} or \code{FALSE} (default), provide
 #'   contrast coefficients tables
+#' @param scaling a named vector of the form \code{c(var1='type',
+#'   var2='type2')} specifying the transformation to apply to covariates, one of
+#'   \code{'centered'} to the mean, \code{'standardized'},\code{'log'} or
+#'   \code{'none'}. \code{'none'} leaves the variable as it is.
 #' @param endogenousTerms a list of lists specifying the models for with the
 #'   mediators as dependent variables.
 #' @param diagram \code{TRUE} or \code{FALSE} (default), produce a path
@@ -841,6 +875,8 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param diag_rotate Choose the diagram labels
 #' @param diag_type Choose the diagram labels
 #' @param diag_shape Choose the diagram labels
+#' @param varcov a list of lists specifying the  covariances that need to be
+#'   estimated
 #' @param cov_y \code{TRUE} or \code{FALSE} (default), produce a path diagram
 #' @param cov_x \code{TRUE} or \code{FALSE} (default), produce a path diagram
 #' @param constraints a list of lists specifying the models random effects.
@@ -884,6 +920,7 @@ pathj <- function(
     contrasts = NULL,
     showRealNames = TRUE,
     showContrastCode = FALSE,
+    scaling = NULL,
     endogenousTerms = list(
                 list()),
     diagram = FALSE,
@@ -893,6 +930,7 @@ pathj <- function(
     diag_rotate = "2",
     diag_type = "tree2",
     diag_shape = "square",
+    varcov,
     cov_y = TRUE,
     cov_x = FALSE,
     constraints = list(),
@@ -956,6 +994,7 @@ pathj <- function(
         contrasts = contrasts,
         showRealNames = showRealNames,
         showContrastCode = showContrastCode,
+        scaling = scaling,
         endogenousTerms = endogenousTerms,
         diagram = diagram,
         diag_paths = diag_paths,
@@ -964,6 +1003,7 @@ pathj <- function(
         diag_rotate = diag_rotate,
         diag_type = diag_type,
         diag_shape = diag_shape,
+        varcov = varcov,
         cov_y = cov_y,
         cov_x = cov_x,
         constraints = constraints,
