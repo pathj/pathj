@@ -32,7 +32,6 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tab<-lav_machine$structure
             
             
-
             #### parameter fit indices table ####
             j.init_table(self$results$fit$indices,"",ci=T,ciroot="rmsea.",ciformat='RMSEA {}% CI',ciwidth=self$options$ciWidth)
             #### parameter estimates table ####
@@ -85,11 +84,12 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             lav_machine<-private$.lav_machine
             data<-private$.data_machine$cleandata(self$data,lav_machine$interactions)
 
-            results<-lav_machine$estimate(data)
-            
-            if (is.something(lav_machine$warnings))
-                for (i in seq_along(lav_machine$warnings))
-                      self$results$info$setNote(i,lav_machine$warnings[[i]])
+            lav_machine$estimate(data)
+
+            warns<-lav_machine$warnings
+            if (is.something(warns[["main"]]))
+                for (i in seq_along(warns[["main"]]))
+                      self$results$info$setNote(i,warns[["main"]][[i]])
 
             if (is.something(lav_machine$errors)) {
                     stop(paste(lav_machine$errors,collapse = "\n\n"))
@@ -101,7 +101,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
              }
              self$results$info$addFormat(rowNo=nr, col=1,jmvcore::Cell.BEGIN_END_GROUP)
              ## fit indices
-             self$results$fit$indices$addRow(1,lav_machine$fitindices)
+             self$results$fit$indices$setRow(rowNo=1,lav_machine$fitindices)
              
              ## fit test
              for (i in seq_along(lav_machine$fit)) 
@@ -124,12 +124,10 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tab2<-lav_machine$correlations
             for (i in seq_len(nrow(tab2))) {
                 if (is.na(tab2$z[i])) {
-                    tab2$user[i]="Sample"
                     tab2$z[i]<-""
                     tab2$pvalue[i]<-""
                     tab2$se[i]<-""
                 }
-                else tab2$user[i]="Estim."
                 self$results$models$correlations$setRow(rowKey=i,tab2[i,])
             }
             tab3<-lav_machine$r2
@@ -148,7 +146,8 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           if (!private$.ready$ready)
                 return()
           if (is.something(private$.lav_machine$errors))
-               stop(paste(private$.lav_machine$errors,collapse = "; "))
+               return()
+#               stop(paste(private$.lav_machine$errors,collapse = "; "))
             
           labs<-self$options$diag_paths
           model<-private$.lav_machine$model
@@ -191,7 +190,12 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                    options[["rotation"]]<-1
                    res$error<-NULL
                    redo<-TRUE
+             } 
+              if  (length(grep("subscript out of",res$error,fixed = T))>0) {
+                  res$error<-"The diagram cannot be displayed. Please try a different layout type"
+                  redo<-FALSE
               } 
+              
               
               if (redo) {
                   res<-try_hard(do.call(semPlot::semPaths,options))

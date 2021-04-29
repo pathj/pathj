@@ -9,6 +9,7 @@ Datamatic <- R6::R6Class(
     factors_levels=list(),
     contrasts_labels=NULL,
     contrasts_values=NULL,
+    contrasts_names=NULL,
     continuous=NULL,
     continuous_scale=NULL,
     initialize=function(options,data) {
@@ -20,17 +21,14 @@ Datamatic <- R6::R6Class(
       self$continuous_scale<-sapply(options$scaling, function(a) a$type)
       names(self$continuous_scale)<-sapply(options$scaling, function(a) a$var)
       private$.inspect_data(data)
-      private$.warnings("ciao")
     },
     cleandata=function(data,interactions=NULL) {
       data64 <- jmvcore::naOmit(data)
       names(data64)<-tob64(names(data))
-      
-
       for (cont in self$continuous) {
         cont64<-tob64(cont)
         if (class(data64[[cont64]]) == "factor")
-           private$.warnings(DATA_WARNS[["fac_to_cont"]])
+              self$warnings<-DATA_WARNS[["fac_to_cont"]]
         data64[[cont64]] <- private$.continuous_value(data64[[cont64]],self$continuous_scale[[cont]])
       }
       for (factor in self$factors) {
@@ -43,7 +41,9 @@ Datamatic <- R6::R6Class(
         dummies<-data.frame(dummies)
         onames<-names(data64)
         data64<-cbind(data64,dummies)
-        names(data64)<-c(onames,paste0(factor64,FACTOR_SYMBOL,1:(nlevels-1)))
+        fn64<-paste0(factor64,FACTOR_SYMBOL,1:(nlevels-1))
+        fn<-paste0(factor,1:(nlevels-1))
+        names(data64)<-c(onames,fn64)
       }
         for (int in interactions) {
           int<-trimws(int)
@@ -68,7 +68,10 @@ Datamatic <- R6::R6Class(
             names(data)<-jmvcore::toB64(names(data))
             for (factor in self$factors) {
                     self$factors_levels[[factor]]<-levels(data[,tob64(factor)])
+                    for (i in seq_along(levels(data[,tob64(factor)])))
+                          self$contrasts_names[[paste0(factor,i)]]<-paste0(tob64(factor),FACTOR_SYMBOL,i)
             }
+     
             private$.create_constrasts()
        },
      .create_constrasts=function() {

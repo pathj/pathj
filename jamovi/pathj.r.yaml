@@ -350,6 +350,7 @@ items:
                   - endogenous
                   - cov_y
                   - constraints
+                  - varcov
 
     items:
             - name: diagram

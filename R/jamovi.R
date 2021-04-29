@@ -1,12 +1,18 @@
 tob64<- function(x,...) UseMethod(".tob64")
 
 .tob64.default<-function(obj,ref=NULL) {
-  
+
+
+  if (is.null(obj))
+      return(list())
+
+
   if (is.null(ref)) {
     obj<-jmvcore::toB64(obj)
   } else {
-    for (r in ref)
+    for (r in ref) {
       obj<-gsub(r,jmvcore::toB64(r),obj,fixed = T)
+    }
   }
   obj
 }

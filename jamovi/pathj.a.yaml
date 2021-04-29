@@ -326,6 +326,16 @@ options:
 
 ### end diagram ###
 
+#### variances and covariances ###
+
+    - name: varcov
+      title: Select pairs
+      type: Pairs
+      description:
+          R: >
+            a list of lists specifying the  covariances that
+            need to be estimated
+            
     - name: cov_y
       title: Endogenous Correlations
       type: Bool

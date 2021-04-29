@@ -53,6 +53,17 @@ const events = {
      onChange_nothing: function(ui) {
       console.log("I did not do anything");
     },
+    onChange_varcovSupplier: function(ui) {
+      console.log("varcovsup change");
+       let values = this.itemsToValues(ui.varcovSupplier.value());
+        this.checkPairsValue(ui.varcov, values);
+      
+    },
+    onUpdate_varcovSupplier: function(ui) {
+      console.log("varcovsup update");
+      
+    },
+
 
 };
 
@@ -78,7 +89,9 @@ var updateSuppliers= function(ui,context) {
     var endogenousList = context.cloneArray(ui.endogenous.value(), []);
     var allList = factorsList.concat(covariatesList).concat(endogenousList);
     ui.endogenousSupplier.setValue(context.valuesToItems(allList, FormatDef.variable));
+    ui.varcovSupplier.setValue(context.valuesToItems(allList, FormatDef.variable));
     context.workspace.endogenousSupplierList=allList;
+    context.workspace.varcovSupplierList=allList;
     
 
 };
