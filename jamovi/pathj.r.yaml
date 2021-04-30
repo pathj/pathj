@@ -160,12 +160,19 @@ items:
                   - contrasts
                   - cov_y
                   - constraints
+                  - data
 
             columns:
+                    - name: lgroup
+                      title: Group
+                      type: text
+                      visible: (multigroup)
+                      combineBelow: true
                     - name: label
                       title: Label
                       type: text
                       visible: (showlabels)
+                      
                     - name: lhs
                       title: "Dep"
                       type: text
@@ -211,6 +218,12 @@ items:
                   - constraints
 
             columns:
+                    - name: lgroup
+                      title: Group
+                      type: text
+                      visible: (multigroup)
+                      combineBelow: true
+            
                     - name: lhs
                       title: "Variable"
                       type: text
@@ -240,6 +253,12 @@ items:
                   - constraints
                   
             columns:
+                    - name: lgroup
+                      title: Group
+                      type: text
+                      visible: (multigroup)
+                      combineBelow: true
+
                     - name: label
                       title: Label
                       type: text
@@ -295,6 +314,12 @@ items:
                   - constraints
                   
             columns:
+                    - name: lgroup
+                      title: Group
+                      type: text
+                      visible: (multigroup)
+                      combineBelow: true
+
                     - name: lhs
                       title: "Label"
                       type: text

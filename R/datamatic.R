@@ -12,6 +12,7 @@ Datamatic <- R6::R6Class(
     contrasts_names=NULL,
     continuous=NULL,
     continuous_scale=NULL,
+    multigroup=NULL,
     initialize=function(options,data) {
       super$initialize(vars=unlist(c(options$endogenous,options$factors,options$covs)))
       self$factors<-options$factors
@@ -20,7 +21,9 @@ Datamatic <- R6::R6Class(
       self$continuous<-unlist(c(options$endogenous,options$covs))
       self$continuous_scale<-sapply(options$scaling, function(a) a$type)
       names(self$continuous_scale)<-sapply(options$scaling, function(a) a$var)
+      self$multigroup=options$multigroup
       private$.inspect_data(data)
+
     },
     cleandata=function(data,interactions=NULL) {
       data64 <- jmvcore::naOmit(data)
@@ -73,6 +76,12 @@ Datamatic <- R6::R6Class(
             }
      
             private$.create_constrasts()
+            if (is.something(self$multigroup)) {
+              var64<-tob64(self$multigroup)
+              levels<-levels(data[,var64])
+              self$multigroup<-list(var=self$multigroup,var64=var64,levels=levels,nlevels=length(levels))
+            }
+            
        },
      .create_constrasts=function() {
        

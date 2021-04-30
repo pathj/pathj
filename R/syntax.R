@@ -15,6 +15,7 @@ Syntax <- R6::R6Class(
               interactions=list(),
               factorinfo=NULL,
               contrasts_names=NULL,
+              multigroup=NULL,
               initialize=function(options,datamatic) {
                 super$initialize(vars=unlist(c(options$endogenous,options$factors,options$covs)))
                 self$options=options
@@ -28,13 +29,24 @@ Syntax <- R6::R6Class(
                 private$.check_interactions()
                 private$.check_varcov()
                 private$.check_constraints(options$constraints)
+
+                self$multigroup=datamatic$multigroup
+                
+                
+                lavoptions<-list(
+                  model=private$.lavaan_syntax(),
+                  int.ov.free = TRUE, 
+                  auto.var = TRUE,
+                  auto.th = TRUE, 
+                  auto.cov.y = self$options$cov_y,
+                  fixed.x=!self$options$cov_x,
+                  meanstructure = TRUE
+                )
+                if (is.something(self$multigroup))
+                   lavoptions[["ngroups"]]<-self$multigroup$nlevels
+
                 results<-try_hard({
-                    lavaan::lavaanify(private$.lavaan_syntax(),
-                                                        int.ov.free = TRUE, 
-                                                        auto.var = TRUE,
-                                                        auto.th = TRUE, 
-                                                        auto.cov.y = self$options$cov_y,
-                                                        fixed.x=!self$options$cov_x)
+                    do.call(lavaan::lavaanify, lavoptions)
                   })
                 private$.lav_structure<-results$obj
                 self$warnings<-list(topic="main",message=results$warning)
@@ -49,6 +61,14 @@ Syntax <- R6::R6Class(
                 .lav_structure$user<-ifelse(.lav_structure$exo==1,"Sample","Estim")
                 .lav_structure$lhs<-fromb64(.lav_structure$lhs,self$vars)
                 .lav_structure$rhs<-fromb64(.lav_structure$rhs,self$vars)
+                mark(.lav_structure)
+                if (is.something(self$multigroup)) {
+                     levs<-c(self$multigroup$levels,"All")
+                     .lav_structure$group<-ifelse(.lav_structure$group==0,length(levs)+1,.lav_structure$group)
+                    .lav_structure$lgroup<-levs[.lav_structure$group]
+                } else
+                  .lav_structure$lgroup=="1"
+                
                  self$structure<-.lav_structure[.lav_structure$op!="==",]
 
                 }, # here initialize ends
@@ -105,7 +125,6 @@ Syntax <- R6::R6Class(
             },
             
             .lavaan_syntax=function() {
-mark(private$.userestimates)
               models<-private$.models
               f<-glue::glue_collapse(unlist(models),sep = " ; ")
               con<-paste(private$.constraints,collapse = " ; ")
@@ -137,8 +156,6 @@ mark(private$.userestimates)
                 if (estim=="")
                      return("")
                 check<-grep(":=|~",estim)
-                mark("est",estim)
-                mark(length(estim))
                 if (length(check)==0 ) {
                      paste0("dp",j,":=",estim)
                 }
@@ -262,21 +279,33 @@ Estimate <- R6::R6Class("Estimate",
                       self$ciwidth<-options$ciWidth/100
                     },
                     estimate=function(data) {
-                      results<-try_hard({
-                                 self$model<-lavaan::lavaan(model = private$.lav_structure, 
-                                                            data = data,
-                                                            se=self$options$se,
-                                                            bootstrap=self$options$bootN,
-                                                            estimator=self$options$estimator
-                                                            )})
+                      
+                      lavoptions<-list(model = private$.lav_structure, 
+                                       data = data,
+                                       se=self$options$se,
+                                       bootstrap=self$options$bootN,
+                                       estimator=self$options$estimator
+                      )
+                      if (is.something(self$multigroup)) {
+                               lavoptions[["group"]]<-self$multigroup$var64
+                               lavoptions[["group.label"]]<-self$multigroup$levels
+                      }
+
+
+                      # we should cannot use the lavaanified table because it gives an error with multigroup
+                      results<-try_hard({do.call(lavaan::lavaan,lavoptions)  })
+                      
+                            
+                      #results<-try_hard({do.call(lavaan::lavaan,lavoptions)})
+                      
 
                       self$warnings<-list(topic="main",message=results$warning)
-                      
                       self$errors<-results$error
 
                       if (is.something(self$errors))
                              return(self$errors)
-
+                      self$model<-results$obj
+                      
                       self$parameters<-lavaan::parameterestimates(
                                             self$model,
                                             ci=self$options$ci,
@@ -284,9 +313,9 @@ Estimate <- R6::R6Class("Estimate",
                                             standardized = T,
                                             boot.ci.type = self$options$bootci
                       )
+                      
                       self$parameters$rhs<-fromb64(self$parameters$rhs,self$vars)
                       self$parameters$lhs<-fromb64(self$parameters$lhs,self$vars)
-                      
                       self$parameters$free<-(self$structure$free>0)
                       self$parameters$endo<-FALSE
                       self$parameters$endo[self$structure$lhs %in% self$options$endogenous | self$structure$rhs %in% self$options$endogenous]<-TRUE
@@ -309,9 +338,10 @@ Estimate <- R6::R6Class("Estimate",
                       #### fit tests ###
                       alist<-list()
                       ff<-lavaan::fitmeasures(self$model)
-
-                      alist<-list(list(label="User Model",chisq=ff[["chisq"]],df=ff[["df"]],pvalue=ff[["pvalue"]]))
-                      try(alist[[2]]<-list(label="Baseline Model",chisq=ff[["baseline.chisq"]],df=ff[["baseline.df"]],pvalue=ff[["baseline.pvalue"]]))
+                      alist<-list()
+                      if (ff[["df"]]>0)
+                            alist[[1]]<-list(label="User Model",chisq=ff[["chisq"]],df=ff[["df"]],pvalue=ff[["pvalue"]])
+                      try(alist[[length(alist)+1]]<-list(label="Baseline Model",chisq=ff[["baseline.chisq"]],df=ff[["baseline.df"]],pvalue=ff[["baseline.pvalue"]]))
 
                      self$fitindices<-as.list(ff)
 
@@ -328,7 +358,6 @@ Estimate <- R6::R6Class("Estimate",
                       try(alist[[length(alist)+1]]<-c(info="Loglikelihood user model",value=ff[["logl"]]) )
                       try(alist[[length(alist)+1]]<-c(info="Loglikelihood unrestricted model",value=ff[["unrestricted.logl"]]))
                       self$info<-alist
-
                       if (is.something(self$constraints)) {
                         tab<-lavaan::lavTestScore(self$model)
                         names(tab$uni)<-c("lhs","op","rhs","chisq","df","pvalue")

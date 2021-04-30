@@ -43,7 +43,8 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             j.init_table(self$results$models$correlations,tab1,ci=T,ciwidth=self$options$ciWidth)
             
             ### prepare r2 table
-            tab1<-lapply(self$options$endogenous,function(e) list(lhs=e))
+            tab1<-tab[tab$op=="~",c("lhs","lgroup")]
+            mark(tab1)
             j.init_table(self$results$models$r2,tab1,ci=T,ciwidth=self$options$ciWidth)
 
             ### prepare defined params ###
@@ -122,14 +123,9 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 self$results$models$main$setRow(rowKey=i,tab1[i,])
    
             tab2<-lav_machine$correlations
-            for (i in seq_len(nrow(tab2))) {
-                if (is.na(tab2$z[i])) {
-                    tab2$z[i]<-""
-                    tab2$pvalue[i]<-""
-                    tab2$se[i]<-""
-                }
+            for (i in seq_len(nrow(tab2))) 
                 self$results$models$correlations$setRow(rowKey=i,tab2[i,])
-            }
+            
             tab3<-lav_machine$r2
             for (i in seq_len(nrow(tab3))) 
                 self$results$models$r2$setRow(rowKey=i,tab3[i,])

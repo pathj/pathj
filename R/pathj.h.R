@@ -9,6 +9,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             endogenous = NULL,
             factors = NULL,
             covs = NULL,
+            multigroup = NULL,
             se = "standard",
             bootci = "perc",
             ci = TRUE,
@@ -67,6 +68,15 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal"),
                 permitted=list(
                     "numeric"),
+                default=NULL)
+            private$..multigroup <- jmvcore::OptionVariable$new(
+                "multigroup",
+                multigroup,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor"),
                 default=NULL)
             private$..se <- jmvcore::OptionList$new(
                 "se",
@@ -258,6 +268,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..endogenous)
             self$.addOption(private$..factors)
             self$.addOption(private$..covs)
+            self$.addOption(private$..multigroup)
             self$.addOption(private$..se)
             self$.addOption(private$..bootci)
             self$.addOption(private$..ci)
@@ -287,6 +298,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         endogenous = function() private$..endogenous$value,
         factors = function() private$..factors$value,
         covs = function() private$..covs$value,
+        multigroup = function() private$..multigroup$value,
         se = function() private$..se$value,
         bootci = function() private$..bootci$value,
         ci = function() private$..ci$value,
@@ -315,6 +327,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..endogenous = NA,
         ..factors = NA,
         ..covs = NA,
+        ..multigroup = NA,
         ..se = NA,
         ..bootci = NA,
         ..ci = NA,
@@ -542,8 +555,15 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "ciType",
                                 "contrasts",
                                 "cov_y",
-                                "constraints"),
+                                "constraints",
+                                "data"),
                             columns=list(
+                                list(
+                                    `name`="lgroup", 
+                                    `title`="Group", 
+                                    `type`="text", 
+                                    `visible`="(multigroup)", 
+                                    `combineBelow`=TRUE),
                                 list(
                                     `name`="label", 
                                     `title`="Label", 
@@ -602,6 +622,12 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "constraints"),
                             columns=list(
                                 list(
+                                    `name`="lgroup", 
+                                    `title`="Group", 
+                                    `type`="text", 
+                                    `visible`="(multigroup)", 
+                                    `combineBelow`=TRUE),
+                                list(
                                     `name`="lhs", 
                                     `title`="Variable", 
                                     `type`="text"),
@@ -632,6 +658,12 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "cov_y",
                                 "constraints"),
                             columns=list(
+                                list(
+                                    `name`="lgroup", 
+                                    `title`="Group", 
+                                    `type`="text", 
+                                    `visible`="(multigroup)", 
+                                    `combineBelow`=TRUE),
                                 list(
                                     `name`="label", 
                                     `title`="Label", 
@@ -698,6 +730,12 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "cov_y",
                                 "constraints"),
                             columns=list(
+                                list(
+                                    `name`="lgroup", 
+                                    `title`="Group", 
+                                    `type`="text", 
+                                    `visible`="(multigroup)", 
+                                    `combineBelow`=TRUE),
                                 list(
                                     `name`="lhs", 
                                     `title`="Label", 
@@ -846,6 +884,7 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param factors a vector of strings naming the fixed factors from
 #'   \code{data}
 #' @param covs a vector of strings naming the covariates from \code{data}
+#' @param multigroup factor defining groups for multigroup analysis
 #' @param se .
 #' @param bootci Choose the confidence interval type
 #' @param ci .
@@ -912,6 +951,7 @@ pathj <- function(
     endogenous = NULL,
     factors = NULL,
     covs = NULL,
+    multigroup = NULL,
     se = "standard",
     bootci = "perc",
     ci = TRUE,
@@ -973,19 +1013,23 @@ pathj <- function(
     if ( ! missing(endogenous)) endogenous <- jmvcore::resolveQuo(jmvcore::enquo(endogenous))
     if ( ! missing(factors)) factors <- jmvcore::resolveQuo(jmvcore::enquo(factors))
     if ( ! missing(covs)) covs <- jmvcore::resolveQuo(jmvcore::enquo(covs))
+    if ( ! missing(multigroup)) multigroup <- jmvcore::resolveQuo(jmvcore::enquo(multigroup))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(endogenous), endogenous, NULL),
             `if`( ! missing(factors), factors, NULL),
-            `if`( ! missing(covs), covs, NULL))
+            `if`( ! missing(covs), covs, NULL),
+            `if`( ! missing(multigroup), multigroup, NULL))
 
     for (v in factors) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    for (v in multigroup) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- pathjOptions$new(
         endogenous = endogenous,
         factors = factors,
         covs = covs,
+        multigroup = multigroup,
         se = se,
         bootci = bootci,
         ci = ci,
