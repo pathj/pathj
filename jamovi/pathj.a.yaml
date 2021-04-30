@@ -65,6 +65,18 @@ options:
       description:
           R: a vector of strings naming the covariates from `data`
 
+    - name: multigroup
+      title: Multigroup Analysis Factor
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      permitted:
+        - factor
+      default:
+      description:
+          R: factor defining groups for multigroup analysis
+
 
     - name: se
       title: Standard errors
@@ -344,7 +356,7 @@ options:
           R: >
             `TRUE` or `FALSE` (default), produce a path diagram
     - name: cov_x
-      title: Exogenous Correlations
+      title: Exogenous Parameters
       type: Bool
       default: false
       description:
