@@ -63,7 +63,7 @@ items:
                       format: zto,pvalue
 
           - name: constraints
-            title: Contraints Tests
+            title: Contraints Score Tests
             type: Table
             visible: false
             clearWith:
@@ -378,15 +378,18 @@ items:
                   - varcov
 
     items:
-            - name: diagram
-              title: Path Diagram
-              visible: (diagram)
-              type: Image
-              description: a path model
-              width: 600
-              height: 500
-              renderFun: .showDiagram
-              clearWith:
+           - name: diagrams
+             title: Path Diagrams
+             type: Array
+             description: an array of path diagrams
+             visible: (diagram)
+             template:
+                   title: $key
+                   type: Image
+                   renderFun: .showDiagram
+                   width: 500
+                   height: 300
+                   clearWith:
                       - diag_resid
                       - diag_paths
                       - diag_labsize
@@ -398,12 +401,12 @@ items:
                       - cov_y
                       - constraints
 
-              refs: diagram    
-            - name: notes
-              type: Table
-              title: ""
-              visible: false
-              columns:
+             refs: diagram    
+           - name: notes
+             type: Table
+             title: ""
+             visible: false
+             columns:
                   - name: info
                     type: text
                     title: "Model diagram notes"

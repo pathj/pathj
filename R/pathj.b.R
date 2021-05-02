@@ -44,7 +44,6 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             ### prepare r2 table
             tab1<-tab[tab$op=="~",c("lhs","lgroup")]
-            mark(tab1)
             j.init_table(self$results$models$r2,tab1,ci=T,ciwidth=self$options$ciWidth)
 
             ### prepare defined params ###
@@ -73,6 +72,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             private$.lav_machine<-lav_machine
             private$.data_machine<-data_machine
             
+            private$.initDiagram()
         },
     
         .run = function() {
@@ -136,14 +136,38 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     self$results$models$defined$setRow(rowKey=i,tab[i,])
                  self$results$models$defined$setVisible(TRUE)
             }
+            private$.prepareDiagrams()
+            
         },
-        .showDiagram=function(image, ggtheme, theme, ...) {
-          
+        .initDiagram=function() {
+            
+            if (self$options$diagram==FALSE) 
+                return()
+                
+            array<-self$results$pathgroup$diagrams
+                
+            if (is.something(private$.data_machine$multigroup))  {
+                            for (level in private$.data_machine$multigroup$levels) {
+                                title <- paste(private$.data_machine$multigroup$var, "=", level)
+                                array$addItem(level)
+                                array$get(key = level)$setTitle(title)
+                            }
+            } else {
+                            array$addItem("0")
+                            array$get(key = "0")$setTitle("")
+                        }
+
+        },
+
+        .prepareDiagrams=function(image, ggtheme, theme, ...) {
+
           if (!private$.ready$ready)
                 return()
           if (is.something(private$.lav_machine$errors))
                return()
-#               stop(paste(private$.lav_machine$errors,collapse = "; "))
+
+          if (self$options$diagram==FALSE) 
+                return()
             
           labs<-self$options$diag_paths
           model<-private$.lav_machine$model
@@ -205,9 +229,33 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           }
           if (self$results$pathgroup$notes$rowCount>0)
               self$results$pathgroup$notes$setVisible(TRUE)
-          
-           return(res$obj)
+           diags<-res$obj
+           
+           array<-self$results$pathgroup$diagrams
+           images<-self$results$pathgroup$diagrams
+           if ("list" %in% class(diags))
+                 for (i in seq_along(array$itemKeys)) {
+                    image<-images$get(key = array$itemKeys[[i]])
+                    image$setState(list(plot = diags[[i]]))
+                 }
+           else {
+               image<-images$get(key = "0")
+               image$setState(list(plot = diags))
+               
+           }
+
+           return()
+        },
+ 
+        .showDiagram=function(image,ggtheme, theme, ...) {
+            if (self$options$diagram==FALSE) 
+                return()
+            
+            plot(image$state$plot)
+            return(image$state$plot)
+
         }
+
         
         
         
