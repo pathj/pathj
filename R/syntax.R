@@ -17,8 +17,7 @@ Syntax <- R6::R6Class(
               contrasts_names=NULL,
               multigroup=NULL,
               initialize=function(options,datamatic) {
-                super$initialize(vars=unlist(c(options$endogenous,options$factors,options$covs)))
-                self$options=options
+                super$initialize(options=options,vars=unlist(c(options$endogenous,options$factors,options$covs)))
                 self$contrasts_names<-datamatic$contrasts_names
                 factorinfo<-sapply(self$options$factors,function(f) length(datamatic$factors_levels[[f]])-1 )
                 self$factorinfo<-factorinfo

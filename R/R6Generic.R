@@ -5,8 +5,10 @@ Dispatch <- R6::R6Class(
   cloneable=FALSE, ## should improve performance https://r6.r-lib.org/articles/Performance.html ###
   public=list(
     vars=NULL,
-    initialize=function(vars) {
+    options=NULL,
+    initialize=function(options,vars) {
       self$vars<-vars
+      self$options<-options
     }
     
   ),
