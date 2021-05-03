@@ -68,6 +68,10 @@ Syntax <- R6::R6Class(
                   .lav_structure$lgroup<-"1"
                  self$structure<-.lav_structure[.lav_structure$op!="==",]
 
+                 ### this is weired, but it works fine with multigroups
+                 r2test<-((.lav_structure$op=="~~") & (.lav_structure$lhs %in% self$options$endogenous) & (.lav_structure$lhs==.lav_structure$rhs))
+                 self$r2<-.lav_structure[r2test,c("lhs","lgroup")]
+
                 }, # here initialize ends
                models=function() {
                   lapply(seq_along(self$options$endogenousTerms), 

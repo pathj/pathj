@@ -45,7 +45,8 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             j.init_table(self$results$models$correlations,tab1,ci=T,ciwidth=self$options$ciWidth)
             
             ### prepare r2 table
-            tab1<-tab[tab$op=="~",c("lhs","lgroup")]
+            tab1<-lav_machine$r2
+            mark(tab1)
             j.init_table(self$results$models$r2,tab1,ci=T,ciwidth=self$options$ciWidth)
 
             ### prepare defined params ###
