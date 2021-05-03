@@ -8,6 +8,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .factors=NULL,
         .lav_machine=NULL,
         .data_machine=NULL,
+        .plot_machine=NULL,
         .model=NULL,
         .ready=NULL,
         .init = function() {
@@ -19,10 +20,11 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                       self$results$info$addRow("info",list(info="Setup",specs=private$.ready$reason))
                 return()
             }
-            ### clean data and prepare the syntax ####
+            ### prepare R6 classes that do the work ####
             data_machine<-Datamatic$new(self$options,self$data)
             lav_machine<-Estimate$new(self$options,data_machine)
-
+            plot_machine<-Plotter$new(self$options,data_machine,lav_machine,self$results$pathgroup)
+            
             ### fill the info table ###
             j.init_table(self$results$info,lav_machine$models())
             j.init_table_append(self$results$info,lav_machine$constraints)
@@ -44,7 +46,6 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             ### prepare r2 table
             tab1<-tab[tab$op=="~",c("lhs","lgroup")]
-            mark(tab1)
             j.init_table(self$results$models$r2,tab1,ci=T,ciwidth=self$options$ciWidth)
 
             ### prepare defined params ###
@@ -69,9 +70,12 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 j.init_table_append(self$results$contraintsnotes,SY_EXAMPLES,indent=-1)
                 self$results$contraintsnotes$setNote(1,CONT_NOTE)
             }
-
+            
             private$.lav_machine<-lav_machine
             private$.data_machine<-data_machine
+            plot_machine$initPlots()
+            private$.plot_machine<-plot_machine 
+            
             
         },
     
@@ -136,78 +140,18 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     self$results$models$defined$setRow(rowKey=i,tab[i,])
                  self$results$models$defined$setVisible(TRUE)
             }
-        },
-        .showDiagram=function(image, ggtheme, theme, ...) {
-          
-          if (!private$.ready$ready)
-                return()
-          if (is.something(private$.lav_machine$errors))
-               return()
-#               stop(paste(private$.lav_machine$errors,collapse = "; "))
             
-          labs<-self$options$diag_paths
-          model<-private$.lav_machine$model
-          nodeLabels<-model@pta$vnames$ov.num[[1]]
-          nodeLabels<-fromb64(nodeLabels)
+            private$.plot_machine$preparePlots()            
+        },
+ 
+        .showDiagram=function(image,ggtheme, theme, ...) {
+            if (self$options$diagram==FALSE) 
+                return()
+            plot(image$state$plot)
+            return(image$state$plot)
 
-          size<-12
-          if (self$options$diag_labsize=="small") size<-8
-          if (self$options$diag_labsize=="large") size<-18
-          nNodes<-length(nodeLabels)
-          size<-size*exp(-nNodes/80)+1
-          options<-list(object = private$.lav_machine$model,
-                        layout = self$options$diag_type,
-                        residuals = self$options$diag_resid,
-                        rotation = as.numeric(self$options$diag_rotate),
-                        intercepts = F
-                        ,nodeLabels=nodeLabels
-                        ,whatLabels=labs
-                        ,sizeMan = size
-                        ,nCharNodes=10
-                        ,sizeMan2=size/2
-                        , curve=2
-                        , shapeMan=self$options$diag_shape
-                        ,edge.label.cex =1.3)
-          
-          res<-try_hard(do.call(semPlot::semPaths,options))
-          redo<-FALSE
-          if (is.something(res$error)) {
-
-             if  (length(grep("Circle layout only supported",res$error,fixed = T))>0) {
-                  self$results$pathgroup$notes$addRow(1,list(info="Rotation set to `Exogenous Top`. Circle layout requires rotation to be `Exogenous Top` or `Exogenous Bottom`"))
-                 res$error<-NULL
-                 options[["rotation"]]<-1
-                 redo<-TRUE
-                 
-             } 
-             if  (length(grep("graph_from_edgelist",res$error,fixed = T))>0) {
-                  self$results$pathgroup$notes$addRow(1,list(info="Layout has been set to Circle"))
-                   options[["layout"]]<-"circle"
-                   options[["rotation"]]<-1
-                   res$error<-NULL
-                   redo<-TRUE
-             } 
-              if  (length(grep("subscript out of",res$error,fixed = T))>0) {
-                  res$error<-"The diagram cannot be displayed. Please try a different layout type"
-                  redo<-FALSE
-              } 
-              
-              
-              if (redo) {
-                  res<-try_hard(do.call(semPlot::semPaths,options))
-              }   
-              if (!isFALSE(res$warning))
-                  self$results$pathgroup$notes$addRow("war",list(info=res$warning))
-              
-              if (!isFALSE(res$error))
-                  self$results$pathgroup$notes$addRow("err",list(info=res$error))
-              
-          }
-          if (self$results$pathgroup$notes$rowCount>0)
-              self$results$pathgroup$notes$setVisible(TRUE)
-          
-           return(res$obj)
         }
+
         
         
         

@@ -441,7 +441,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="constraints",
-                            title="Contraints Tests",
+                            title="Contraints Score Tests",
                             visible=FALSE,
                             clearWith=list(
                                 "endogenous",
@@ -793,7 +793,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
-                    diagram = function() private$.items[["diagram"]],
+                    diagrams = function() private$.items[["diagrams"]],
                     notes = function() private$.items[["notes"]]),
                 private = list(),
                 public=list(
@@ -807,25 +807,28 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "cov_y",
                     "constraints",
                     "varcov"))
-                        self$add(jmvcore::Image$new(
+                        self$add(jmvcore::Array$new(
                             options=options,
-                            name="diagram",
-                            title="Path Diagram",
+                            name="diagrams",
+                            title="Path Diagrams",
                             visible="(diagram)",
-                            width=600,
-                            height=500,
-                            renderFun=".showDiagram",
-                            clearWith=list(
-                                "diag_resid",
-                                "diag_paths",
-                                "diag_labsize",
-                                "diag_rotate",
-                                "diag_type",
-                                "diag_shape",
-                                "contrasts",
-                                "endogenousTerms",
-                                "cov_y",
-                                "constraints"),
+                            template=jmvcore::Image$new(
+                                options=options,
+                                title="$key",
+                                renderFun=".showDiagram",
+                                width=500,
+                                height=300,
+                                clearWith=list(
+                                    "diag_resid",
+                                    "diag_paths",
+                                    "diag_labsize",
+                                    "diag_rotate",
+                                    "diag_type",
+                                    "diag_shape",
+                                    "contrasts",
+                                    "endogenousTerms",
+                                    "cov_y",
+                                    "constraints")),
                             refs="diagram"))
                         self$add(jmvcore::Table$new(
                             options=options,
@@ -934,7 +937,7 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$models$correlations} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$models$defined} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$models$contrastCodeTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$pathgroup$diagram} \tab \tab \tab \tab \tab a path model \cr
+#'   \code{results$pathgroup$diagrams} \tab \tab \tab \tab \tab an array of path diagrams \cr
 #'   \code{results$pathgroup$notes} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$contraintsnotes} \tab \tab \tab \tab \tab a table \cr
 #' }

@@ -5,5 +5,4 @@ jmvtools::check()
 
 source("local/functions.R")
 installme("pathj")
-  
 

@@ -14,7 +14,7 @@ Datamatic <- R6::R6Class(
     continuous_scale=NULL,
     multigroup=NULL,
     initialize=function(options,data) {
-      super$initialize(vars=unlist(c(options$endogenous,options$factors,options$covs)))
+      super$initialize(options=options,vars=unlist(c(options$endogenous,options$factors,options$covs)))
       self$factors<-options$factors
       self$factors_scale<-sapply(options$contrasts, function(a) a$type)
       names(self$factors_scale)<-sapply(options$contrasts, function(a) a$var)

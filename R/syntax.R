@@ -17,8 +17,7 @@ Syntax <- R6::R6Class(
               contrasts_names=NULL,
               multigroup=NULL,
               initialize=function(options,datamatic) {
-                super$initialize(vars=unlist(c(options$endogenous,options$factors,options$covs)))
-                self$options=options
+                super$initialize(options=options,vars=unlist(c(options$endogenous,options$factors,options$covs)))
                 self$contrasts_names<-datamatic$contrasts_names
                 factorinfo<-sapply(self$options$factors,function(f) length(datamatic$factors_levels[[f]])-1 )
                 self$factorinfo<-factorinfo
@@ -61,14 +60,12 @@ Syntax <- R6::R6Class(
                 .lav_structure$user<-ifelse(.lav_structure$exo==1,"Sample","Estim")
                 .lav_structure$lhs<-fromb64(.lav_structure$lhs,self$vars)
                 .lav_structure$rhs<-fromb64(.lav_structure$rhs,self$vars)
-                mark(.lav_structure)
                 if (is.something(self$multigroup)) {
                      levs<-c(self$multigroup$levels,"All")
                      .lav_structure$group<-ifelse(.lav_structure$group==0,length(levs)+1,.lav_structure$group)
                     .lav_structure$lgroup<-levs[.lav_structure$group]
                 } else
-                  .lav_structure$lgroup=="1"
-                
+                  .lav_structure$lgroup<-"1"
                  self$structure<-.lav_structure[.lav_structure$op!="==",]
 
                 }, # here initialize ends
@@ -292,7 +289,7 @@ Estimate <- R6::R6Class("Estimate",
                       }
 
 
-                      # we should cannot use the lavaanified table because it gives an error with multigroup
+                      
                       results<-try_hard({do.call(lavaan::lavaan,lavoptions)  })
                       
                             
