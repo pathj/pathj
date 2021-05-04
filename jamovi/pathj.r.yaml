@@ -148,7 +148,7 @@ items:
                   - endogenousTerms
     items:
     
-          - name: main
+          - name: coefficients
             title: Parameter Estimates
             type: Table
             refs: lavaan

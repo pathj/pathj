@@ -101,3 +101,34 @@ j.init_table_append<-function(table,obj, indent=NULL) {
   }
   
 }
+
+
+j.fill_table<-function(table,obj, fixNA=TRUE,append=FALSE,add=FALSE) {
+
+  if (!is.something(obj))
+    return()
+  
+  last<-0
+  if (append)  last<-table$rowCount
+  FUNC<-function(i,w) table$setRow(rowNo=i,w)
+  if (add)   FUNC<-function(i,w) table$addRow(rowKey=i,w)
+
+  square<-(length(dim(obj))>1)
+  if (square)
+           for (i in seq_len(nrow(obj))) {
+              t<-obj[i,]
+              if (fixNA) 
+                  t[which(is.na(t))]<-""
+              FUNC(i+last,t)
+           }
+   else 
+     for (i in seq_along(obj)) {
+       t<-obj[[i]]
+       if (fixNA) 
+         t[which(is.na(t))]<-""
+       FUNC(i+last,t)
+   }
+     
+  table$setVisible(TRUE)
+}
+

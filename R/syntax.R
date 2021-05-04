@@ -26,8 +26,8 @@ Syntax <- R6::R6Class(
                 private$.lav_terms<-lapply(tob64(self$options$endogenousTerms), function(alist) private$.factorlist(alist,factorinfo))
                 private$.check_models()
                 private$.check_interactions()
+                private$.check_constraints()
                 private$.check_varcov()
-                private$.check_constraints(options$constraints)
 
                 self$multigroup=datamatic$multigroup
                 
@@ -67,7 +67,6 @@ Syntax <- R6::R6Class(
                 } else
                   .lav_structure$lgroup<-"1"
                  self$structure<-.lav_structure[.lav_structure$op!="==",]
-
                  ### this is weired, but it works fine with multigroups
                  r2test<-((.lav_structure$op=="~~") & (.lav_structure$lhs %in% self$options$endogenous) & (.lav_structure$lhs==.lav_structure$rhs))
                  self$r2<-.lav_structure[r2test,c("lhs","lgroup")]
@@ -89,12 +88,27 @@ Syntax <- R6::R6Class(
                return(private$.warnings)
              if (is.null(obj))
                return()
+             if (is.null(obj$message))
+                 return()
              check<-length(grep("fixed.x=FALSE",obj$message,fixed = T)>0) 
              if (check) 
                obj$message<-WARNS[["usercov"]]
                
              super$warnings<-obj
+           },
+           errors=function(obj) {
+             
+             if (missing(obj))
+               return(private$.errors)
+             if (is.null(obj))
+               return()
+             check<-length(grep("infinite or missing",obj,fixed = T)>0) 
+             if (check) 
+               obj<-ERRS[["noluck"]]
+             
+             super$errors<-obj
            }
+           
           ),
           private=list(
             .lav_terms=NULL,
@@ -135,7 +149,9 @@ Syntax <- R6::R6Class(
               f
             },
             
-            .check_constraints=function(consts) {
+            .check_constraints=function() {
+              
+              consts<-self$options$constraints
               realconsts<-list()
               realestims<-list()
               for (con in consts) {

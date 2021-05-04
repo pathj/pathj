@@ -55,3 +55,4 @@ DATA_WARNS[["cont_to_fac"]]<-"Warning: variable coerced to factor"
 
 ERRS<-list()
 ERRS[["nolatent"]]<-"Latent variables are not allowed in pathj. Please use another  SEM module"
+ERRS[["noluck"]]<-"The model cannot be estimated. Please refine the model"

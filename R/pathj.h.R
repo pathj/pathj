@@ -529,7 +529,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
-                    main = function() private$.items[["main"]],
+                    coefficients = function() private$.items[["coefficients"]],
                     r2 = function() private$.items[["r2"]],
                     correlations = function() private$.items[["correlations"]],
                     defined = function() private$.items[["defined"]],
@@ -545,7 +545,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "endogenousTerms"))
                         self$add(jmvcore::Table$new(
                             options=options,
-                            name="main",
+                            name="coefficients",
                             title="Parameter Estimates",
                             refs="lavaan",
                             clearWith=list(
@@ -932,7 +932,7 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$fit$main} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$fit$constraints} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$fit$indices} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$models$main} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$models$coefficients} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$models$r2} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$models$correlations} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$models$defined} \tab \tab \tab \tab \tab a table \cr
