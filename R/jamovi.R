@@ -103,15 +103,16 @@ j.init_table_append<-function(table,obj, indent=NULL) {
 }
 
 
-j.fill_table<-function(table,obj, fixNA=TRUE,append=FALSE,add=FALSE) {
+j.fill_table<-function(table,obj, fixNA=TRUE,append=FALSE,spaceby=NULL,start=1) {
 
   if (!is.something(obj))
     return()
   
-  last<-0
+  last<-start-1
   if (append)  last<-table$rowCount
+  
   FUNC<-function(i,w) table$setRow(rowNo=i,w)
-  if (add)   FUNC<-function(i,w) table$addRow(rowKey=i,w)
+  if (append)   FUNC<-function(i,w) table$addRow(rowKey=i,w)
 
   square<-(length(dim(obj))>1)
   if (square)
@@ -128,7 +129,13 @@ j.fill_table<-function(table,obj, fixNA=TRUE,append=FALSE,add=FALSE) {
          t[which(is.na(t))]<-""
        FUNC(i+last,t)
    }
-     
+  if (is.something(spaceby)) {
+    col<-obj[,spaceby]
+    rows<-unlist(lapply(unique(col),function(x) min(which(col==x))))
+    for (j in rows)
+      table$addFormat(rowNo=j+last,col=1,jmvcore::Cell.BEGIN_GROUP)
+    
+  }
   table$setVisible(TRUE)
 }
 

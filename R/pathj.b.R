@@ -26,9 +26,11 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plot_machine<-Plotter$new(self$options,data_machine,lav_machine,self$results$pathgroup)
             
             ### fill the info table ###
-            j.init_table(self$results$info,lav_machine$models())
+            j.init_table(self$results$info,lav_machine$info)
+            j.init_table_append(self$results$info,lav_machine$models())
             j.init_table_append(self$results$info,lav_machine$constraints)
             j.init_table_append(self$results$info,lav_machine$userestimates)
+            
 
             ### get the lavaan structure of the model ###
             tab<-lav_machine$structure
@@ -52,6 +54,9 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tab1<-tab[tab$op==":=",]
             j.init_table(self$results$models$defined,tab1,ci=T,ciwidth=self$options$ciWidth)
 
+            ### prepare intercepts ###
+            j.init_table(self$results$models$intercepts,lav_machine$intercepts,ci=T,ciwidth=self$options$ciWidth)
+            
             # #### contrast tables ####
              if (length(self$options$factors)>0) {
                 for (factor in self$options$factors) {
@@ -100,20 +105,17 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     stop(paste(lav_machine$errors,collapse = "\n\n"))
             }
             ## fit info
-             nr<-self$results$info$rowCount
-             j.fill_table(self$results$info,lav_machine$info,append=T,add=T)
-             self$results$info$addFormat(rowNo=nr, col=1,jmvcore::Cell.BEGIN_END_GROUP)
+             j.fill_table(self$results$info,lav_machine$info)
 
              ## fit indices
              self$results$fit$indices$setRow(rowNo=1,lav_machine$fitindices)
              
              ## fit test
-             j.fill_table(self$results$fit$main,lav_machine$fit,add=T)
+             j.fill_table(self$results$fit$main,lav_machine$fit,append=T)
 
              ## constraints fit test
              
-             j.fill_table(self$results$fit$constraints,lav_machine$constfit,add=T)
-
+             j.fill_table(self$results$fit$constraints,lav_machine$constfit,append=T, spaceby="type")
 
 
             ### parameters estimates ####
@@ -124,6 +126,8 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             j.fill_table(self$results$models$r2,lav_machine$r2)
 
             j.fill_table(self$results$models$defined,lav_machine$definedParameters)
+
+            j.fill_table(self$results$models$intercepts,lav_machine$intercepts)
             
             ## diagrams
             private$.plot_machine$preparePlots()            

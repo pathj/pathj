@@ -287,6 +287,21 @@ children:
                 format: number
                 enable: '(se:boot)'
 
+      - type: LayoutBox
+        margin: large
+        style: inline
+        children:
+          - type: Label
+            label: Intercepts
+            margin: large
+            style: list
+            children:
+              - type: CheckBox
+                name: intercepts
+              - type: CheckBox
+                name: showintercepts
+                enable: (intercepts)
+
   - type: CollapseBox
     label: Path Diagram
     collapsed: true
@@ -390,11 +405,26 @@ children:
                           ghostText: drag term here
           - type: LayoutBox
             margin: large
+            style: inline
+
             children:
-              - type: LayoutBox
-                margin: large
+              - type: Label
+                label: Information
                 children:
-                  - type: CheckBox
-                    name: showlabels
-                  - type: CheckBox
-                    name: constraints_examples
+                  - type: LayoutBox
+                    margin: large
+                    children:
+                      - type: CheckBox
+                        name: showlabels
+                      - type: CheckBox
+                        name: constraints_examples
+              - type: Label
+                label: Constraints Tests
+                children:
+                  - type: LayoutBox
+                    margin: large
+                    children:
+                      - type: CheckBox
+                        name: scoretest
+                      - type: CheckBox
+                        name: cumscoretest

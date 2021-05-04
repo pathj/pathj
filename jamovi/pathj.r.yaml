@@ -76,6 +76,11 @@ items:
                   - constraints
 
             columns:
+                    - name: type
+                      type: text
+                      title: Type
+                      visible: true
+                      combineBelow: true
                     - name: lhs
                       title: Par 1
                       type: text
@@ -300,10 +305,10 @@ items:
                       title: "Type"
                       type: text
 
-          - name: defined
-            title: Defined Parameters
+          - name: intercepts
+            title: Intercepts
             type: Table
-            visible: false
+            visible: (showintercepts)
             clearWith:
                   - endogenous
                   - covs
@@ -319,6 +324,59 @@ items:
                       type: text
                       visible: (multigroup)
                       combineBelow: true
+
+                    - name: label
+                      title: Label
+                      type: text
+                      visible: (showlabels)
+                    - name: lhs
+                      title: "Variable"
+                      type: text
+                    - name: est
+                      title: "Intercept"
+                      type: number
+                      format: zto,pvalue
+
+                    - name: se
+                      title: "SE"
+                      type: number
+                      format: zto,pvalue
+                    - name: ci.lower
+                      type: number
+                      title: Lower
+                      visible: (ci)
+                      format: zto,pvalue
+
+                    - name: ci.upper
+                      type: number
+                      title: Upper
+                      visible: (ci)
+                      format: zto,pvalue
+
+                    - name: z
+                      title: "z"
+                      type: number
+                      format: zto,pvalue
+
+                    - name: pvalue
+                      title: "p"
+                      type: number
+                      format: zto,pvalue
+
+          - name: defined
+            title: Defined Parameters
+            type: Table
+            visible: false
+            clearWith:
+                  - endogenous
+                  - covs
+                  - factors
+                  - ciType
+                  - contrasts
+                  - cov_y
+                  - constraints
+                  
+            columns:
 
                     - name: lhs
                       title: "Label"

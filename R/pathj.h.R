@@ -15,6 +15,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             ci = TRUE,
             ciWidth = 95,
             bootN = 1000,
+            showintercepts = FALSE,
+            intercepts = TRUE,
             contrasts = NULL,
             showRealNames = TRUE,
             showContrastCode = FALSE,
@@ -34,6 +36,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             constraints = list(),
             constraints_examples = FALSE,
             showlabels = FALSE,
+            scoretest = TRUE,
+            cumscoretest = FALSE,
             estimator = "ML", ...) {
 
             super$initialize(
@@ -111,6 +115,14 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 bootN,
                 min=50,
                 default=1000)
+            private$..showintercepts <- jmvcore::OptionBool$new(
+                "showintercepts",
+                showintercepts,
+                default=FALSE)
+            private$..intercepts <- jmvcore::OptionBool$new(
+                "intercepts",
+                intercepts,
+                default=TRUE)
             private$..contrasts <- jmvcore::OptionArray$new(
                 "contrasts",
                 contrasts,
@@ -253,6 +265,14 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showlabels",
                 showlabels,
                 default=FALSE)
+            private$..scoretest <- jmvcore::OptionBool$new(
+                "scoretest",
+                scoretest,
+                default=TRUE)
+            private$..cumscoretest <- jmvcore::OptionBool$new(
+                "cumscoretest",
+                cumscoretest,
+                default=FALSE)
             private$..estimator <- jmvcore::OptionList$new(
                 "estimator",
                 estimator,
@@ -261,8 +281,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "GLS",
                     "WLS",
                     "DWLS",
-                    "ULS",
-                    "PML"),
+                    "ULS"),
                 default="ML")
 
             self$.addOption(private$..endogenous)
@@ -274,6 +293,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..ci)
             self$.addOption(private$..ciWidth)
             self$.addOption(private$..bootN)
+            self$.addOption(private$..showintercepts)
+            self$.addOption(private$..intercepts)
             self$.addOption(private$..contrasts)
             self$.addOption(private$..showRealNames)
             self$.addOption(private$..showContrastCode)
@@ -292,6 +313,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..constraints)
             self$.addOption(private$..constraints_examples)
             self$.addOption(private$..showlabels)
+            self$.addOption(private$..scoretest)
+            self$.addOption(private$..cumscoretest)
             self$.addOption(private$..estimator)
         }),
     active = list(
@@ -304,6 +327,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ci = function() private$..ci$value,
         ciWidth = function() private$..ciWidth$value,
         bootN = function() private$..bootN$value,
+        showintercepts = function() private$..showintercepts$value,
+        intercepts = function() private$..intercepts$value,
         contrasts = function() private$..contrasts$value,
         showRealNames = function() private$..showRealNames$value,
         showContrastCode = function() private$..showContrastCode$value,
@@ -322,6 +347,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         constraints = function() private$..constraints$value,
         constraints_examples = function() private$..constraints_examples$value,
         showlabels = function() private$..showlabels$value,
+        scoretest = function() private$..scoretest$value,
+        cumscoretest = function() private$..cumscoretest$value,
         estimator = function() private$..estimator$value),
     private = list(
         ..endogenous = NA,
@@ -333,6 +360,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..ci = NA,
         ..ciWidth = NA,
         ..bootN = NA,
+        ..showintercepts = NA,
+        ..intercepts = NA,
         ..contrasts = NA,
         ..showRealNames = NA,
         ..showContrastCode = NA,
@@ -351,6 +380,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..constraints = NA,
         ..constraints_examples = NA,
         ..showlabels = NA,
+        ..scoretest = NA,
+        ..cumscoretest = NA,
         ..estimator = NA)
 )
 
@@ -453,6 +484,12 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "constraints"),
                             columns=list(
                                 list(
+                                    `name`="type", 
+                                    `type`="text", 
+                                    `title`="Type", 
+                                    `visible`=TRUE, 
+                                    `combineBelow`=TRUE),
+                                list(
                                     `name`="lhs", 
                                     `title`="Par 1", 
                                     `type`="text"),
@@ -532,6 +569,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     coefficients = function() private$.items[["coefficients"]],
                     r2 = function() private$.items[["r2"]],
                     correlations = function() private$.items[["correlations"]],
+                    intercepts = function() private$.items[["intercepts"]],
                     defined = function() private$.items[["defined"]],
                     contrastCodeTable = function() private$.items[["contrastCodeTable"]]),
                 private = list(),
@@ -718,9 +756,9 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     `type`="text"))))
                         self$add(jmvcore::Table$new(
                             options=options,
-                            name="defined",
-                            title="Defined Parameters",
-                            visible=FALSE,
+                            name="intercepts",
+                            title="Intercepts",
+                            visible="(showintercepts)",
                             clearWith=list(
                                 "endogenous",
                                 "covs",
@@ -736,6 +774,61 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     `type`="text", 
                                     `visible`="(multigroup)", 
                                     `combineBelow`=TRUE),
+                                list(
+                                    `name`="label", 
+                                    `title`="Label", 
+                                    `type`="text", 
+                                    `visible`="(showlabels)"),
+                                list(
+                                    `name`="lhs", 
+                                    `title`="Variable", 
+                                    `type`="text"),
+                                list(
+                                    `name`="est", 
+                                    `title`="Intercept", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"),
+                                list(
+                                    `name`="se", 
+                                    `title`="SE", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"),
+                                list(
+                                    `name`="ci.lower", 
+                                    `type`="number", 
+                                    `title`="Lower", 
+                                    `visible`="(ci)", 
+                                    `format`="zto,pvalue"),
+                                list(
+                                    `name`="ci.upper", 
+                                    `type`="number", 
+                                    `title`="Upper", 
+                                    `visible`="(ci)", 
+                                    `format`="zto,pvalue"),
+                                list(
+                                    `name`="z", 
+                                    `title`="z", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"),
+                                list(
+                                    `name`="pvalue", 
+                                    `title`="p", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="defined",
+                            title="Defined Parameters",
+                            visible=FALSE,
+                            clearWith=list(
+                                "endogenous",
+                                "covs",
+                                "factors",
+                                "ciType",
+                                "contrasts",
+                                "cov_y",
+                                "constraints"),
+                            columns=list(
                                 list(
                                     `name`="lhs", 
                                     `title`="Label", 
@@ -895,6 +988,9 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   confidence interval width for the parameter estimates
 #' @param bootN number of bootstrap samples for estimating confidence
 #'   intervals
+#' @param showintercepts \code{TRUE} or \code{FALSE} (default), show
+#'   intercepts
+#' @param intercepts \code{TRUE} or \code{FALSE} (default), show intercepts
 #' @param contrasts a list of lists specifying the factor and type of contrast
 #'   to use, one of \code{'deviation'}, \code{'simple'}, \code{'difference'},
 #'   \code{'helmert'}, \code{'repeated'} or \code{'polynomial'}
@@ -924,6 +1020,8 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param constraints a list of lists specifying the models random effects.
 #' @param constraints_examples .
 #' @param showlabels .
+#' @param scoretest .
+#' @param cumscoretest .
 #' @param estimator Choose the diagram labels
 #' @param formula (optional) the formula to use, see the examples
 #' @return A results object containing:
@@ -935,6 +1033,7 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$models$coefficients} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$models$r2} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$models$correlations} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$models$intercepts} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$models$defined} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$models$contrastCodeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$pathgroup$diagrams} \tab \tab \tab \tab \tab an array of path diagrams \cr
@@ -960,6 +1059,8 @@ pathj <- function(
     ci = TRUE,
     ciWidth = 95,
     bootN = 1000,
+    showintercepts = FALSE,
+    intercepts = TRUE,
     contrasts = NULL,
     showRealNames = TRUE,
     showContrastCode = FALSE,
@@ -979,6 +1080,8 @@ pathj <- function(
     constraints = list(),
     constraints_examples = FALSE,
     showlabels = FALSE,
+    scoretest = TRUE,
+    cumscoretest = FALSE,
     estimator = "ML",
     formula) {
 
@@ -1038,6 +1141,8 @@ pathj <- function(
         ci = ci,
         ciWidth = ciWidth,
         bootN = bootN,
+        showintercepts = showintercepts,
+        intercepts = intercepts,
         contrasts = contrasts,
         showRealNames = showRealNames,
         showContrastCode = showContrastCode,
@@ -1056,6 +1161,8 @@ pathj <- function(
         constraints = constraints,
         constraints_examples = constraints_examples,
         showlabels = showlabels,
+        scoretest = scoretest,
+        cumscoretest = cumscoretest,
         estimator = estimator)
 
     analysis <- pathjClass$new(

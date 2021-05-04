@@ -16,6 +16,9 @@ Syntax <- R6::R6Class(
               factorinfo=NULL,
               contrasts_names=NULL,
               multigroup=NULL,
+              indirect_synt=NULL,
+              indirect_names=NULL,
+              intercepts=NULL,
               initialize=function(options,datamatic) {
                 super$initialize(options=options,vars=unlist(c(options$endogenous,options$factors,options$covs)))
                 self$contrasts_names<-datamatic$contrasts_names
@@ -30,47 +33,14 @@ Syntax <- R6::R6Class(
                 private$.check_varcov()
 
                 self$multigroup=datamatic$multigroup
-                
-                
-                lavoptions<-list(
-                  model=private$.lavaan_syntax(),
-                  int.ov.free = TRUE, 
-                  auto.var = TRUE,
-                  auto.th = TRUE, 
-                  auto.cov.y = self$options$cov_y,
-                  fixed.x=!self$options$cov_x,
-                  meanstructure = TRUE
-                )
-                if (is.something(self$multigroup))
-                   lavoptions[["ngroups"]]<-self$multigroup$nlevels
+                ### here we update to build a lavaanify structure
+                private$.update()  
+                ### here we set up things that require a lavaanify structure
+                private$.indirect()
 
-                results<-try_hard({
-                    do.call(lavaan::lavaanify, lavoptions)
-                  })
-                private$.lav_structure<-results$obj
-                self$warnings<-list(topic="main",message=results$warning)
-                self$errors<-results$error
+                # we finally update for good
+                private$.update()  
                 
-                if (is.something(self$errors))
-                     stop(paste(self$errors,collapse = "\n"))
-                
-
-                 private$.lav_structure$label<-gsub(".","",private$.lav_structure$plabel,fixed=T)
-                .lav_structure<-private$.lav_structure
-                .lav_structure$user<-ifelse(.lav_structure$exo==1,"Sample","Estim")
-                .lav_structure$lhs<-fromb64(.lav_structure$lhs,self$vars)
-                .lav_structure$rhs<-fromb64(.lav_structure$rhs,self$vars)
-                if (is.something(self$multigroup)) {
-                     levs<-c(self$multigroup$levels,"All")
-                     .lav_structure$group<-ifelse(.lav_structure$group==0,length(levs)+1,.lav_structure$group)
-                    .lav_structure$lgroup<-levs[.lav_structure$group]
-                } else
-                  .lav_structure$lgroup<-"1"
-                 self$structure<-.lav_structure[.lav_structure$op!="==",]
-                 ### this is weired, but it works fine with multigroups
-                 r2test<-((.lav_structure$op=="~~") & (.lav_structure$lhs %in% self$options$endogenous) & (.lav_structure$lhs==.lav_structure$rhs))
-                 self$r2<-.lav_structure[r2test,c("lhs","lgroup")]
-
                 }, # here initialize ends
                models=function() {
                   lapply(seq_along(self$options$endogenousTerms), 
@@ -117,6 +87,65 @@ Syntax <- R6::R6Class(
             .userestimates=NULL,
             .lav_models=NULL,
             .models=NULL,
+            .update=function() {
+                               
+              lavoptions<-list(
+                model=private$.lavaan_syntax(),
+                int.ov.free = self$options$intercepts, 
+                auto.var = TRUE,
+                auto.th = TRUE, 
+                auto.cov.y = self$options$cov_y,
+                fixed.x=!self$options$cov_x,
+                meanstructure = TRUE
+              )
+              if (is.something(self$multigroup))
+                lavoptions[["ngroups"]]<-self$multigroup$nlevels
+              
+              results<-try_hard({
+                do.call(lavaan::lavaanify, lavoptions)
+              })
+              private$.lav_structure<-results$obj
+              self$warnings<-list(topic="main",message=results$warning)
+              self$errors<-results$error
+              if (is.something(self$errors))
+                stop(paste(self$errors,collapse = "\n"))
+              
+              
+              private$.lav_structure$label<-gsub(".","",private$.lav_structure$plabel,fixed=T)
+              .lav_structure<-private$.lav_structure
+              .lav_structure$user<-ifelse(.lav_structure$exo==1,"Sample","Estim")
+              .lav_structure$lhs<-fromb64(.lav_structure$lhs,self$vars)
+              .lav_structure$rhs<-fromb64(.lav_structure$rhs,self$vars)
+              if (is.something(self$multigroup)) {
+                levs<-c(self$multigroup$levels,"All")
+                .lav_structure$group<-ifelse(.lav_structure$group==0,length(levs)+1,.lav_structure$group)
+                .lav_structure$lgroup<-levs[.lav_structure$group]
+              } else
+                .lav_structure$lgroup<-"1"
+              sel<-grep("==|<|>",.lav_structure$op,invert = T)
+              self$structure<-.lav_structure[sel,]
+              ### this is weired, but it works fine with multigroups
+              r2test<-((.lav_structure$op=="~~") & (.lav_structure$lhs %in% self$options$endogenous) & (.lav_structure$lhs==.lav_structure$rhs))
+              self$r2<-.lav_structure[r2test,c("lhs","lgroup")]
+              
+              if (self$options$intercepts & self$options$showintercepts)
+                       self$intercepts<-.lav_structure[.lav_structure$op=="~1",]
+
+              alist<-list()
+              alist[[length(alist)+1]]<-c(info="Estimation Method",value=self$options$estimator)
+              alist[[length(alist)+1]]<-c(info="Number of observations",value="") 
+              alist[[length(alist)+1]]<-c(info="Free parameters",value=max(.lav_structure$free))
+              alist[[length(alist)+1]]<-c(info="Converged","") 
+              alist[[length(alist)+1]]<-c(info="",value="")
+              alist[[length(alist)+1]]<-c(info="Loglikelihood user model",value="" )
+              alist[[length(alist)+1]]<-c(info="Loglikelihood unrestricted model",value="")
+              alist[[length(alist)+1]]<-c(info="",value="")
+              
+              self$info<-alist
+              
+              
+              
+            },
             .check_models=function() {
               
               terms<-private$.lav_terms
@@ -146,6 +175,10 @@ Syntax <- R6::R6Class(
               f<-paste(f,con,sep=" ; ")
               est<-paste(private$.userestimates,collapse = " ; ")
               f<-paste(f,est,sep=" ; ")
+              if (is.something(self$indirect_synt)) {
+                f<-paste(f,";")
+                f<-paste(f,self$indirect_synt,collapse = " ; ")
+              }
               f
             },
             
@@ -160,7 +193,7 @@ Syntax <- R6::R6Class(
                       self$errors<-ERRS[["nolatent"]]
                       return()
                 }
-                check<-(length(grep("==",con,fixed=T))>0) 
+                check<-(length(grep("==|>|<",con,fixed=F))>0) 
                 if (check)
                   realconsts[[length(realconsts)+1]]<-con
                 else
@@ -266,6 +299,71 @@ Syntax <- R6::R6Class(
               }
 
               terms  
+            },
+            .indirect=function() {
+              
+              tab<-self$structure
+              termslist<-list()
+              labslist<-list()
+              sel<-grep(":",tab$rhs,fixed = T,invert=T) 
+              tab<-tab[sel,]
+              sel<-tab$op=="~" 
+              tab<-tab[sel,]
+              tab<-tab[tab$group>0,]
+              
+              .doit<-function(tab,term,alist=list(),blist=list(),lab=NULL) {
+                alist<-c(alist,term)
+                blist<-c(blist,lab)
+                if (term %in% deps) {
+                  final<-unlist(alist)
+                  if (length(final)>2) {
+                    termslist[[length(termslist)+1]]<<-final
+                    labslist[[length(labslist)+1]]<<-unlist(blist)
+                  }
+                  return()
+                }
+                a<-tab[tab$rhs==term,]
+                if (length(a$lhs)==0)
+                  return()
+                for (i in 1:nrow(a)) {
+                  x<-a$lhs[i]
+                  lab<-a$label[i]
+                  .doit(tab,x,alist,blist,lab)
+                }
+                
+              }
+              
+              terms<-unique(tab$rhs)
+              deps<-unique(setdiff(tab$lhs,tab$rhs))
+              
+              
+              if (length(deps)==0) {
+                self$warnings<-list(topic="indirect",message="Indirect effects cannot be computed for this model")
+                return()
+              }
+              tabs<-list()
+              for (i in tab$group) 
+                tabs[[i]]<-tab[tab$group==i,]
+              
+              results<-list()
+              for (i in seq_along(tabs)) {
+                .results<-try_hard({
+                  for (tt in terms)
+                    .doit(tabs[[i]],term=tt)
+                })
+                if (.results$error)
+                  self$warnings<-list(topic="indirect",message="Indirect effects cannot be computed for this model")
+                results[[i]]<-.results
+              }
+              pars<-sapply(labslist,paste,collapse="*")
+              if (!is.something(pars))
+                return()
+              labs<-sapply(termslist,paste,collapse="->")
+              plabs<-paste0("IE",1:length(pars))
+              synt<-paste(plabs,pars,sep=":=",collapse = " ; ")
+              self$indirect_synt<-synt
+              self$indirect_names<-labs
+              
             }
             
             
@@ -296,7 +394,7 @@ Estimate <- R6::R6Class("Estimate",
                       self$ciwidth<-options$ciWidth/100
                     },
                     estimate=function(data) {
-                      
+
                       lavoptions<-list(model = private$.lav_structure, 
                                        data = data,
                                        se=self$options$se,
@@ -309,7 +407,6 @@ Estimate <- R6::R6Class("Estimate",
                       }
 
 
-                      
                       results<-try_hard({do.call(lavaan::lavaan,lavoptions)  })
                       
                             
@@ -330,14 +427,13 @@ Estimate <- R6::R6Class("Estimate",
                                             standardized = T,
                                             boot.ci.type = self$options$bootci
                       )
-                      
                       self$parameters$rhs<-fromb64(self$parameters$rhs,self$vars)
                       self$parameters$lhs<-fromb64(self$parameters$lhs,self$vars)
                       self$parameters$free<-(self$structure$free>0)
+
                       self$parameters$endo<-FALSE
                       self$parameters$endo[self$structure$lhs %in% self$options$endogenous | self$structure$rhs %in% self$options$endogenous]<-TRUE
                       self$coefficients<-self$parameters[self$parameters$op=="~",]
-                      self$correlations<-self$parameters[self$parameters$op=="~~",]
                       self$correlations<-self$parameters[self$parameters$op=="~~",]
                       self$correlations$type<-ifelse(self$correlations$endo,"Residuals","Variables")
                       self$definedParameters<-self$parameters[self$parameters$op==":=",]
@@ -351,7 +447,10 @@ Estimate <- R6::R6Class("Estimate",
                       end$ci.lower<-1-(upper/end$var)
                       end$r2<-1-end$std.all
                       self$r2<-end
-                      
+                      if (self$options$intercepts & self$options$showintercepts)
+                            self$intercepts<-self$parameters[self$parameters$op=="~1",]
+
+
                       #### fit tests ###
                       alist<-list()
                       ff<-lavaan::fitmeasures(self$model)
@@ -367,27 +466,45 @@ Estimate <- R6::R6Class("Estimate",
                       # fit indices
                       ff<-sapply(ff, round,3)
                       alist<-list()
-                      alist[[length(alist)+1]]<-c(info="Free parameters",value=self$model@Fit@npar)
                       alist[[length(alist)+1]]<-c(info="Estimation Method",value=self$model@Options$estimator)
                       alist[[length(alist)+1]]<-c(info="Number of observations",value=lavaan::lavInspect(self$model,"ntotal")) 
+                      alist[[length(alist)+1]]<-c(info="Free parameters",value=self$model@Fit@npar)
                       alist[[length(alist)+1]]<-c(info="Converged",value=self$model@Fit@converged) 
                       alist[[length(alist)+1]]<-c(info="",value="")
                       try(alist[[length(alist)+1]]<-c(info="Loglikelihood user model",value=ff[["logl"]]) )
                       try(alist[[length(alist)+1]]<-c(info="Loglikelihood unrestricted model",value=ff[["unrestricted.logl"]]))
+                      alist[[length(alist)+1]]<-c(info="",value="")
+                      
                       self$info<-alist
                       if (is.something(self$constraints)) {
-                        tab<-lavaan::lavTestScore(self$model)
-                        names(tab$uni)<-c("lhs","op","rhs","chisq","df","pvalue")
-                        self$constfit<-tab$uni
-                        
-                        self$fit[[length(self$fit)+1]]<-list(label="Constraints Score Test",
-                                                             chisq=tab$test$X2,
-                                                             df=tab$test$df,
-                                                             pvalue=tab$test$p.value)
+                        check<-sapply(self$constraints,function(con) length(grep("<|>",con$value))>0,simplify = T)
+                        if (any(check)) {
+                          self$warnings<-list(topic="main",message="Score Tests not available with inequality constraints")
+                        } else {
+                              tab<-lavaan::lavTestScore(self$model,
+                                                        univariate = self$options$scoretest,
+                                                        cumulative = self$options$cumscoretest)
+                              
+                              if (self$options$scoretest) {
+                                  names(tab$uni)<-c("lhs","op","rhs","chisq","df","pvalue")
+                                  self$constfit<-tab$uni
+                                  self$constfit$type="Univariate"
+                              }
+                              if (self$options$cumscoretest) {
+                                   names(tab$cumulative)<-c("lhs","op","rhs","chisq","df","pvalue")
+                                   tab$cumulative$type<-"Cumulative"
+                                   self$constfit<-rbind(self$constfit,tab$cumulative)
+                              }
+                              self$fit[[length(self$fit)+1]]<-list(label="Constraints Score Test",
+                                                                   chisq=tab$test$X2,
+                                                                   df=tab$test$df,
+                                                                   pvalue=tab$test$p.value)
+                              
 
-                        
-                      }
-                    }
-                  )
-)
+                              }
+                            } # end of checking constraints
+                      
+                    } # end of private function estimate
+                  ) # end of private
+)  # end of class
                     
