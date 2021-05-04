@@ -137,6 +137,20 @@ options:
           R: >
             number of bootstrap samples for estimating confidence intervals
 
+    - name: showintercepts
+      title: Show intercepts estimates
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), show intercepts
+    - name: intercepts
+      title: Estimates intercepts
+      type: Bool
+      default: true
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), show intercepts
 
 
     - name: contrasts
@@ -384,6 +398,15 @@ options:
       title: Show parameters labels
       default: false
 
+    - name: scoretest
+      type: Bool
+      title: Univariate
+      default: true
+    - name: cumscoretest
+      type: Bool
+      title: Cumulative
+      default: false
+
     - name: estimator
       title: Method
       type: List
@@ -398,8 +421,6 @@ options:
           title: Diagonally weighted LS
         - name: ULS
           title: Unweighted LS
-        - name: PML
-          title: Pairwise Maximum Lik
       default: ML
       description:
           R: >

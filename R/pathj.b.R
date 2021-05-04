@@ -26,9 +26,11 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plot_machine<-Plotter$new(self$options,data_machine,lav_machine,self$results$pathgroup)
             
             ### fill the info table ###
-            j.init_table(self$results$info,lav_machine$models())
+            j.init_table(self$results$info,lav_machine$info)
+            j.init_table_append(self$results$info,lav_machine$models())
             j.init_table_append(self$results$info,lav_machine$constraints)
             j.init_table_append(self$results$info,lav_machine$userestimates)
+            
 
             ### get the lavaan structure of the model ###
             tab<-lav_machine$structure
@@ -38,20 +40,23 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             j.init_table(self$results$fit$indices,"",ci=T,ciroot="rmsea.",ciformat='RMSEA {}% CI',ciwidth=self$options$ciWidth)
             #### parameter estimates table ####
             tab1<-tab[tab$op=="~",]
-            j.init_table(self$results$models$main,tab1,ci=T,ciwidth=self$options$ciWidth)
+            j.init_table(self$results$models$coefficients,tab1,ci=T,ciwidth=self$options$ciWidth)
 
             ### prepare var cov table ###
             tab1<-tab[tab$op=="~~",]
             j.init_table(self$results$models$correlations,tab1,ci=T,ciwidth=self$options$ciWidth)
             
             ### prepare r2 table
-            tab1<-tab[tab$op=="~",c("lhs","lgroup")]
+            tab1<-lav_machine$r2
             j.init_table(self$results$models$r2,tab1,ci=T,ciwidth=self$options$ciWidth)
 
             ### prepare defined params ###
             tab1<-tab[tab$op==":=",]
             j.init_table(self$results$models$defined,tab1,ci=T,ciwidth=self$options$ciWidth)
 
+            ### prepare intercepts ###
+            j.init_table(self$results$models$intercepts,lav_machine$intercepts,ci=T,ciwidth=self$options$ciWidth)
+            
             # #### contrast tables ####
              if (length(self$options$factors)>0) {
                 for (factor in self$options$factors) {
@@ -100,53 +105,40 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     stop(paste(lav_machine$errors,collapse = "\n\n"))
             }
             ## fit info
-             nr<-self$results$info$rowCount
-             for (i in seq_along(lav_machine$info)) {
-                 self$results$info$addRow(rowKey=nr+i+1,lav_machine$info[[i]])
-             }
-             self$results$info$addFormat(rowNo=nr, col=1,jmvcore::Cell.BEGIN_END_GROUP)
+             j.fill_table(self$results$info,lav_machine$info)
+
              ## fit indices
              self$results$fit$indices$setRow(rowNo=1,lav_machine$fitindices)
              
              ## fit test
-             for (i in seq_along(lav_machine$fit)) 
-                 self$results$fit$main$addRow(rowKey=i,lav_machine$fit[[i]])
+             j.fill_table(self$results$fit$main,lav_machine$fit,append=T)
+
+             ## constraints fit test
              
-             
-             tab<-lav_machine$constfit
-             if (is.something(tab)) {
-                 for (i in seq_len(nrow(tab)))
-                     self$results$fit$constraints$addRow(rowKey=i,lav_machine$constfit[i,])
-                 self$results$fit$constraints$setVisible(TRUE)
-             }
-             
+             j.fill_table(self$results$fit$constraints,lav_machine$constfit,append=T, spaceby="type")
+
 
             ### parameters estimates ####
-            tab1<-lav_machine$coefficients
-            for (i in seq_len(nrow(tab1))) 
-                self$results$models$main$setRow(rowKey=i,tab1[i,])
-   
-            tab2<-lav_machine$correlations
-            for (i in seq_len(nrow(tab2))) 
-                self$results$models$correlations$setRow(rowKey=i,tab2[i,])
+            j.fill_table(self$results$models$coefficients,lav_machine$coefficients)
+
+            j.fill_table(self$results$models$correlations,lav_machine$correlations)
             
-            tab3<-lav_machine$r2
-            for (i in seq_len(nrow(tab3))) 
-                self$results$models$r2$setRow(rowKey=i,tab3[i,])
+            j.fill_table(self$results$models$r2,lav_machine$r2)
+
+            j.fill_table(self$results$models$defined,lav_machine$definedParameters)
+
+            j.fill_table(self$results$models$intercepts,lav_machine$intercepts)
             
-            tab<-lav_machine$definedParameters
-            if (is.something(tab)) {
-                 for (i in seq_len(nrow(tab))) 
-                    self$results$models$defined$setRow(rowKey=i,tab[i,])
-                 self$results$models$defined$setVisible(TRUE)
-            }
-            
+            ## diagrams
             private$.plot_machine$preparePlots()            
         },
  
         .showDiagram=function(image,ggtheme, theme, ...) {
             if (self$options$diagram==FALSE) 
                 return()
+            if (!is.something(image$state$plot))
+                 return()
+            
             plot(image$state$plot)
             return(image$state$plot)
 

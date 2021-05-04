@@ -5,4 +5,4 @@ version 0.*
 
 # Docs and help
 
-To be done
+Help and examples can be found at [PATHj page](https://pathj.github.io/)

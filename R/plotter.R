@@ -32,17 +32,23 @@ Plotter <- R6::R6Class(
         if (!self$options$diagram)
           return()
         
-        labs<-self$options$diag_paths
         model<-private$.operator$model
+        ### this is due to the fact that semPaths seems to fail when a inequality constraints is in ###
+        ### check for more lavaanian solution ###
+        check<-grep(">|<",model@ParTable$op,invert = T)
+        par<-model@ParTable
+        model@ParTable<-sapply(par, function(x) x[check],simplify = F)
+        ### end ###
+
+        labs<-self$options$diag_paths
         nodeLabels<-model@pta$vnames$ov.num[[1]]
         nodeLabels<-fromb64(nodeLabels)
-        
         size<-12
         if (self$options$diag_labsize=="small") size<-8
         if (self$options$diag_labsize=="large") size<-18
         nNodes<-length(nodeLabels)
         size<-size*exp(-nNodes/80)+1
-        options<-list(object = private$.operator$model,
+        options<-list(object = model,
                       layout = self$options$diag_type,
                       residuals = self$options$diag_resid,
                       rotation = as.numeric(self$options$diag_rotate),
@@ -87,9 +93,13 @@ Plotter <- R6::R6Class(
           if (!isFALSE(res$warning))
             private$.plotgroup$notes$addRow("war",list(info=res$warning))
           
-          if (!isFALSE(res$error))
+          if (!isFALSE(res$error)) {
             private$.plotgroup$notes$addRow("err",list(info=res$error))
-          
+            private$.plotgroup$notes$setVisible(TRUE)
+            private$.plotgroup$diagrams$setVisible(FALSE)
+            
+            return()
+          }
         }
         
         if (private$.plotgroup$notes$rowCount>0)
