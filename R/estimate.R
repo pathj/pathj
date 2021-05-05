@@ -162,8 +162,29 @@ Estimate <- R6::R6Class("Estimate",
                               end$ci.lower<-rlower
                               ####
                             }
+                            
+                                    end$chisq<-0
+                                    end$df<-0
+                                    end$pvalue<-0
+                                    for (i in seq_len(nrow(end))) {
+                                          labels<-self$structure[self$structure$lhs==end$lhs[i] & self$structure$op=="~" ,"label"]
+                                          const<-paste(labels,0,sep="==",collapse = " ; ")
+                                          results<-try_hard({tests<-lavaan::lavTestWald(self$model,const)})
+                                          if (results$error!=FALSE) {
+                                                  self$warnings<-list(topic="r2",message="Some inferential tests cannot be computed for this model")
+                                                  end$chisq[i]<-NaN   
+                                                  end$df[i]<-NaN
+                                                  end$pvalue[i]<-NaN
+                                            
+                                          } else {
+                                                end$chisq[i]<-tests$stat   
+                                                end$df[i]<-tests$df
+                                                end$pvalue[i]<-tests$p.value
+                                          }
+                                        }
                             self$r2<-end
-                          }
+                            
+                          } ## end of r2
                             
                         ) # end of private
 )  # end of class

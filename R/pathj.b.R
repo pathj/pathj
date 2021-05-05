@@ -124,9 +124,9 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             j.fill_table(self$results$models$correlations,lav_machine$correlations)
             
             j.fill_table(self$results$models$r2,lav_machine$r2)
-
+            j.add_warnings(self$results$models$r2,lav_machine,"r2")
+            
             j.fill_table(self$results$models$defined,lav_machine$definedParameters)
-            mark(lav_machine$warnings)
             j.add_warnings(self$results$models$defined,lav_machine,"defined")
             
             if (self$options$showintercepts)

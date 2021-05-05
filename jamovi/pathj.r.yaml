@@ -184,10 +184,22 @@ items:
                       type: number
                       title: Lower
                       visible: (ci)
+                      format: zto
                     - name: ci.upper
                       type: number
                       title: Upper
                       visible: (ci)
+                      format: zto
+                    - name: chisq
+                      title: Wald X²
+                      type: number
+                    - name:  df
+                      title: "df"
+                      type: integer
+                    - name: pvalue
+                      title: "p"
+                      type: number
+                      format: zto,pvalue
 
 
     
