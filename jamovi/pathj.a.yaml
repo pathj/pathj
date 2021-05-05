@@ -92,6 +92,20 @@ options:
           title: Bootstrap
       default: standard
 
+    - name: r2ci
+      title: R-squared C.I
+      type: List
+      options:
+        - name: fisher
+          title: Z-to-r transform
+        - name: model
+          title: Residual C.I. 
+
+      default: fisher
+      description:
+          R: >
+             Choose the confidence interval type
+
 
     - name: bootci
       title: Bootstrap C.I

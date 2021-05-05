@@ -258,6 +258,8 @@ children:
                 suffix: '%'
                 format: number
                 enable: (ci)
+              - type: ComboBox
+                name: r2ci
 
           - type: Label
             label: Bootstrap C.I. 

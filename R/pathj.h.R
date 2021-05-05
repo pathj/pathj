@@ -11,6 +11,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             covs = NULL,
             multigroup = NULL,
             se = "standard",
+            r2ci = "fisher",
             bootci = "perc",
             ci = TRUE,
             ciWidth = 95,
@@ -93,6 +94,13 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "robust.huber.white",
                     "boot"),
                 default="standard")
+            private$..r2ci <- jmvcore::OptionList$new(
+                "r2ci",
+                r2ci,
+                options=list(
+                    "fisher",
+                    "model"),
+                default="fisher")
             private$..bootci <- jmvcore::OptionList$new(
                 "bootci",
                 bootci,
@@ -302,6 +310,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..covs)
             self$.addOption(private$..multigroup)
             self$.addOption(private$..se)
+            self$.addOption(private$..r2ci)
             self$.addOption(private$..bootci)
             self$.addOption(private$..ci)
             self$.addOption(private$..ciWidth)
@@ -338,6 +347,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         covs = function() private$..covs$value,
         multigroup = function() private$..multigroup$value,
         se = function() private$..se$value,
+        r2ci = function() private$..r2ci$value,
         bootci = function() private$..bootci$value,
         ci = function() private$..ci$value,
         ciWidth = function() private$..ciWidth$value,
@@ -373,6 +383,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..covs = NA,
         ..multigroup = NA,
         ..se = NA,
+        ..r2ci = NA,
         ..bootci = NA,
         ..ci = NA,
         ..ciWidth = NA,
@@ -1022,6 +1033,7 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param covs a vector of strings naming the covariates from \code{data}
 #' @param multigroup factor defining groups for multigroup analysis
 #' @param se .
+#' @param r2ci Choose the confidence interval type
 #' @param bootci Choose the confidence interval type
 #' @param ci .
 #' @param ciWidth a number between 50 and 99.9 (default: 95) specifying the
@@ -1097,6 +1109,7 @@ pathj <- function(
     covs = NULL,
     multigroup = NULL,
     se = "standard",
+    r2ci = "fisher",
     bootci = "perc",
     ci = TRUE,
     ciWidth = 95,
@@ -1181,6 +1194,7 @@ pathj <- function(
         covs = covs,
         multigroup = multigroup,
         se = se,
+        r2ci = r2ci,
         bootci = bootci,
         ci = ci,
         ciWidth = ciWidth,

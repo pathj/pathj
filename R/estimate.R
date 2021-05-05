@@ -70,13 +70,9 @@ Estimate <- R6::R6Class("Estimate",
                             if (nrow(self$definedParameters)==0) self$definedParameters<-NULL
                             tab<-self$correlations
                             end<-tab[tab$lhs %in% self$options$endogenous & tab$lhs==tab$rhs,]
-                            end$var<-end$est/end$std.all
-                            upper<-end$ci.upper
-                            lower<-end$ci.lower
-                            end$ci.upper<-1-(lower/end$var)
-                            end$ci.lower<-1-(upper/end$var)
-                            end$r2<-1-end$std.all
-                            self$r2<-end
+                            self$computeR2(end)
+
+                            
                             
                             self$intercepts<-self$parameters[self$parameters$op=="~1",]
                             if (nrow(self$intercepts)==0) self$intercepts<-NULL
@@ -135,7 +131,40 @@ Estimate <- R6::R6Class("Estimate",
                               }
                             } # end of checking constraints
                             
-                          } # end of private function estimate
+                          }, # end of private function estimate
+                          
+                          computeR2=function(end) {
+                            
+                            end$var<-end$est/end$std.all
+                            upper<-end$ci.upper
+                            lower<-end$ci.lower
+                            end$ci.upper<-1-(lower/end$var)
+                            end$ci.lower<-1-(upper/end$var)
+                            end$r2<-1-end$std.all
+                            
+                            if (self$options$r2ci=="fisher") {
+                              ### https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3821705/
+                              N<-lavaan::lavInspect(self$model,"ntotal")
+                              r<-sqrt(end$r2)
+                              f<-.5 * log((1 + r)/(1 - r))
+                              zr<-f*sqrt((N-3))
+                              z0<-qnorm((1-self$ciwidth)/2,lower.tail = F)
+                              
+                              lower<-zr-z0
+                              upper<-zr+z0
+                              flower<-lower/sqrt(N-3)
+                              fupper<-upper/sqrt(N-3)
+                              rupper<-(exp(2*fupper)-1)/(1+exp(2*fupper))
+                              rupper<-rupper^2
+                              rlower<-(exp(2*flower)-1)/(1+exp(2*flower))
+                              rlower<-rlower^2
+                              end$ci.upper<-rupper
+                              end$ci.lower<-rlower
+                              ####
+                            }
+                            self$r2<-end
+                          }
+                            
                         ) # end of private
 )  # end of class
 
