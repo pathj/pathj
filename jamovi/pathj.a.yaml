@@ -426,6 +426,19 @@ options:
           R: >
              Choose the diagram labels
 
+    - name: likelihood
+      title: ML likelihood approach
+      type: List
+      options:
+        - name: normal 
+          title: Normal
+        - name:  wishart
+          title: Wishart
+          
+      default: normal
+      description:
+          R: >
+             Choose the diagram labels
 
 
 

@@ -149,8 +149,7 @@ items:
     title: "Estimates"
     type: Group
     visible: false
-    clearWith:
-                  - endogenousTerms
+
     items:
     
           - name: coefficients
@@ -158,6 +157,7 @@ items:
             type: Table
             refs: lavaan
             clearWith:
+                  - endogenousTerms
                   - endogenous
                   - covs
                   - factors
@@ -166,6 +166,7 @@ items:
                   - cov_y
                   - constraints
                   - data
+                  - multigroup
 
             columns:
                     - name: lgroup
@@ -221,6 +222,8 @@ items:
                   - contrasts
                   - cov_y
                   - constraints
+                  - data
+                  - multigroup
 
             columns:
                     - name: lgroup
@@ -256,6 +259,8 @@ items:
                   - contrasts
                   - cov_y
                   - constraints
+                  - data
+                  - multigroup
                   
             columns:
                     - name: lgroup
@@ -317,6 +322,8 @@ items:
                   - contrasts
                   - cov_y
                   - constraints
+                  - data
+                  - multigroup
                   
             columns:
                     - name: lgroup
@@ -375,6 +382,8 @@ items:
                   - contrasts
                   - cov_y
                   - constraints
+                  - data
+                  - multigroup
                   
             columns:
 
@@ -434,6 +443,8 @@ items:
                   - cov_y
                   - constraints
                   - varcov
+                  - data
+                  - multigroup
 
     items:
            - name: diagrams
@@ -458,6 +469,8 @@ items:
                       - endogenousTerms
                       - cov_y
                       - constraints
+                      - data
+                      - multigroup
 
              refs: diagram    
            - name: notes

@@ -122,6 +122,7 @@ Syntax <- R6::R6Class(
                 .lav_structure$lgroup<-levs[.lav_structure$group]
               } else
                 .lav_structure$lgroup<-"1"
+              mark(.lav_structure)
               sel<-grep("==|<|>",.lav_structure$op,invert = T)
               self$structure<-.lav_structure[sel,]
               ### this is weired, but it works fine with multigroups
@@ -405,6 +406,10 @@ Estimate <- R6::R6Class("Estimate",
                                lavoptions[["group"]]<-self$multigroup$var64
                                lavoptions[["group.label"]]<-self$multigroup$levels
                       }
+                      if (self$options$estimator=="ML") {
+                        lavoptions[["likelihood"]]<-self$options$likelihood
+                      }
+
 
 
                       results<-try_hard({do.call(lavaan::lavaan,lavoptions)  })

@@ -38,7 +38,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showlabels = FALSE,
             scoretest = TRUE,
             cumscoretest = FALSE,
-            estimator = "ML", ...) {
+            estimator = "ML",
+            likelihood = "normal", ...) {
 
             super$initialize(
                 package="pathj",
@@ -283,6 +284,13 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "DWLS",
                     "ULS"),
                 default="ML")
+            private$..likelihood <- jmvcore::OptionList$new(
+                "likelihood",
+                likelihood,
+                options=list(
+                    "normal",
+                    "wishart"),
+                default="normal")
 
             self$.addOption(private$..endogenous)
             self$.addOption(private$..factors)
@@ -316,6 +324,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..scoretest)
             self$.addOption(private$..cumscoretest)
             self$.addOption(private$..estimator)
+            self$.addOption(private$..likelihood)
         }),
     active = list(
         endogenous = function() private$..endogenous$value,
@@ -349,7 +358,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showlabels = function() private$..showlabels$value,
         scoretest = function() private$..scoretest$value,
         cumscoretest = function() private$..cumscoretest$value,
-        estimator = function() private$..estimator$value),
+        estimator = function() private$..estimator$value,
+        likelihood = function() private$..likelihood$value),
     private = list(
         ..endogenous = NA,
         ..factors = NA,
@@ -382,7 +392,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..showlabels = NA,
         ..scoretest = NA,
         ..cumscoretest = NA,
-        ..estimator = NA)
+        ..estimator = NA,
+        ..likelihood = NA)
 )
 
 pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -578,15 +589,14 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         super$initialize(
                             options=options,
                             name="models",
-                            title="Estimates",
-                            clearWith=list(
-                    "endogenousTerms"))
+                            title="Estimates")
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="coefficients",
                             title="Parameter Estimates",
                             refs="lavaan",
                             clearWith=list(
+                                "endogenousTerms",
                                 "endogenous",
                                 "covs",
                                 "factors",
@@ -594,7 +604,8 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "contrasts",
                                 "cov_y",
                                 "constraints",
-                                "data"),
+                                "data",
+                                "multigroup"),
                             columns=list(
                                 list(
                                     `name`="lgroup", 
@@ -657,7 +668,9 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "ciType",
                                 "contrasts",
                                 "cov_y",
-                                "constraints"),
+                                "constraints",
+                                "data",
+                                "multigroup"),
                             columns=list(
                                 list(
                                     `name`="lgroup", 
@@ -694,7 +707,9 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "ciType",
                                 "contrasts",
                                 "cov_y",
-                                "constraints"),
+                                "constraints",
+                                "data",
+                                "multigroup"),
                             columns=list(
                                 list(
                                     `name`="lgroup", 
@@ -766,7 +781,9 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "ciType",
                                 "contrasts",
                                 "cov_y",
-                                "constraints"),
+                                "constraints",
+                                "data",
+                                "multigroup"),
                             columns=list(
                                 list(
                                     `name`="lgroup", 
@@ -827,7 +844,9 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "ciType",
                                 "contrasts",
                                 "cov_y",
-                                "constraints"),
+                                "constraints",
+                                "data",
+                                "multigroup"),
                             columns=list(
                                 list(
                                     `name`="lhs", 
@@ -899,7 +918,9 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "endogenous",
                     "cov_y",
                     "constraints",
-                    "varcov"))
+                    "varcov",
+                    "data",
+                    "multigroup"))
                         self$add(jmvcore::Array$new(
                             options=options,
                             name="diagrams",
@@ -921,7 +942,9 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     "contrasts",
                                     "endogenousTerms",
                                     "cov_y",
-                                    "constraints")),
+                                    "constraints",
+                                    "data",
+                                    "multigroup")),
                             refs="diagram"))
                         self$add(jmvcore::Table$new(
                             options=options,
@@ -1023,6 +1046,7 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param scoretest .
 #' @param cumscoretest .
 #' @param estimator Choose the diagram labels
+#' @param likelihood Choose the diagram labels
 #' @param formula (optional) the formula to use, see the examples
 #' @return A results object containing:
 #' \tabular{llllll}{
@@ -1083,6 +1107,7 @@ pathj <- function(
     scoretest = TRUE,
     cumscoretest = FALSE,
     estimator = "ML",
+    likelihood = "normal",
     formula) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -1163,7 +1188,8 @@ pathj <- function(
         showlabels = showlabels,
         scoretest = scoretest,
         cumscoretest = cumscoretest,
-        estimator = estimator)
+        estimator = estimator,
+        likelihood = likelihood)
 
     analysis <- pathjClass$new(
         options = options,

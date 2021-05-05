@@ -211,6 +211,9 @@ children:
             children:
               - type: ComboBox
                 name: estimator
+              - type: ComboBox
+                name: likelihood
+                enable: (estimator:ML)
 
   - type: CollapseBox
     label: Parameter Options
