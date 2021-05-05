@@ -216,7 +216,7 @@ children:
                 enable: (estimator:ML)
 
   - type: CollapseBox
-    label: Parameter Options
+    label: Parameters Options
     collapsed: true
     stretchFactor: 1
     children:
@@ -295,7 +295,7 @@ children:
         style: inline
         children:
           - type: Label
-            label: Intercepts
+            label: Estimates
             margin: large
             style: list
             children:
@@ -303,7 +303,8 @@ children:
                 name: intercepts
               - type: CheckBox
                 name: showintercepts
-                enable: (intercepts)
+              - type: CheckBox
+                name: indirect
 
   - type: CollapseBox
     label: Path Diagram

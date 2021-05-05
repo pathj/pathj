@@ -22,7 +22,10 @@ Dispatch <- R6::R6Class(
               if (obj$message==FALSE)
                            return()
               obj<-fromb64(obj,self$vars)
-              private$.warnings[[obj$topic]][[length(private$.warnings[[obj$topic]])+1]]<-obj$message
+              topic<-private$.warnings[[obj$topic]]
+              topic[[length(topic)+1]]<-obj$message
+              topic<-unique(topic)
+              private$.warnings[[obj$topic]]<-topic
               
           },
         errors=function(obj) {

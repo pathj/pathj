@@ -51,11 +51,11 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             j.init_table(self$results$models$r2,tab1,ci=T,ciwidth=self$options$ciWidth)
 
             ### prepare defined params ###
-            tab1<-tab[tab$op==":=",]
-            j.init_table(self$results$models$defined,tab1,ci=T,ciwidth=self$options$ciWidth)
+            j.init_table(self$results$models$defined,lav_machine$definedParameters,ci=T,ciwidth=self$options$ciWidth)
 
             ### prepare intercepts ###
-            j.init_table(self$results$models$intercepts,lav_machine$intercepts,ci=T,ciwidth=self$options$ciWidth)
+            if (self$options$showintercepts)
+                 j.init_table(self$results$models$intercepts,lav_machine$intercepts,ci=T,ciwidth=self$options$ciWidth)
             
             # #### contrast tables ####
              if (length(self$options$factors)>0) {
@@ -126,9 +126,13 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             j.fill_table(self$results$models$r2,lav_machine$r2)
 
             j.fill_table(self$results$models$defined,lav_machine$definedParameters)
-
-            j.fill_table(self$results$models$intercepts,lav_machine$intercepts)
+            mark(lav_machine$warnings)
+            j.add_warnings(self$results$models$defined,lav_machine,"defined")
             
+            if (self$options$showintercepts)
+                   j.fill_table(self$results$models$intercepts,lav_machine$intercepts)
+            
+
             ## diagrams
             private$.plot_machine$preparePlots()            
         },

@@ -140,7 +140,7 @@ options:
     - name: showintercepts
       title: Show intercepts estimates
       type: Bool
-      default: false
+      default: true
       description:
           R: >
             `TRUE` or `FALSE` (default), show intercepts
@@ -152,6 +152,13 @@ options:
           R: >
             `TRUE` or `FALSE` (default), show intercepts
 
+    - name: indirect
+      title: Indirect Effects
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), show intercepts
 
     - name: contrasts
       title: Factors Coding
