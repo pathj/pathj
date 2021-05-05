@@ -12,6 +12,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             multigroup = NULL,
             se = "standard",
             r2ci = "fisher",
+            r2test = TRUE,
             bootci = "perc",
             ci = TRUE,
             ciWidth = 95,
@@ -101,6 +102,10 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fisher",
                     "model"),
                 default="fisher")
+            private$..r2test <- jmvcore::OptionBool$new(
+                "r2test",
+                r2test,
+                default=TRUE)
             private$..bootci <- jmvcore::OptionList$new(
                 "bootci",
                 bootci,
@@ -311,6 +316,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..multigroup)
             self$.addOption(private$..se)
             self$.addOption(private$..r2ci)
+            self$.addOption(private$..r2test)
             self$.addOption(private$..bootci)
             self$.addOption(private$..ci)
             self$.addOption(private$..ciWidth)
@@ -348,6 +354,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         multigroup = function() private$..multigroup$value,
         se = function() private$..se$value,
         r2ci = function() private$..r2ci$value,
+        r2test = function() private$..r2test$value,
         bootci = function() private$..bootci$value,
         ci = function() private$..ci$value,
         ciWidth = function() private$..ciWidth$value,
@@ -384,6 +391,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..multigroup = NA,
         ..se = NA,
         ..r2ci = NA,
+        ..r2test = NA,
         ..bootci = NA,
         ..ci = NA,
         ..ciWidth = NA,
@@ -575,19 +583,23 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 list(
                                     `name`="srmr", 
                                     `title`="SRMR", 
-                                    `type`="number"),
+                                    `type`="number", 
+                                    `format`="zto"),
                                 list(
                                     `name`="rmsea", 
                                     `title`="RMSEA", 
-                                    `type`="number"),
+                                    `type`="number", 
+                                    `format`="zto"),
                                 list(
                                     `name`="rmsea.ci.lower", 
                                     `title`="Lower", 
-                                    `type`="number"),
+                                    `type`="number", 
+                                    `format`="zto"),
                                 list(
                                     `name`="rmsea.ci.upper", 
                                     `title`="Upper", 
-                                    `type`="number"),
+                                    `type`="number", 
+                                    `format`="zto"),
                                 list(
                                     `name`="rmsea.pvalue", 
                                     `title`="RMSEA p", 
@@ -636,7 +648,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     `type`="text"),
                                 list(
                                     `name`="r2", 
-                                    `title`="R^2", 
+                                    `title`="R\u00B2", 
                                     `type`="number"),
                                 list(
                                     `name`="ci.lower", 
@@ -653,16 +665,19 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 list(
                                     `name`="chisq", 
                                     `title`="Wald X\u00B2", 
-                                    `type`="number"),
+                                    `type`="number", 
+                                    `visible`="(r2test)"),
                                 list(
                                     `name`="df", 
                                     `title`="df", 
-                                    `type`="integer"),
+                                    `type`="integer", 
+                                    `visible`="(r2test)"),
                                 list(
                                     `name`="pvalue", 
                                     `title`="p", 
                                     `type`="number", 
-                                    `format`="zto,pvalue"))))
+                                    `format`="zto,pvalue", 
+                                    `visible`="(r2test)"))))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="coefficients",
@@ -1049,6 +1064,7 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param multigroup factor defining groups for multigroup analysis
 #' @param se .
 #' @param r2ci Choose the confidence interval type
+#' @param r2test .
 #' @param bootci Choose the confidence interval type
 #' @param ci .
 #' @param ciWidth a number between 50 and 99.9 (default: 95) specifying the
@@ -1125,6 +1141,7 @@ pathj <- function(
     multigroup = NULL,
     se = "standard",
     r2ci = "fisher",
+    r2test = TRUE,
     bootci = "perc",
     ci = TRUE,
     ciWidth = 95,
@@ -1210,6 +1227,7 @@ pathj <- function(
         multigroup = multigroup,
         se = se,
         r2ci = r2ci,
+        r2test = r2test,
         bootci = bootci,
         ci = ci,
         ciWidth = ciWidth,

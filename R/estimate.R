@@ -85,13 +85,11 @@ Estimate <- R6::R6Class("Estimate",
                             if (ff[["df"]]>0)
                               alist[[1]]<-list(label="User Model",chisq=ff[["chisq"]],df=ff[["df"]],pvalue=ff[["pvalue"]])
                             try(alist[[length(alist)+1]]<-list(label="Baseline Model",chisq=ff[["baseline.chisq"]],df=ff[["baseline.df"]],pvalue=ff[["baseline.pvalue"]]))
-                            
                             self$fitindices<-as.list(ff)
                             
                             self$fit<-alist
                             
                             # fit indices
-                            ff<-sapply(ff, round,3)
                             alist<-list()
                             alist[[length(alist)+1]]<-c(info="Estimation Method",value=self$model@Options$estimator)
                             alist[[length(alist)+1]]<-c(info="Number of observations",value=lavaan::lavInspect(self$model,"ntotal")) 
@@ -131,6 +129,7 @@ Estimate <- R6::R6Class("Estimate",
                               }
                             } # end of checking constraints
                             
+                            ginfo("Estimation is done...")
                           }, # end of private function estimate
                           
                           computeR2=function(end) {
@@ -162,26 +161,35 @@ Estimate <- R6::R6Class("Estimate",
                               end$ci.lower<-rlower
                               ####
                             }
+                            self$r2<-end
+                            if (!self$options$r2test)
+                              return()
                             
                                     end$chisq<-0
                                     end$df<-0
                                     end$pvalue<-0
-                                    for (i in seq_len(nrow(end))) {
-                                          labels<-self$structure[self$structure$lhs==end$lhs[i] & self$structure$op=="~" ,"label"]
-                                          const<-paste(labels,0,sep="==",collapse = " ; ")
-                                          results<-try_hard({tests<-lavaan::lavTestWald(self$model,const)})
-                                          if (results$error!=FALSE) {
+
+                                    sel<-(self$structure$lhs %in% unique(end$lhs) & self$structure$op=="~" & self$structure$group>0)
+                                    .structure<-self$structure[sel,]
+
+                                      for (i in seq_len(nrow(end))) {
+                                            sel<-(.structure$lhs==end$lhs[i] &  .structure$group==end$group[i])
+                                           ..structure<-.structure[sel,]
+                                            const<-paste(..structure$label,0,sep="==",collapse = " ; ")
+                                            results<-try_hard({tests<-lavaan::lavTestWald(self$model,const)})
+                                            if (results$error!=FALSE) {
                                                   self$warnings<-list(topic="r2",message="Some inferential tests cannot be computed for this model")
+                                                  self$warnings<-list(topic="r2",message=results$error)
                                                   end$chisq[i]<-NaN   
                                                   end$df[i]<-NaN
                                                   end$pvalue[i]<-NaN
                                             
-                                          } else {
+                                            } else {
                                                 end$chisq[i]<-tests$stat   
                                                 end$df[i]<-tests$df
                                                 end$pvalue[i]<-tests$p.value
                                           }
-                                        }
+                                    }
                             self$r2<-end
                             
                           } ## end of r2

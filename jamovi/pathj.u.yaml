@@ -214,6 +214,13 @@ children:
               - type: ComboBox
                 name: likelihood
                 enable: (estimator:ML)
+          - type: Label
+            label: Inferential Tests
+            margin: large
+            style: list
+            children:
+              - type: CheckBox
+                name: r2test
 
   - type: CollapseBox
     label: Parameters Options

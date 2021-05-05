@@ -130,15 +130,23 @@ items:
                     - name:  srmr
                       title: SRMR
                       type: number
+                      format: zto
+
                     - name: rmsea
                       title:  RMSEA
                       type: number
+                      format: zto
+                      
                     - name:  rmsea.ci.lower
                       title: Lower
                       type: number
+                      format: zto
+
                     - name:  rmsea.ci.upper
                       title: Upper
                       type: number
+                      format: zto
+
                     - name: rmsea.pvalue
                       title: 'RMSEA p'
                       type: number
@@ -178,7 +186,7 @@ items:
                       title: "Variable"
                       type: text
                     - name: r2
-                      title: "R^2"
+                      title: R²
                       type: number
                     - name: ci.lower
                       type: number
@@ -193,13 +201,17 @@ items:
                     - name: chisq
                       title: Wald X²
                       type: number
+                      visible: (r2test)
                     - name:  df
                       title: "df"
                       type: integer
+                      visible: (r2test)
+
                     - name: pvalue
                       title: "p"
                       type: number
                       format: zto,pvalue
+                      visible: (r2test)
 
 
     
