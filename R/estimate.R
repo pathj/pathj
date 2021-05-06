@@ -108,8 +108,8 @@ Estimate <- R6::R6Class("Estimate",
                             alist[[length(alist)+1]]<-c(info="Free parameters",value=self$model@Fit@npar)
                             alist[[length(alist)+1]]<-c(info="Converged",value=self$model@Fit@converged) 
                             alist[[length(alist)+1]]<-c(info="",value="")
-                            try(alist[[length(alist)+1]]<-c(info="Loglikelihood user model",value=ff[["logl"]]) )
-                            try(alist[[length(alist)+1]]<-c(info="Loglikelihood unrestricted model",value=ff[["unrestricted.logl"]]))
+                            try(alist[[length(alist)+1]]<-c(info="Loglikelihood user model",value=round(ff[["logl"]],digits=3) ))
+                            try(alist[[length(alist)+1]]<-c(info="Loglikelihood unrestricted model",value=round(ff[["unrestricted.logl"]],digits=3)))
                             alist[[length(alist)+1]]<-c(info="",value="")
                             
                             self$tab_info<-alist
