@@ -2,10 +2,10 @@ refs:
    pathj:
       type: 'software'
       author: Gallucci, M.
-      year: 2020
+      year: 2021
       title: "pathj: jamovi Path Analysis"
-      publisher: '[jamovi module]. Retrieved from https://jamovi-pathj.github.io/'
-      url: 'https://jamovi-pathj.github.io/'
+      publisher: '[jamovi module]. For help please visit https://pathj.github.io/'
+      url: 'https://pathj.github.io/'
    lavaan:
       type: 'article'
       author: Rosseel, Y. 
@@ -15,8 +15,8 @@ refs:
       url: 'http://www.jstatsoft.org/v48/i02/'
    semplot:
       type: "software"
-      title: "semPlot"
-      author: Sacha Epskamp ,Simon Stuber,Jason Nak, Myrthe Veenman, Terrence D. Jorgensen
+      title: "semPlot: Path Diagrams and Visual Analysis of Various SEM Packages' Output"
+      author: Epskamp S. , Stuber S., Nak J., Veenman M,, Jorgensen T.D.
       year: 2019
-      publisher: "[R Package]. Retrieved from https://cran.r-project.org/web/packages/semPlot/"
-      url: 'https://github.com/SachaEpskamp/semPlot'
+      publisher: "[R Package]. Retrieved from https://CRAN.R-project.org/package=semPlot"
+      url: 'https://CRAN.R-project.org/package=semPlot'
