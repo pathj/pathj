@@ -143,7 +143,7 @@ Syntax <- R6::R6Class(
                 auto.var = TRUE,
                 auto.th = TRUE, 
                 auto.cov.y = self$options$cov_y,
-                fixed.x=!self$options$cov_x,
+                fixed.x=self$options$cov_x,
                 meanstructure = TRUE  ### this is needed for semPaths to work also with multigroups
               )
               if (is.something(self$multigroup))
@@ -242,7 +242,7 @@ Syntax <- R6::R6Class(
                                 arow<-.structure[j,]
                                 group<-arow$group
                                 if (is.something(self$multigroup))  groupsub<-SUB[[group]] else groupsub<-""
-                                target<-paste0("(",arow$lhs,arow$op,arow$rhs,")",groupsub)
+                                target<-paste0(" (",arow$lhs,arow$op,arow$rhs,") ",groupsub)
                                 reg<-paste0(arow$label,"(?![0-9])")
                                 r<-stringr::str_replace(r,reg,target)
                                 }
@@ -479,7 +479,7 @@ Syntax <- R6::R6Class(
               pars<-sapply(labslist,paste,collapse="*")
               if (!is.something(pars))
                 return()
-              labs<-sapply(termslist,paste,collapse="->")
+              labs<-sapply(termslist,paste,collapse=" \U21d2 ")
               plabs<-paste0("IE",1:length(pars))
               synt<-paste(plabs,pars,sep=":=",collapse = " ; ")
               private$.lav_indirect<-synt

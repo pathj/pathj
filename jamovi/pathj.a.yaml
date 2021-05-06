@@ -421,9 +421,9 @@ options:
           R: >
             `TRUE` or `FALSE` (default), produce a path diagram
     - name: cov_x
-      title: Exogenous Parameters
+      title: Fixed Exogenous
       type: Bool
-      default: false
+      default: true
       description:
           R: >
             `TRUE` or `FALSE` (default), produce a path diagram

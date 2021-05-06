@@ -140,8 +140,6 @@ children:
             children:
               - type: CheckBox
                 name: cov_y
-              - type: CheckBox
-                name: cov_x
   - type: CollapseBox
     label: Factors Coding
     collapsed: true
@@ -299,6 +297,7 @@ children:
                 format: number
                 enable: '(se:boot)'
 
+
       - type: LayoutBox
         margin: large
         style: inline
@@ -314,6 +313,13 @@ children:
                 name: showintercepts
               - type: CheckBox
                 name: indirect
+          - type: Label
+            label: Miscellaneous
+            margin: large
+            style: list
+            children:
+              - type: CheckBox
+                name: cov_x
 
   - type: CollapseBox
     label: Path Diagram
