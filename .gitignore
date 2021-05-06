@@ -9,6 +9,8 @@
 # jamovi
 build/
 build*/
+local/
+local*/
 
 temp/
 *.jmo
