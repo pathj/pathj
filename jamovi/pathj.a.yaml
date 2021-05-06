@@ -119,7 +119,7 @@ options:
         - name: perc
           title: Percentiles
         - name: bca.simple
-          title: Adjuseste Bias corrected
+          title: Adjusted bias corrected
         - name: norm
           title: Normal
         - name: basic
