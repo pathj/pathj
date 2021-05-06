@@ -36,7 +36,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             diag_abbrev = "0",
             varcov = NULL,
             cov_y = TRUE,
-            cov_x = FALSE,
+            cov_x = TRUE,
             constraints = list(),
             constraints_examples = FALSE,
             showlabels = FALSE,
@@ -281,7 +281,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..cov_x <- jmvcore::OptionBool$new(
                 "cov_x",
                 cov_x,
-                default=FALSE)
+                default=TRUE)
             private$..constraints <- jmvcore::OptionArray$new(
                 "constraints",
                 constraints,
@@ -1183,7 +1183,7 @@ pathj <- function(
     diag_abbrev = "0",
     varcov,
     cov_y = TRUE,
-    cov_x = FALSE,
+    cov_x = TRUE,
     constraints = list(),
     constraints_examples = FALSE,
     showlabels = FALSE,
