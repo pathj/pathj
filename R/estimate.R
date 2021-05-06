@@ -205,29 +205,13 @@ Estimate <- R6::R6Class("Estimate",
                                     }
                             self$tab_r2<-end
                             
-                        }, ## end of r2
-                        savePredRes=function(results) {
-              
-                            
-                            if (self$options$predicted && results$predicted$isNotFilled()) {
-                              p<-lavaan::predict(self$model)
-                              pdf <- data.frame(predicted=p, row.names=rownames(mf.getModelData(model)))
-                              results$predicted$setValues(p)
-                            }
-                            if (options$residuals && results$residuals$isNotFilled()) {
-                              ginfo("Saving residuals")
-                              p<-stats::resid(model)
-                              # we need the rownames in case there are missing in the datasheet
-                              pdf <- data.frame(residuals=p, row.names=rownames(mf.getModelData(model)))
-                              results$residuals$setValues(pdf)
-                            }
-                          }
+                        } ## end of r2
+                        
                           
                           
                           
                                       
-                        } # end of savePreRes
-                            
+
               ) # end of private
 )  # end of class
 
