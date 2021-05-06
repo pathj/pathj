@@ -3,7 +3,7 @@
 ### It takes care also of producing and checking constraints
 ### free parameters, indirect effects and the like. 
 ### it assumes that the estimation will be done on B64 names, and the results reported in plain names
-### It assumes that all interactions term are computed as new variables with INTERCATION_SYMBOL as separator (in place of ":") in the 
+### It assumes that all interactions term are computed as new variables with INTERACTION_SYMBOL as separator (in place of ":") in the 
 ### variable name. 
 ### It assumes that all factors are present in the data as K-1 new variables with appropriated constrast value as numeric variables. 
 ### each "dummy" variable in named `VAR{FACTOR_SYMBOL}k`` 
