@@ -30,7 +30,7 @@ options:
 
 
     - name: endogenous
-      title: endogenous
+      title: Endogenous Variables
       type: Variables
       suggested:
         - continuous
