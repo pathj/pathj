@@ -5,14 +5,21 @@
     `pathj`=list(
         `type`="software", 
         `author`="Gallucci, M.", 
-        `year`=2020, 
+        `year`=2021, 
         `title`="pathj: jamovi Path Analysis", 
-        `publisher`="[jamovi module]. Retrieved from https://jamovi-pathj.github.io/", 
-        `url`="https://jamovi-pathj.github.io/"), 
+        `publisher`="[jamovi module]. For help please visit https://pathj.github.io/", 
+        `url`="https://pathj.github.io/"), 
     `lavaan`=list(
         `type`="article", 
         `author`="Rosseel, Y.", 
         `year`=2019, 
         `title`="lavaan: An R Package for Structural Equation Modeling", 
         `publisher`="Journal of Statistical Software, 48(2), 1-36", 
-        `url`="http://www.jstatsoft.org/v48/i02/"))
+        `url`="http://www.jstatsoft.org/v48/i02/"), 
+    `semplot`=list(
+        `type`="software", 
+        `title`="semPlot: Path Diagrams and Visual Analysis of Various SEM Packages' Output", 
+        `author`="Epskamp S. , Stuber S., Nak J., Veenman M,, Jorgensen T.D.", 
+        `year`=2019, 
+        `publisher`="[R Package]. Retrieved from https://CRAN.R-project.org/package=semPlot", 
+        `url`="https://CRAN.R-project.org/package=semPlot"))

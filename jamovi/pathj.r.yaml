@@ -513,7 +513,8 @@ items:
                       - data
                       - multigroup
 
-             refs: diagram    
+             refs: semplot
+             
            - name: notes
              type: Table
              title: ""

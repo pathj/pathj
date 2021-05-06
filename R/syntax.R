@@ -28,7 +28,7 @@ Syntax <- R6::R6Class(
               tab_defined=NULL,
               tab_r2=NULL,
               tab_info=NULL,
-              
+              structure=NULL,
               options=NULL,
               constraints=NULL,
               defined=NULL,
@@ -174,6 +174,7 @@ Syntax <- R6::R6Class(
               
               ## first, we update the lavaanified structure table
               private$.make_structure()
+              
 
               ## now we start the filling of the tables to be used in the init of results
               .lav_structure<-private$.lav_structure
@@ -191,9 +192,14 @@ Syntax <- R6::R6Class(
                    } else
                         .lav_structure$lgroup<-"1"
               
-              ### .tab_coefficients contains all regression coefficients
-#               sel<-grep("==|<|>",.lav_structure$op,invert = T) this is for all but not used now
+              ### self$structure containts all parameters with plain names. Useful for children to refer to parameters properties
+              ### is not a tab_* which will be displayed in results
                   
+              sel<-grep("==|<|>",.lav_structure$op,invert = T)
+              self$structure<-.lav_structure[sel,]
+
+              ### tab_coefficients contains all regression coefficients
+              
               self$tab_coefficients<-.lav_structure[.lav_structure$op=="~",]
               
               ### tab_r2 contains the r-squares for endogenous variables
