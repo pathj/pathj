@@ -1,3 +1,8 @@
+### This class takes care of passing all information from lavaan tables definitions and estimations  from jamovi input
+### to jamovi results tables. It wokrs using Syntax R6 class, Estimate R6 class, and Plotter R6 class.
+### Syntax R6 class gets all input and defines the tables required for showing the results. Estimate R6 class inherit from Syntax
+### all properties of the tables and fill them with the actual results estimated with lavaan() function.
+### Filling the results tables is handle by function in jamovi.R (functions starting with j.)
 
 
 pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
