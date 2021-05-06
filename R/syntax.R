@@ -28,7 +28,7 @@ Syntax <- R6::R6Class(
               tab_defined=NULL,
               tab_r2=NULL,
               tab_info=NULL,
-              
+              structure=NULL,
               options=NULL,
               constraints=NULL,
               defined=NULL,
@@ -192,7 +192,8 @@ Syntax <- R6::R6Class(
                         .lav_structure$lgroup<-"1"
               
               ### .tab_coefficients contains all regression coefficients
-#               sel<-grep("==|<|>",.lav_structure$op,invert = T) this is for all but not used now
+              sel<-grep("==|<|>",.lav_structure$op,invert = T)
+              self$structure<-.lav_structure[sel,]
                   
               self$tab_coefficients<-.lav_structure[.lav_structure$op=="~",]
               

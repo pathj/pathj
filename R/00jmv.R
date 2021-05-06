@@ -15,4 +15,11 @@
         `year`=2019, 
         `title`="lavaan: An R Package for Structural Equation Modeling", 
         `publisher`="Journal of Statistical Software, 48(2), 1-36", 
-        `url`="http://www.jstatsoft.org/v48/i02/"))
+        `url`="http://www.jstatsoft.org/v48/i02/"), 
+    `semplot`=list(
+        `type`="software", 
+        `title`="semPlot", 
+        `author`="Sacha Epskamp ,Simon Stuber,Jason Nak, Myrthe Veenman, Terrence D. Jorgensen", 
+        `year`=2019, 
+        `publisher`="[R Package]. Retrieved from https://cran.r-project.org/web/packages/semPlot/", 
+        `url`="https://github.com/SachaEpskamp/semPlot"))

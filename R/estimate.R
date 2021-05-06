@@ -174,6 +174,7 @@ Estimate <- R6::R6Class("Estimate",
                               ####
                             }
                             self$tab_r2<-end
+                            mark(end)
                             if (!self$options$r2test)
                               return()
                             
@@ -182,6 +183,8 @@ Estimate <- R6::R6Class("Estimate",
                                     end$pvalue<-0
                                     if (!("group" %in% names(end)))
                                                end$group<-1
+                                    
+                                    .lav_structure<-private$.lav_structure
 
                                     sel<-(self$structure$lhs %in% unique(end$lhs) & self$structure$op=="~" & self$structure$group>0)
                                     .structure<-self$structure[sel,]
