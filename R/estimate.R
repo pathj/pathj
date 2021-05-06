@@ -1,26 +1,25 @@
+## This class takes care of estimating the model and return the results. It inherit from Syntax, and define the same tables
+## defined by Syntax, but it fill them with the results.
+
 Estimate <- R6::R6Class("Estimate",
                         inherit = Syntax,
                         cloneable=FALSE,
                         class=FALSE,
                         list(
                           model=NULL,
+                          tab_fit=NULL,
+                          tab_fitindices=NULL,
                           ciwidth=NULL,
-                          parameters=NULL,
-                          coefficients=NULL,
-                          correlations=NULL,
-                          fit=NULL,
-                          fitindices=NULL,
-                          constfit=NULL,
-                          info=NULL,
-                          r2=NULL,
-                          initialize=function(options=options,data=data) {
+                          tab_constfit=NULL,
+                          initialize=function(options,datamatic) {
                             super$initialize(
                               options=options,
-                              data=data)
+                              datamatic=datamatic)
                             self$ciwidth<-options$ciWidth/100
                           },
                           estimate=function(data) {
                             
+                            ## prepare the options based on Syntax definitions
                             lavoptions<-list(model = private$.lav_structure, 
                                              data = data,
                                              se=self$options$se,
@@ -36,46 +35,59 @@ Estimate <- R6::R6Class("Estimate",
                             }
                             
                             
-                            
+                            ## estimate the models
                             results<-try_hard({do.call(lavaan::lavaan,lavoptions)  })
                             
                             
-                            #results<-try_hard({do.call(lavaan::lavaan,lavoptions)})
-                            
-                            
+
                             self$warnings<-list(topic="main",message=results$warning)
                             self$errors<-results$error
                             
                             if (is.something(self$errors))
-                              return(self$errors)
-                            self$model<-results$obj
+                                return(self$errors)
                             
-                            self$parameters<-lavaan::parameterestimates(
+                            ## ask for the paramters estimates
+                            self$model<-results$obj
+                            .lav_params<-lavaan::parameterestimates(
                               self$model,
                               ci=self$options$ci,
                               level = self$ciwidth,
                               standardized = T,
                               boot.ci.type = self$options$bootci
                             )
-                            self$parameters$rhs<-fromb64(self$parameters$rhs,self$vars)
-                            self$parameters$lhs<-fromb64(self$parameters$lhs,self$vars)
-                            self$parameters$free<-(self$structure$free>0)
                             
-                            self$parameters$endo<-FALSE
-                            self$parameters$endo[self$structure$lhs %in% self$options$endogenous | self$structure$rhs %in% self$options$endogenous]<-TRUE
-                            self$coefficients<-self$parameters[self$parameters$op=="~",]
-                            self$correlations<-self$parameters[self$parameters$op=="~~",]
-                            self$correlations$type<-ifelse(self$correlations$endo,"Residuals","Variables")
-                            self$definedParameters<-self$parameters[self$parameters$op==":=",]
-                            if (nrow(self$definedParameters)==0) self$definedParameters<-NULL
-                            tab<-self$correlations
+                            ## we need some info initialized by Syntax regarding the parameters properties
+                            .lav_structure<-private$.lav_structure
+                             sel<-grep("==|<|>",.lav_structure$op,invert = T)
+                            .lav_structure<-.lav_structure[sel,]
+                            ## make some change to render the results
+                            
+                            .lav_params$rhs<-fromb64(.lav_params$rhs,self$vars)
+                            .lav_params$lhs<-fromb64(.lav_params$lhs,self$vars)
+                            .lav_params$free<-(.lav_structure$free>0)
+                            
+                            .lav_params$endo<-FALSE
+                            .lav_params$endo[.lav_params$lhs %in% self$options$endogenous | .lav_params$rhs %in% self$options$endogenous]<-TRUE
+                            ## collect regression coefficient table
+                            self$tab_coefficients<-.lav_params[.lav_params$op=="~",]
+
+                            ## collect variances and covariances table
+                            self$tab_covariances<-.lav_params[.lav_params$op=="~~",]
+                            self$tab_covariances$type<-ifelse(self$tab_covariances$endo,"Residuals","Variables")
+                            
+                            ## collect defined parameters table
+                            self$tab_defined<-.lav_params[.lav_params$op==":=",]
+                            if (nrow(self$tab_defined)==0) self$tab_defined<-NULL
+                            
+                            # prepare and comput R2 and collect a table for them
+                            tab<-self$tab_covariances
                             end<-tab[tab$lhs %in% self$options$endogenous & tab$lhs==tab$rhs,]
                             self$computeR2(end)
 
                             
-                            
-                            self$intercepts<-self$parameters[self$parameters$op=="~1",]
-                            if (nrow(self$intercepts)==0) self$intercepts<-NULL
+                            ### collect intercepts
+                            self$tab_intercepts<-.lav_params[.lav_params$op=="~1",]
+                            if (nrow(self$tab_intercepts)==0) self$tab_intercepts<-NULL
                             
                             
                             #### fit tests ###
@@ -85,9 +97,9 @@ Estimate <- R6::R6Class("Estimate",
                             if (ff[["df"]]>0)
                               alist[[1]]<-list(label="User Model",chisq=ff[["chisq"]],df=ff[["df"]],pvalue=ff[["pvalue"]])
                             try(alist[[length(alist)+1]]<-list(label="Baseline Model",chisq=ff[["baseline.chisq"]],df=ff[["baseline.df"]],pvalue=ff[["baseline.pvalue"]]))
-                            self$fitindices<-as.list(ff)
+                            self$tab_fitindices<-as.list(ff)
                             
-                            self$fit<-alist
+                            self$tab_fit<-alist
                             
                             # fit indices
                             alist<-list()
@@ -100,7 +112,7 @@ Estimate <- R6::R6Class("Estimate",
                             try(alist[[length(alist)+1]]<-c(info="Loglikelihood unrestricted model",value=ff[["unrestricted.logl"]]))
                             alist[[length(alist)+1]]<-c(info="",value="")
                             
-                            self$info<-alist
+                            self$tab_info<-alist
                             if (is.something(self$constraints)) {
                               check<-sapply(self$constraints,function(con) length(grep("<|>",con$value))>0,simplify = T)
                               if (any(check)) {
@@ -112,15 +124,15 @@ Estimate <- R6::R6Class("Estimate",
                                 
                                 if (self$options$scoretest) {
                                   names(tab$uni)<-c("lhs","op","rhs","chisq","df","pvalue")
-                                  self$constfit<-tab$uni
-                                  self$constfit$type="Univariate"
+                                  self$tab_constfit<-tab$uni
+                                  self$tab_constfit$type="Univariate"
                                 }
                                 if (self$options$cumscoretest) {
                                   names(tab$cumulative)<-c("lhs","op","rhs","chisq","df","pvalue")
                                   tab$cumulative$type<-"Cumulative"
                                   self$constfit<-rbind(self$constfit,tab$cumulative)
                                 }
-                                self$fit[[length(self$fit)+1]]<-list(label="Constraints Score Test",
+                                self$tab_fit[[length(self$tab_fit)+1]]<-list(label="Constraints Score Test",
                                                                      chisq=tab$test$X2,
                                                                      df=tab$test$df,
                                                                      pvalue=tab$test$p.value)
@@ -161,7 +173,7 @@ Estimate <- R6::R6Class("Estimate",
                               end$ci.lower<-rlower
                               ####
                             }
-                            self$r2<-end
+                            self$tab_r2<-end
                             if (!self$options$r2test)
                               return()
                             
@@ -177,7 +189,6 @@ Estimate <- R6::R6Class("Estimate",
                                             sel<-(.structure$lhs==end$lhs[i] &  .structure$group==end$group[i])
                                            ..structure<-.structure[sel,]
                                             const<-paste(..structure$label,0,sep="==",collapse = " ; ")
-                                            mark(..structure)
                                             results<-try_hard({tests<-lavaan::lavTestWald(self$model,const)})
                                             if (results$error!=FALSE) {
                                                   self$warnings<-list(topic="r2",message="Some inferential tests cannot be computed for this model")
@@ -192,10 +203,31 @@ Estimate <- R6::R6Class("Estimate",
                                                 end$pvalue[i]<-tests$p.value
                                           }
                                     }
-                            self$r2<-end
+                            self$tab_r2<-end
                             
-                          } ## end of r2
+                        }, ## end of r2
+                        savePredRes=function(results) {
+              
                             
-                        ) # end of private
+                            if (self$options$predicted && results$predicted$isNotFilled()) {
+                              p<-lavaan::predict(self$model)
+                              pdf <- data.frame(predicted=p, row.names=rownames(mf.getModelData(model)))
+                              results$predicted$setValues(p)
+                            }
+                            if (options$residuals && results$residuals$isNotFilled()) {
+                              ginfo("Saving residuals")
+                              p<-stats::resid(model)
+                              # we need the rownames in case there are missing in the datasheet
+                              pdf <- data.frame(residuals=p, row.names=rownames(mf.getModelData(model)))
+                              results$residuals$setValues(pdf)
+                            }
+                          }
+                          
+                          
+                          
+                                      
+                        } # end of savePreRes
+                            
+              ) # end of private
 )  # end of class
 

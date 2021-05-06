@@ -496,8 +496,8 @@ items:
                    title: $key
                    type: Image
                    renderFun: .showDiagram
-                   width: 500
-                   height: 300
+                   width: 800
+                   height: 600
                    clearWith:
                       - diag_resid
                       - diag_paths
@@ -505,6 +505,7 @@ items:
                       - diag_rotate
                       - diag_type
                       - diag_shape
+                      - diag_abbrev
                       - contrasts
                       - endogenousTerms
                       - cov_y

@@ -26,36 +26,32 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plot_machine<-Plotter$new(self$options,data_machine,lav_machine,self$results$pathgroup)
             
             ### fill the info table ###
-            j.init_table(self$results$info,lav_machine$info)
+            j.init_table(self$results$info,lav_machine$tab_info)
             j.init_table_append(self$results$info,lav_machine$models())
             j.init_table_append(self$results$info,lav_machine$constraints)
-            j.init_table_append(self$results$info,lav_machine$userestimates)
+            j.init_table_append(self$results$info,lav_machine$defined)
             
 
-            ### get the lavaan structure of the model ###
-            tab<-lav_machine$structure
-            
+
             
             #### parameter fit indices table ####
             j.init_table(self$results$fit$indices,"",ci=T,ciroot="rmsea.",ciformat='RMSEA {}% CI',ciwidth=self$options$ciWidth)
+            ### prepare r2 table
+            j.init_table(self$results$models$r2,lav_machine$tab_r2,ci=T,ciwidth=self$options$ciWidth)
+            
             #### parameter estimates table ####
-            tab1<-tab[tab$op=="~",]
-            j.init_table(self$results$models$coefficients,tab1,ci=T,ciwidth=self$options$ciWidth)
+            j.init_table(self$results$models$coefficients,lav_machine$tab_coefficients,ci=T,ciwidth=self$options$ciWidth)
 
             ### prepare var cov table ###
-            tab1<-tab[tab$op=="~~",]
-            j.init_table(self$results$models$correlations,tab1,ci=T,ciwidth=self$options$ciWidth)
+            j.init_table(self$results$models$correlations,lav_machine$tab_covariances,ci=T,ciwidth=self$options$ciWidth)
             
-            ### prepare r2 table
-            tab1<-lav_machine$r2
-            j.init_table(self$results$models$r2,tab1,ci=T,ciwidth=self$options$ciWidth)
 
             ### prepare defined params ###
-            j.init_table(self$results$models$defined,lav_machine$definedParameters,ci=T,ciwidth=self$options$ciWidth)
+            j.init_table(self$results$models$defined,lav_machine$tab_defined,ci=T,ciwidth=self$options$ciWidth)
 
             ### prepare intercepts ###
             if (self$options$showintercepts)
-                 j.init_table(self$results$models$intercepts,lav_machine$intercepts,ci=T,ciwidth=self$options$ciWidth)
+                 j.init_table(self$results$models$intercepts,lav_machine$tab_intercepts,ci=T,ciwidth=self$options$ciWidth)
             
             # #### contrast tables ####
              if (length(self$options$factors)>0) {
@@ -105,32 +101,32 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     stop(paste(lav_machine$errors,collapse = "\n\n"))
             }
             ## fit info
-             j.fill_table(self$results$info,lav_machine$info)
+             j.fill_table(self$results$info,lav_machine$tab_info)
 
              ## fit indices
-             self$results$fit$indices$setRow(rowNo=1,lav_machine$fitindices)
+             self$results$fit$indices$setRow(rowNo=1,lav_machine$tab_fitindices)
              
              ## fit test
-             j.fill_table(self$results$fit$main,lav_machine$fit,append=T)
+             j.fill_table(self$results$fit$main,lav_machine$tab_fit,append=T)
 
              ## constraints fit test
              
-             j.fill_table(self$results$fit$constraints,lav_machine$constfit,append=T, spaceby="type")
+             j.fill_table(self$results$fit$constraints,lav_machine$tab_constfit,append=T, spaceby="type")
 
 
             ### parameters estimates ####
-            j.fill_table(self$results$models$coefficients,lav_machine$coefficients)
+            j.fill_table(self$results$models$coefficients,lav_machine$tab_coefficients)
 
-            j.fill_table(self$results$models$correlations,lav_machine$correlations)
+            j.fill_table(self$results$models$correlations,lav_machine$tab_covariances)
             
-            j.fill_table(self$results$models$r2,lav_machine$r2)
+            j.fill_table(self$results$models$r2,lav_machine$tab_r2)
             j.add_warnings(self$results$models$r2,lav_machine,"r2")
             
-            j.fill_table(self$results$models$defined,lav_machine$definedParameters)
+            j.fill_table(self$results$models$defined,lav_machine$tab_defined)
             j.add_warnings(self$results$models$defined,lav_machine,"defined")
             
             if (self$options$showintercepts)
-                   j.fill_table(self$results$models$intercepts,lav_machine$intercepts)
+                   j.fill_table(self$results$models$intercepts,lav_machine$tab_intercepts)
             
 
             ## diagrams

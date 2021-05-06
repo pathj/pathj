@@ -32,7 +32,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             diag_labsize = "medium",
             diag_rotate = "2",
             diag_type = "tree2",
-            diag_shape = "square",
+            diag_shape = "rectangle",
+            diag_abbrev = "0",
             varcov = NULL,
             cov_y = TRUE,
             cov_x = FALSE,
@@ -227,7 +228,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "small",
                     "medium",
-                    "large"),
+                    "large",
+                    "vlarge"),
                 default="medium")
             private$..diag_rotate <- jmvcore::OptionList$new(
                 "diag_rotate",
@@ -252,12 +254,23 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "diag_shape",
                 diag_shape,
                 options=list(
-                    "square",
                     "rectangle",
+                    "square",
                     "circle",
                     "ellipse",
                     "diamond"),
-                default="square")
+                default="rectangle")
+            private$..diag_abbrev <- jmvcore::OptionList$new(
+                "diag_abbrev",
+                diag_abbrev,
+                options=list(
+                    "0",
+                    "5",
+                    "10",
+                    "15",
+                    "20",
+                    "25"),
+                default="0")
             private$..varcov <- jmvcore::OptionPairs$new(
                 "varcov",
                 varcov)
@@ -336,6 +349,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..diag_rotate)
             self$.addOption(private$..diag_type)
             self$.addOption(private$..diag_shape)
+            self$.addOption(private$..diag_abbrev)
             self$.addOption(private$..varcov)
             self$.addOption(private$..cov_y)
             self$.addOption(private$..cov_x)
@@ -374,6 +388,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         diag_rotate = function() private$..diag_rotate$value,
         diag_type = function() private$..diag_type$value,
         diag_shape = function() private$..diag_shape$value,
+        diag_abbrev = function() private$..diag_abbrev$value,
         varcov = function() private$..varcov$value,
         cov_y = function() private$..cov_y$value,
         cov_x = function() private$..cov_x$value,
@@ -411,6 +426,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..diag_rotate = NA,
         ..diag_type = NA,
         ..diag_shape = NA,
+        ..diag_abbrev = NA,
         ..varcov = NA,
         ..cov_y = NA,
         ..cov_x = NA,
@@ -988,8 +1004,8 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 options=options,
                                 title="$key",
                                 renderFun=".showDiagram",
-                                width=500,
-                                height=300,
+                                width=800,
+                                height=600,
                                 clearWith=list(
                                     "diag_resid",
                                     "diag_paths",
@@ -997,6 +1013,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     "diag_rotate",
                                     "diag_type",
                                     "diag_shape",
+                                    "diag_abbrev",
                                     "contrasts",
                                     "endogenousTerms",
                                     "cov_y",
@@ -1097,6 +1114,7 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param diag_rotate Choose the diagram labels
 #' @param diag_type Choose the diagram labels
 #' @param diag_shape Choose the diagram labels
+#' @param diag_abbrev Choose the diagram labels
 #' @param varcov a list of lists specifying the  covariances that need to be
 #'   estimated
 #' @param cov_y \code{TRUE} or \code{FALSE} (default), produce a path diagram
@@ -1161,7 +1179,8 @@ pathj <- function(
     diag_labsize = "medium",
     diag_rotate = "2",
     diag_type = "tree2",
-    diag_shape = "square",
+    diag_shape = "rectangle",
+    diag_abbrev = "0",
     varcov,
     cov_y = TRUE,
     cov_x = FALSE,
@@ -1247,6 +1266,7 @@ pathj <- function(
         diag_rotate = diag_rotate,
         diag_type = diag_type,
         diag_shape = diag_shape,
+        diag_abbrev = diag_abbrev,
         varcov = varcov,
         cov_y = cov_y,
         cov_x = cov_x,

@@ -43,9 +43,14 @@ Plotter <- R6::R6Class(
         labs<-self$options$diag_paths
         nodeLabels<-model@pta$vnames$ov.num[[1]]
         nodeLabels<-fromb64(nodeLabels)
+        if (self$options$diag_abbrev!="0")
+            nodeLabels<-abbreviate(nodeLabels,minlength = as.numeric(self$options$diag_abbrev),strict = T)
+        
         size<-12
         if (self$options$diag_labsize=="small") size<-8
         if (self$options$diag_labsize=="large") size<-18
+        if (self$options$diag_labsize=="vlarge") size<-24
+        
         nNodes<-length(nodeLabels)
         size<-size*exp(-nNodes/80)+1
         options<-list(object = model,
@@ -56,7 +61,6 @@ Plotter <- R6::R6Class(
                       ,nodeLabels=nodeLabels
                       ,whatLabels=labs
                       ,sizeMan = size
-                      ,nCharNodes=10
                       ,sizeMan2=size/2
                       , curve=2
                       , shapeMan=self$options$diag_shape

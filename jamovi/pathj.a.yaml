@@ -313,6 +313,9 @@ options:
           title: Medium
         - name: large
           title: Large
+        - name: vlarge
+          title: Very Large
+
       default: medium
       description:
           R: >
@@ -359,10 +362,10 @@ options:
       title: Shapes
       type: List
       options:
-        - name:  "square"
-          title:  Squares
         - name:  "rectangle"
           title:  Rectangles
+        - name:  "square"
+          title:  Squares
         - name: "circle"
           title: Circles
         - name: "ellipse"
@@ -370,7 +373,29 @@ options:
         - name: "diamond"
           title: Diamonds
 
-      default: "square"
+      default: "rectangle"
+      description:
+          R: >
+             Choose the diagram labels
+
+
+    - name: diag_abbrev
+      title: Abbreviate
+      type: List
+      options:
+        - name:  "0"
+          title:  No abbrev.
+        - name:  "5"
+          title:  "5"
+        - name:  "10"
+          title:  "10"
+        - name:  "15"
+          title:  "15"
+        - name:  "20"
+          title:  "20"
+        - name:  "25"
+          title:  "25"
+      default: "0"
       description:
           R: >
              Choose the diagram labels

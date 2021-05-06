@@ -364,6 +364,7 @@ children:
        - type: LayoutBox
          margin: large
          stretchFactor: 1
+         style: inline
          children:
             - type: Label
               label: Layout
@@ -376,12 +377,23 @@ children:
                 - type: ComboBox
                   name: diag_rotate
                   enable: (diagram)
-                - type: ComboBox
-                  name: diag_shape
-                  enable: (diagram)
+
+            - type: Label
+              label: Nodes
+              margin: large
+              style: list
+              children:
                 - type: ComboBox
                   name: diag_labsize
                   enable: (diagram)
+                - type: ComboBox
+                  name: diag_shape
+                  enable: (diagram)
+
+                - type: ComboBox
+                  name: diag_abbrev
+                  enable: (diagram)
+                  
 
   - type: CollapseBox
     label: Custom Model Settings
