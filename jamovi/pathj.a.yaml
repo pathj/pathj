@@ -107,7 +107,7 @@ options:
              Choose the confidence interval type
 
     - name: r2test
-      title: R-squares tests
+      title: R-squared tests
       type: Bool
       default: true
 
