@@ -24,7 +24,8 @@ readiness <- function(options) {
     result$reason <- glue::glue("Predictors not specified for {length(options$endogenous)-check} endogenous variable")
     return(result)
   }
-  
+
+  check<-length(unlist(options$varcov))
 
   return(result)
 }

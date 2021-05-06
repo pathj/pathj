@@ -139,3 +139,18 @@ j.fill_table<-function(table,obj, fixNA=TRUE,append=FALSE,spaceby=NULL,start=1) 
   table$setVisible(TRUE)
 }
 
+j.add_warnings<-function(atable,adispatch,atopic) {
+  
+  if (!is.something(adispatch$warnings[[atopic]]))
+       return()
+  
+  if (atable$rowCount==0)
+        atable$setError(paste(adispatch$warnings[[atopic]],collapse = "; "))
+  else
+      for (i in seq_along(adispatch$warnings[[atopic]]))
+               atable$setNote(i,adispatch$warnings[[atopic]][[i]])
+
+    
+  atable$setVisible(TRUE)
+  
+}

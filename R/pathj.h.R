@@ -11,12 +11,15 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             covs = NULL,
             multigroup = NULL,
             se = "standard",
+            r2ci = "fisher",
+            r2test = TRUE,
             bootci = "perc",
             ci = TRUE,
             ciWidth = 95,
             bootN = 1000,
-            showintercepts = FALSE,
+            showintercepts = TRUE,
             intercepts = TRUE,
+            indirect = FALSE,
             contrasts = NULL,
             showRealNames = TRUE,
             showContrastCode = FALSE,
@@ -29,7 +32,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             diag_labsize = "medium",
             diag_rotate = "2",
             diag_type = "tree2",
-            diag_shape = "square",
+            diag_shape = "rectangle",
+            diag_abbrev = "0",
             varcov = NULL,
             cov_y = TRUE,
             cov_x = FALSE,
@@ -38,7 +42,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             showlabels = FALSE,
             scoretest = TRUE,
             cumscoretest = FALSE,
-            estimator = "ML", ...) {
+            estimator = "ML",
+            likelihood = "normal", ...) {
 
             super$initialize(
                 package="pathj",
@@ -91,6 +96,17 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "robust.huber.white",
                     "boot"),
                 default="standard")
+            private$..r2ci <- jmvcore::OptionList$new(
+                "r2ci",
+                r2ci,
+                options=list(
+                    "fisher",
+                    "model"),
+                default="fisher")
+            private$..r2test <- jmvcore::OptionBool$new(
+                "r2test",
+                r2test,
+                default=TRUE)
             private$..bootci <- jmvcore::OptionList$new(
                 "bootci",
                 bootci,
@@ -118,11 +134,15 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..showintercepts <- jmvcore::OptionBool$new(
                 "showintercepts",
                 showintercepts,
-                default=FALSE)
+                default=TRUE)
             private$..intercepts <- jmvcore::OptionBool$new(
                 "intercepts",
                 intercepts,
                 default=TRUE)
+            private$..indirect <- jmvcore::OptionBool$new(
+                "indirect",
+                indirect,
+                default=FALSE)
             private$..contrasts <- jmvcore::OptionArray$new(
                 "contrasts",
                 contrasts,
@@ -208,7 +228,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=list(
                     "small",
                     "medium",
-                    "large"),
+                    "large",
+                    "vlarge"),
                 default="medium")
             private$..diag_rotate <- jmvcore::OptionList$new(
                 "diag_rotate",
@@ -233,12 +254,23 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "diag_shape",
                 diag_shape,
                 options=list(
-                    "square",
                     "rectangle",
+                    "square",
                     "circle",
                     "ellipse",
                     "diamond"),
-                default="square")
+                default="rectangle")
+            private$..diag_abbrev <- jmvcore::OptionList$new(
+                "diag_abbrev",
+                diag_abbrev,
+                options=list(
+                    "0",
+                    "5",
+                    "10",
+                    "15",
+                    "20",
+                    "25"),
+                default="0")
             private$..varcov <- jmvcore::OptionPairs$new(
                 "varcov",
                 varcov)
@@ -283,18 +315,28 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "DWLS",
                     "ULS"),
                 default="ML")
+            private$..likelihood <- jmvcore::OptionList$new(
+                "likelihood",
+                likelihood,
+                options=list(
+                    "normal",
+                    "wishart"),
+                default="normal")
 
             self$.addOption(private$..endogenous)
             self$.addOption(private$..factors)
             self$.addOption(private$..covs)
             self$.addOption(private$..multigroup)
             self$.addOption(private$..se)
+            self$.addOption(private$..r2ci)
+            self$.addOption(private$..r2test)
             self$.addOption(private$..bootci)
             self$.addOption(private$..ci)
             self$.addOption(private$..ciWidth)
             self$.addOption(private$..bootN)
             self$.addOption(private$..showintercepts)
             self$.addOption(private$..intercepts)
+            self$.addOption(private$..indirect)
             self$.addOption(private$..contrasts)
             self$.addOption(private$..showRealNames)
             self$.addOption(private$..showContrastCode)
@@ -307,6 +349,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..diag_rotate)
             self$.addOption(private$..diag_type)
             self$.addOption(private$..diag_shape)
+            self$.addOption(private$..diag_abbrev)
             self$.addOption(private$..varcov)
             self$.addOption(private$..cov_y)
             self$.addOption(private$..cov_x)
@@ -316,6 +359,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..scoretest)
             self$.addOption(private$..cumscoretest)
             self$.addOption(private$..estimator)
+            self$.addOption(private$..likelihood)
         }),
     active = list(
         endogenous = function() private$..endogenous$value,
@@ -323,12 +367,15 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         covs = function() private$..covs$value,
         multigroup = function() private$..multigroup$value,
         se = function() private$..se$value,
+        r2ci = function() private$..r2ci$value,
+        r2test = function() private$..r2test$value,
         bootci = function() private$..bootci$value,
         ci = function() private$..ci$value,
         ciWidth = function() private$..ciWidth$value,
         bootN = function() private$..bootN$value,
         showintercepts = function() private$..showintercepts$value,
         intercepts = function() private$..intercepts$value,
+        indirect = function() private$..indirect$value,
         contrasts = function() private$..contrasts$value,
         showRealNames = function() private$..showRealNames$value,
         showContrastCode = function() private$..showContrastCode$value,
@@ -341,6 +388,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         diag_rotate = function() private$..diag_rotate$value,
         diag_type = function() private$..diag_type$value,
         diag_shape = function() private$..diag_shape$value,
+        diag_abbrev = function() private$..diag_abbrev$value,
         varcov = function() private$..varcov$value,
         cov_y = function() private$..cov_y$value,
         cov_x = function() private$..cov_x$value,
@@ -349,19 +397,23 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         showlabels = function() private$..showlabels$value,
         scoretest = function() private$..scoretest$value,
         cumscoretest = function() private$..cumscoretest$value,
-        estimator = function() private$..estimator$value),
+        estimator = function() private$..estimator$value,
+        likelihood = function() private$..likelihood$value),
     private = list(
         ..endogenous = NA,
         ..factors = NA,
         ..covs = NA,
         ..multigroup = NA,
         ..se = NA,
+        ..r2ci = NA,
+        ..r2test = NA,
         ..bootci = NA,
         ..ci = NA,
         ..ciWidth = NA,
         ..bootN = NA,
         ..showintercepts = NA,
         ..intercepts = NA,
+        ..indirect = NA,
         ..contrasts = NA,
         ..showRealNames = NA,
         ..showContrastCode = NA,
@@ -374,6 +426,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..diag_rotate = NA,
         ..diag_type = NA,
         ..diag_shape = NA,
+        ..diag_abbrev = NA,
         ..varcov = NA,
         ..cov_y = NA,
         ..cov_x = NA,
@@ -382,7 +435,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..showlabels = NA,
         ..scoretest = NA,
         ..cumscoretest = NA,
-        ..estimator = NA)
+        ..estimator = NA,
+        ..likelihood = NA)
 )
 
 pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -545,19 +599,23 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 list(
                                     `name`="srmr", 
                                     `title`="SRMR", 
-                                    `type`="number"),
+                                    `type`="number", 
+                                    `format`="zto"),
                                 list(
                                     `name`="rmsea", 
                                     `title`="RMSEA", 
-                                    `type`="number"),
+                                    `type`="number", 
+                                    `format`="zto"),
                                 list(
                                     `name`="rmsea.ci.lower", 
                                     `title`="Lower", 
-                                    `type`="number"),
+                                    `type`="number", 
+                                    `format`="zto"),
                                 list(
                                     `name`="rmsea.ci.upper", 
                                     `title`="Upper", 
-                                    `type`="number"),
+                                    `type`="number", 
+                                    `format`="zto"),
                                 list(
                                     `name`="rmsea.pvalue", 
                                     `title`="RMSEA p", 
@@ -566,8 +624,8 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
-                    coefficients = function() private$.items[["coefficients"]],
                     r2 = function() private$.items[["r2"]],
+                    coefficients = function() private$.items[["coefficients"]],
                     correlations = function() private$.items[["correlations"]],
                     intercepts = function() private$.items[["intercepts"]],
                     defined = function() private$.items[["defined"]],
@@ -578,14 +636,11 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         super$initialize(
                             options=options,
                             name="models",
-                            title="Estimates",
-                            clearWith=list(
-                    "endogenousTerms"))
+                            title="Estimates")
                         self$add(jmvcore::Table$new(
                             options=options,
-                            name="coefficients",
-                            title="Parameter Estimates",
-                            refs="lavaan",
+                            name="r2",
+                            title="R-squared",
                             clearWith=list(
                                 "endogenous",
                                 "covs",
@@ -594,7 +649,67 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "contrasts",
                                 "cov_y",
                                 "constraints",
-                                "data"),
+                                "data",
+                                "multigroup"),
+                            columns=list(
+                                list(
+                                    `name`="lgroup", 
+                                    `title`="Group", 
+                                    `type`="text", 
+                                    `visible`="(multigroup)", 
+                                    `combineBelow`=TRUE),
+                                list(
+                                    `name`="lhs", 
+                                    `title`="Variable", 
+                                    `type`="text"),
+                                list(
+                                    `name`="r2", 
+                                    `title`="R\u00B2", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci.lower", 
+                                    `type`="number", 
+                                    `title`="Lower", 
+                                    `visible`="(ci)", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="ci.upper", 
+                                    `type`="number", 
+                                    `title`="Upper", 
+                                    `visible`="(ci)", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="chisq", 
+                                    `title`="Wald X\u00B2", 
+                                    `type`="number", 
+                                    `visible`="(r2test)"),
+                                list(
+                                    `name`="df", 
+                                    `title`="df", 
+                                    `type`="integer", 
+                                    `visible`="(r2test)"),
+                                list(
+                                    `name`="pvalue", 
+                                    `title`="p", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue", 
+                                    `visible`="(r2test)"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="coefficients",
+                            title="Parameter Estimates",
+                            refs="lavaan",
+                            clearWith=list(
+                                "endogenousTerms",
+                                "endogenous",
+                                "covs",
+                                "factors",
+                                "ciType",
+                                "contrasts",
+                                "cov_y",
+                                "constraints",
+                                "data",
+                                "multigroup"),
                             columns=list(
                                 list(
                                     `name`="lgroup", 
@@ -648,43 +763,6 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     `format`="zto,pvalue"))))
                         self$add(jmvcore::Table$new(
                             options=options,
-                            name="r2",
-                            title="R-squared",
-                            clearWith=list(
-                                "endogenous",
-                                "covs",
-                                "factors",
-                                "ciType",
-                                "contrasts",
-                                "cov_y",
-                                "constraints"),
-                            columns=list(
-                                list(
-                                    `name`="lgroup", 
-                                    `title`="Group", 
-                                    `type`="text", 
-                                    `visible`="(multigroup)", 
-                                    `combineBelow`=TRUE),
-                                list(
-                                    `name`="lhs", 
-                                    `title`="Variable", 
-                                    `type`="text"),
-                                list(
-                                    `name`="r2", 
-                                    `title`="R^2", 
-                                    `type`="number"),
-                                list(
-                                    `name`="ci.lower", 
-                                    `type`="number", 
-                                    `title`="Lower", 
-                                    `visible`="(ci)"),
-                                list(
-                                    `name`="ci.upper", 
-                                    `type`="number", 
-                                    `title`="Upper", 
-                                    `visible`="(ci)"))))
-                        self$add(jmvcore::Table$new(
-                            options=options,
                             name="correlations",
                             title="Variances and Covariances",
                             clearWith=list(
@@ -694,7 +772,9 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "ciType",
                                 "contrasts",
                                 "cov_y",
-                                "constraints"),
+                                "constraints",
+                                "data",
+                                "multigroup"),
                             columns=list(
                                 list(
                                     `name`="lgroup", 
@@ -766,7 +846,9 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "ciType",
                                 "contrasts",
                                 "cov_y",
-                                "constraints"),
+                                "constraints",
+                                "data",
+                                "multigroup"),
                             columns=list(
                                 list(
                                     `name`="lgroup", 
@@ -787,34 +869,34 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     `name`="est", 
                                     `title`="Intercept", 
                                     `type`="number", 
-                                    `format`="zto,pvalue"),
+                                    `format`="zto"),
                                 list(
                                     `name`="se", 
                                     `title`="SE", 
                                     `type`="number", 
-                                    `format`="zto,pvalue"),
+                                    `format`="zto"),
                                 list(
                                     `name`="ci.lower", 
                                     `type`="number", 
                                     `title`="Lower", 
                                     `visible`="(ci)", 
-                                    `format`="zto,pvalue"),
+                                    `format`="zto"),
                                 list(
                                     `name`="ci.upper", 
                                     `type`="number", 
                                     `title`="Upper", 
                                     `visible`="(ci)", 
-                                    `format`="zto,pvalue"),
+                                    `format`="zto"),
                                 list(
                                     `name`="z", 
                                     `title`="z", 
                                     `type`="number", 
-                                    `format`="zto,pvalue"),
+                                    `format`="zto"),
                                 list(
                                     `name`="pvalue", 
                                     `title`="p", 
                                     `type`="number", 
-                                    `format`="zto,pvalue"))))
+                                    `format`="zto"))))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="defined",
@@ -827,13 +909,18 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "ciType",
                                 "contrasts",
                                 "cov_y",
-                                "constraints"),
+                                "constraints",
+                                "data",
+                                "multigroup"),
                             columns=list(
                                 list(
                                     `name`="lhs", 
                                     `title`="Label", 
-                                    `type`="text", 
-                                    `combineBelow`=TRUE),
+                                    `type`="text"),
+                                list(
+                                    `name`="desc", 
+                                    `title`="Description", 
+                                    `type`="text"),
                                 list(
                                     `name`="rhs", 
                                     `title`="Parameter", 
@@ -841,29 +928,35 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 list(
                                     `name`="est", 
                                     `title`="Estimate", 
-                                    `type`="number"),
+                                    `type`="number", 
+                                    `format`="zto"),
                                 list(
                                     `name`="se", 
                                     `title`="SE", 
-                                    `type`="number"),
+                                    `type`="number", 
+                                    `format`="zto"),
                                 list(
                                     `name`="ci.lower", 
                                     `type`="number", 
                                     `title`="Lower", 
-                                    `visible`="(ci)"),
+                                    `visible`="(ci)", 
+                                    `format`="zto"),
                                 list(
                                     `name`="ci.upper", 
                                     `type`="number", 
                                     `title`="Upper", 
-                                    `visible`="(ci)"),
+                                    `visible`="(ci)", 
+                                    `format`="zto"),
                                 list(
                                     `name`="std.all", 
                                     `type`="number", 
-                                    `title`="\u03B2"),
+                                    `title`="\u03B2", 
+                                    `format`="zto"),
                                 list(
                                     `name`="z", 
                                     `title`="z", 
-                                    `type`="number"),
+                                    `type`="number", 
+                                    `format`="zto"),
                                 list(
                                     `name`="pvalue", 
                                     `title`="p", 
@@ -899,7 +992,9 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "endogenous",
                     "cov_y",
                     "constraints",
-                    "varcov"))
+                    "varcov",
+                    "data",
+                    "multigroup"))
                         self$add(jmvcore::Array$new(
                             options=options,
                             name="diagrams",
@@ -909,8 +1004,8 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 options=options,
                                 title="$key",
                                 renderFun=".showDiagram",
-                                width=500,
-                                height=300,
+                                width=800,
+                                height=600,
                                 clearWith=list(
                                     "diag_resid",
                                     "diag_paths",
@@ -918,10 +1013,13 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     "diag_rotate",
                                     "diag_type",
                                     "diag_shape",
+                                    "diag_abbrev",
                                     "contrasts",
                                     "endogenousTerms",
                                     "cov_y",
-                                    "constraints")),
+                                    "constraints",
+                                    "data",
+                                    "multigroup")),
                             refs="diagram"))
                         self$add(jmvcore::Table$new(
                             options=options,
@@ -982,6 +1080,8 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param covs a vector of strings naming the covariates from \code{data}
 #' @param multigroup factor defining groups for multigroup analysis
 #' @param se .
+#' @param r2ci Choose the confidence interval type
+#' @param r2test .
 #' @param bootci Choose the confidence interval type
 #' @param ci .
 #' @param ciWidth a number between 50 and 99.9 (default: 95) specifying the
@@ -991,6 +1091,7 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showintercepts \code{TRUE} or \code{FALSE} (default), show
 #'   intercepts
 #' @param intercepts \code{TRUE} or \code{FALSE} (default), show intercepts
+#' @param indirect \code{TRUE} or \code{FALSE} (default), show intercepts
 #' @param contrasts a list of lists specifying the factor and type of contrast
 #'   to use, one of \code{'deviation'}, \code{'simple'}, \code{'difference'},
 #'   \code{'helmert'}, \code{'repeated'} or \code{'polynomial'}
@@ -1013,6 +1114,7 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param diag_rotate Choose the diagram labels
 #' @param diag_type Choose the diagram labels
 #' @param diag_shape Choose the diagram labels
+#' @param diag_abbrev Choose the diagram labels
 #' @param varcov a list of lists specifying the  covariances that need to be
 #'   estimated
 #' @param cov_y \code{TRUE} or \code{FALSE} (default), produce a path diagram
@@ -1023,6 +1125,7 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param scoretest .
 #' @param cumscoretest .
 #' @param estimator Choose the diagram labels
+#' @param likelihood Choose the diagram labels
 #' @param formula (optional) the formula to use, see the examples
 #' @return A results object containing:
 #' \tabular{llllll}{
@@ -1030,8 +1133,8 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$fit$main} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$fit$constraints} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$fit$indices} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$models$coefficients} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$models$r2} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$models$coefficients} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$models$correlations} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$models$intercepts} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$models$defined} \tab \tab \tab \tab \tab a table \cr
@@ -1055,12 +1158,15 @@ pathj <- function(
     covs = NULL,
     multigroup = NULL,
     se = "standard",
+    r2ci = "fisher",
+    r2test = TRUE,
     bootci = "perc",
     ci = TRUE,
     ciWidth = 95,
     bootN = 1000,
-    showintercepts = FALSE,
+    showintercepts = TRUE,
     intercepts = TRUE,
+    indirect = FALSE,
     contrasts = NULL,
     showRealNames = TRUE,
     showContrastCode = FALSE,
@@ -1073,7 +1179,8 @@ pathj <- function(
     diag_labsize = "medium",
     diag_rotate = "2",
     diag_type = "tree2",
-    diag_shape = "square",
+    diag_shape = "rectangle",
+    diag_abbrev = "0",
     varcov,
     cov_y = TRUE,
     cov_x = FALSE,
@@ -1083,6 +1190,7 @@ pathj <- function(
     scoretest = TRUE,
     cumscoretest = FALSE,
     estimator = "ML",
+    likelihood = "normal",
     formula) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
@@ -1137,12 +1245,15 @@ pathj <- function(
         covs = covs,
         multigroup = multigroup,
         se = se,
+        r2ci = r2ci,
+        r2test = r2test,
         bootci = bootci,
         ci = ci,
         ciWidth = ciWidth,
         bootN = bootN,
         showintercepts = showintercepts,
         intercepts = intercepts,
+        indirect = indirect,
         contrasts = contrasts,
         showRealNames = showRealNames,
         showContrastCode = showContrastCode,
@@ -1155,6 +1266,7 @@ pathj <- function(
         diag_rotate = diag_rotate,
         diag_type = diag_type,
         diag_shape = diag_shape,
+        diag_abbrev = diag_abbrev,
         varcov = varcov,
         cov_y = cov_y,
         cov_x = cov_x,
@@ -1163,7 +1275,8 @@ pathj <- function(
         showlabels = showlabels,
         scoretest = scoretest,
         cumscoretest = cumscoretest,
-        estimator = estimator)
+        estimator = estimator,
+        likelihood = likelihood)
 
     analysis <- pathjClass$new(
         options = options,

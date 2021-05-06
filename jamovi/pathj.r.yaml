@@ -130,15 +130,23 @@ items:
                     - name:  srmr
                       title: SRMR
                       type: number
+                      format: zto
+
                     - name: rmsea
                       title:  RMSEA
                       type: number
+                      format: zto
+                      
                     - name:  rmsea.ci.lower
                       title: Lower
                       type: number
+                      format: zto
+
                     - name:  rmsea.ci.upper
                       title: Upper
                       type: number
+                      format: zto
+
                     - name: rmsea.pvalue
                       title: 'RMSEA p'
                       type: number
@@ -149,14 +157,13 @@ items:
     title: "Estimates"
     type: Group
     visible: false
-    clearWith:
-                  - endogenousTerms
+
     items:
     
-          - name: coefficients
-            title: Parameter Estimates
+          - name: r2
+          
+            title: R-squared
             type: Table
-            refs: lavaan
             clearWith:
                   - endogenous
                   - covs
@@ -166,6 +173,63 @@ items:
                   - cov_y
                   - constraints
                   - data
+                  - multigroup
+
+            columns:
+                    - name: lgroup
+                      title: Group
+                      type: text
+                      visible: (multigroup)
+                      combineBelow: true
+            
+                    - name: lhs
+                      title: "Variable"
+                      type: text
+                    - name: r2
+                      title: R²
+                      type: number
+                    - name: ci.lower
+                      type: number
+                      title: Lower
+                      visible: (ci)
+                      format: zto
+                    - name: ci.upper
+                      type: number
+                      title: Upper
+                      visible: (ci)
+                      format: zto
+                    - name: chisq
+                      title: Wald X²
+                      type: number
+                      visible: (r2test)
+                    - name:  df
+                      title: "df"
+                      type: integer
+                      visible: (r2test)
+
+                    - name: pvalue
+                      title: "p"
+                      type: number
+                      format: zto,pvalue
+                      visible: (r2test)
+
+
+    
+          - name: coefficients
+            title: Parameter Estimates
+            type: Table
+            refs: lavaan
+            clearWith:
+                  - endogenousTerms
+                  - endogenous
+                  - covs
+                  - factors
+                  - ciType
+                  - contrasts
+                  - cov_y
+                  - constraints
+                  - data
+                  - multigroup
 
             columns:
                     - name: lgroup
@@ -209,41 +273,6 @@ items:
                       type: number
                       format: zto,pvalue
 
-          - name: r2
-          
-            title: R-squared
-            type: Table
-            clearWith:
-                  - endogenous
-                  - covs
-                  - factors
-                  - ciType
-                  - contrasts
-                  - cov_y
-                  - constraints
-
-            columns:
-                    - name: lgroup
-                      title: Group
-                      type: text
-                      visible: (multigroup)
-                      combineBelow: true
-            
-                    - name: lhs
-                      title: "Variable"
-                      type: text
-                    - name: r2
-                      title: "R^2"
-                      type: number
-                    - name: ci.lower
-                      type: number
-                      title: Lower
-                      visible: (ci)
-                    - name: ci.upper
-                      type: number
-                      title: Upper
-                      visible: (ci)
-
 
           - name: correlations
             title: Variances and Covariances
@@ -256,6 +285,8 @@ items:
                   - contrasts
                   - cov_y
                   - constraints
+                  - data
+                  - multigroup
                   
             columns:
                     - name: lgroup
@@ -317,6 +348,8 @@ items:
                   - contrasts
                   - cov_y
                   - constraints
+                  - data
+                  - multigroup
                   
             columns:
                     - name: lgroup
@@ -335,33 +368,33 @@ items:
                     - name: est
                       title: "Intercept"
                       type: number
-                      format: zto,pvalue
+                      format: zto
 
                     - name: se
                       title: "SE"
                       type: number
-                      format: zto,pvalue
+                      format: zto
                     - name: ci.lower
                       type: number
                       title: Lower
                       visible: (ci)
-                      format: zto,pvalue
+                      format: zto
 
                     - name: ci.upper
                       type: number
                       title: Upper
                       visible: (ci)
-                      format: zto,pvalue
+                      format: zto
 
                     - name: z
                       title: "z"
                       type: number
-                      format: zto,pvalue
+                      format: zto
 
                     - name: pvalue
                       title: "p"
                       type: number
-                      format: zto,pvalue
+                      format: zto
 
           - name: defined
             title: Defined Parameters
@@ -375,36 +408,52 @@ items:
                   - contrasts
                   - cov_y
                   - constraints
+                  - data
+                  - multigroup
                   
             columns:
 
                     - name: lhs
                       title: "Label"
                       type: text
-                      combineBelow: true
+                    - name: desc
+                      title: "Description"
+                      type: text
+
                     - name:  rhs
                       title: "Parameter"
                       type: text
                     - name: est
                       title: "Estimate"
                       type: number
+                      format: zto
                     - name: se
                       title: "SE"
                       type: number
+                      format: zto
+
                     - name: ci.lower
                       type: number
                       title: Lower
                       visible: (ci)
+                      format: zto
+
                     - name: ci.upper
                       type: number
                       title: Upper
                       visible: (ci)
+                      format: zto
+
                     - name: std.all
                       type: number
                       title: β
+                      format: zto
+
                     - name: z
                       title: "z"
                       type: number
+                      format: zto
+
                     - name: pvalue
                       title: "p"
                       type: number
@@ -434,6 +483,8 @@ items:
                   - cov_y
                   - constraints
                   - varcov
+                  - data
+                  - multigroup
 
     items:
            - name: diagrams
@@ -445,8 +496,8 @@ items:
                    title: $key
                    type: Image
                    renderFun: .showDiagram
-                   width: 500
-                   height: 300
+                   width: 800
+                   height: 600
                    clearWith:
                       - diag_resid
                       - diag_paths
@@ -454,10 +505,13 @@ items:
                       - diag_rotate
                       - diag_type
                       - diag_shape
+                      - diag_abbrev
                       - contrasts
                       - endogenousTerms
                       - cov_y
                       - constraints
+                      - data
+                      - multigroup
 
              refs: diagram    
            - name: notes

@@ -211,9 +211,19 @@ children:
             children:
               - type: ComboBox
                 name: estimator
+              - type: ComboBox
+                name: likelihood
+                enable: (estimator:ML)
+          - type: Label
+            label: Inferential Tests
+            margin: large
+            style: list
+            children:
+              - type: CheckBox
+                name: r2test
 
   - type: CollapseBox
-    label: Parameter Options
+    label: Parameters Options
     collapsed: true
     stretchFactor: 1
     children:
@@ -255,6 +265,8 @@ children:
                 suffix: '%'
                 format: number
                 enable: (ci)
+              - type: ComboBox
+                name: r2ci
 
           - type: Label
             label: Bootstrap C.I. 
@@ -292,7 +304,7 @@ children:
         style: inline
         children:
           - type: Label
-            label: Intercepts
+            label: Estimates
             margin: large
             style: list
             children:
@@ -300,7 +312,8 @@ children:
                 name: intercepts
               - type: CheckBox
                 name: showintercepts
-                enable: (intercepts)
+              - type: CheckBox
+                name: indirect
 
   - type: CollapseBox
     label: Path Diagram
@@ -351,6 +364,7 @@ children:
        - type: LayoutBox
          margin: large
          stretchFactor: 1
+         style: inline
          children:
             - type: Label
               label: Layout
@@ -363,12 +377,23 @@ children:
                 - type: ComboBox
                   name: diag_rotate
                   enable: (diagram)
-                - type: ComboBox
-                  name: diag_shape
-                  enable: (diagram)
+
+            - type: Label
+              label: Nodes
+              margin: large
+              style: list
+              children:
                 - type: ComboBox
                   name: diag_labsize
                   enable: (diagram)
+                - type: ComboBox
+                  name: diag_shape
+                  enable: (diagram)
+
+                - type: ComboBox
+                  name: diag_abbrev
+                  enable: (diagram)
+                  
 
   - type: CollapseBox
     label: Custom Model Settings
