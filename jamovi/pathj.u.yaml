@@ -140,57 +140,7 @@ children:
             children:
               - type: CheckBox
                 name: cov_y
-  - type: CollapseBox
-    label: Factors Coding
-    collapsed: true
-    stretchFactor: 1
-    children:
-      - type: ListBox
-        name: contrasts
-        stretchFactor: 1
-        showColumnHeaders: false
-        columns:
-          - name: var
-            label: null
-            selectable: false
-            stretchFactor: 1
-            maxWidth: 300
-            template:
-              type: VariableLabel
-          - name: type
-            label: null
-            selectable: false
-            stretchFactor: 0.5
-            template:
-              type: ComboBox
-      - type: CheckBox
-        name: showRealNames
-      - type: CheckBox
-        name: showContrastCode
 
-  - type: CollapseBox
-    label: Continuous Variables Scaling
-    collapsed: true
-    stretchFactor: 1
-    children:
-      - type: ListBox
-        name: scaling
-        stretchFactor: 1
-        showColumnHeaders: false
-        columns:
-          - name: var
-            label: null
-            selectable: false
-            stretchFactor: 1
-            maxWidth: 300
-            template:
-              type: VariableLabel
-          - name: type
-            label: null
-            selectable: false
-            stretchFactor: 0.5
-            template:
-              type: ComboBox
 
 
   - type: CollapseBox
@@ -459,3 +409,55 @@ children:
                         name: scoretest
                       - type: CheckBox
                         name: cumscoretest
+
+  - type: CollapseBox
+    label: Factors Coding
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: ListBox
+        name: contrasts
+        stretchFactor: 1
+        showColumnHeaders: false
+        columns:
+          - name: var
+            label: null
+            selectable: false
+            stretchFactor: 1
+            maxWidth: 300
+            template:
+              type: VariableLabel
+          - name: type
+            label: null
+            selectable: false
+            stretchFactor: 0.5
+            template:
+              type: ComboBox
+      - type: CheckBox
+        name: showRealNames
+      - type: CheckBox
+        name: showContrastCode
+
+  - type: CollapseBox
+    label: Continuous Variables Scaling
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: ListBox
+        name: scaling
+        stretchFactor: 1
+        showColumnHeaders: false
+        columns:
+          - name: var
+            label: null
+            selectable: false
+            stretchFactor: 1
+            maxWidth: 300
+            template:
+              type: VariableLabel
+          - name: type
+            label: null
+            selectable: false
+            stretchFactor: 0.5
+            template:
+              type: ComboBox
