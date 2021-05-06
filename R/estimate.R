@@ -168,14 +168,16 @@ Estimate <- R6::R6Class("Estimate",
                                     end$chisq<-0
                                     end$df<-0
                                     end$pvalue<-0
+                                    if (!("group" %in% names(end)))
+                                               end$group<-1
 
                                     sel<-(self$structure$lhs %in% unique(end$lhs) & self$structure$op=="~" & self$structure$group>0)
                                     .structure<-self$structure[sel,]
-
                                       for (i in seq_len(nrow(end))) {
                                             sel<-(.structure$lhs==end$lhs[i] &  .structure$group==end$group[i])
                                            ..structure<-.structure[sel,]
                                             const<-paste(..structure$label,0,sep="==",collapse = " ; ")
+                                            mark(..structure)
                                             results<-try_hard({tests<-lavaan::lavTestWald(self$model,const)})
                                             if (results$error!=FALSE) {
                                                   self$warnings<-list(topic="r2",message="Some inferential tests cannot be computed for this model")

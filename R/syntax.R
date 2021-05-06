@@ -303,11 +303,12 @@ Syntax <- R6::R6Class(
             .check_varcov=function() {
               
               varcov64<-tob64(self$options$varcov)
+              mark(varcov64)
               factorinfo64<-self$factorinfo
               names(factorinfo64)<-tob64(names(factorinfo64))
               varcov64<-private$.factorlist(varcov64,factorinfo64)
               res<-lapply(varcov64, function(vc) {
-                if (!is.null(vc$i1) &  !is.null(vc$i2)) {
+                if (!is.something(vc$i1) &  !is.something(vc$i2)) {
                        private$.userestimates[[length(private$.userestimates)+1]]<-paste(vc$i1,vc$i2,sep = "~~")
                 }
               })
