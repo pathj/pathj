@@ -6,6 +6,11 @@ jrs: '1.0'
 
 items:
 
+  - name: model
+    type: Property
+    description: The underlying `lavaan` object
+
+
   - name: info
     title: Models Info
     type: Table
@@ -496,8 +501,8 @@ items:
                    title: $key
                    type: Image
                    renderFun: .showDiagram
-                   width: 800
-                   height: 600
+                   width: 700
+                   height: 500
                    clearWith:
                       - diag_resid
                       - diag_paths

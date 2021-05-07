@@ -19,6 +19,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .ready=NULL,
         .init = function() {
             ginfo("init")
+            cat(print("test test"),"\n")
             ### check that we have enough information to run ####
             private$.ready<-readiness(self$options)
             if (!private$.ready$ready) {
@@ -105,7 +106,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             if (is.something(lav_machine$errors)) {
                     stop(paste(lav_machine$errors,collapse = "\n\n"))
-            }
+            } 
             ## fit info
              j.fill_table(self$results$info,lav_machine$tab_info)
 
@@ -136,7 +137,8 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
 
             ## diagrams
-            private$.plot_machine$preparePlots()            
+            private$.plot_machine$preparePlots()   
+            self$results$.setModel(lav_machine$model)
         },
  
         .showDiagram=function(image,ggtheme, theme, ...) {
@@ -144,9 +146,8 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 return()
             if (!is.something(image$state$plot))
                  return()
-            
             plot(image$state$plot)
-            return(image$state$plot)
+            return(TRUE)
 
         }
 
