@@ -383,18 +383,20 @@ Syntax <- R6::R6Class(
 
             },
             .check_varcov=function() {
-              
+
               varcov64<-tob64(self$options$varcov)
+              ## we need to check for single variable pair, when a term is null
+              sel<-unlist(sapply(varcov64, function(vc) !any(unlist(sapply(vc,is.null)))))
+              varcov64<-varcov64[sel]
               factorinfo64<-self$factorinfo
               names(factorinfo64)<-tob64(names(factorinfo64))
               varcov64<-private$.factorlist(varcov64,factorinfo64)
               res<-lapply(varcov64, function(vc) {
-                if (!is.something(vc$i1) &  !is.something(vc$i2)) {
-                       private$.lav_defined[[length(private$..lav_defined)+1]]<-paste(vc$i1,vc$i2,sep = "~~")
+                if (length(vc)==2) {
+                        private$.lav_defined[[length(private$..lav_defined)+1]]<-paste(vc[[1]],vc[[2]],sep = "~~")
                 }
               })
 
-              
             },
             .factorlist=function(terms,factorslen) {
               .terms<-list()
