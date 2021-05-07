@@ -393,7 +393,6 @@ Syntax <- R6::R6Class(
               varcov64<-private$.factorlist(varcov64,factorinfo64)
               res<-lapply(varcov64, function(vc) {
                 if (length(vc)==2) {
-                   if (is.something(vc[[1]]) & is.something(vc[[2]]))
                         private$.lav_defined[[length(private$..lav_defined)+1]]<-paste(vc[[1]],vc[[2]],sep = "~~")
                 }
               })
