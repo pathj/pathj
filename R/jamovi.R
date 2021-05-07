@@ -4,7 +4,7 @@ tob64<- function(x,...) UseMethod(".tob64")
 
 
   if (is.null(obj))
-      return(list())
+      return()
 
 
   if (is.null(ref)) {
