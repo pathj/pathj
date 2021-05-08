@@ -62,6 +62,10 @@ ERRS<-list()
 ERRS[["nolatent"]]<-"Latent variables are not allowed in pathj. Please use another  SEM module"
 ERRS[["noluck"]]<-"The model cannot be estimated. Please refine the model"
 
+PLOT_WARNS<-list()
+PLOT_WARNS[["nocircle"]]<-"Rotation set to `Exogenous Top`. Circle layout requires rotation to be `Exogenous Top` or `Exogenous Bottom`"
+PLOT_WARNS[["circlelayout"]]<-"Layout has been set to Circle"
+PLOT_WARNS[["fail"]]<-"The diagram cannot be displayed. Please try a different layout type"
 
 SUB<-list("\u2081","\u2082","\u2083","\u2084","\u2085","\u2086","\u2087","\u2088","\u2089","\u20810",
           "\u20811","\u20812","\u20813","\u20814","\u20815","\u20816","\u20817","\u20818","\u20819","\u20820")
