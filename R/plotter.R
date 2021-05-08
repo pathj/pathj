@@ -33,11 +33,11 @@ Plotter <- R6::R6Class(
           return()
         
         model<-private$.operator$model
-        ### this is due to the fact that semPaths seems to fail when a inequality constraints is in ###
+        ### this is due to the fact that semPaths seems to fail when an inequality constraints is in ###
         ### check for more lavaanian solution ###
-#        check<-grep(">|<",model@ParTable$op,invert = T)
-#        par<-model@ParTable
-#        model@ParTable<-sapply(par, function(x) x[check],simplify = F)
+        check<-grep(">|<",model@ParTable$op,invert = T)
+        par<-model@ParTable
+        model@ParTable<-sapply(par, function(x) x[check],simplify = F)
         ### end ###
 
         labs<-self$options$diag_paths
