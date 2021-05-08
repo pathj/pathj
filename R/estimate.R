@@ -51,8 +51,8 @@ Estimate <- R6::R6Class("Estimate",
                             .lav_params<-lavaan::parameterestimates(
                               self$model,
                               ci=self$options$ci,
-                              level = self$ciwidth,
                               standardized = T,
+                              level = self$ciwidth,
                               boot.ci.type = self$options$bootci
                             )
                             
@@ -209,10 +209,6 @@ Estimate <- R6::R6Class("Estimate",
                             
                         } ## end of r2
                         
-                          
-                          
-                          
-                                      
 
               ) # end of private
 )  # end of class
