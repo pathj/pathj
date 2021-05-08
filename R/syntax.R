@@ -424,16 +424,17 @@ Syntax <- R6::R6Class(
 
               ## first, we update the lavaanified structure table
               private$.make_structure()
-              
               tab<-private$.lav_structure
               termslist<-list()
               labslist<-list()
+              groupslist<-list()
               sel<-grep(":",tab$rhs,fixed = T,invert=T) 
               tab<-tab[sel,]
               sel<-tab$op=="~" 
               tab<-tab[sel,]
               tab<-tab[tab$group>0,]
               
+              ## recursive function to extact indirect effects.
               .doit<-function(tab,term,alist=list(),blist=list(),lab=NULL) {
                 alist<-c(alist,term)
                 blist<-c(blist,lab)
@@ -442,6 +443,8 @@ Syntax <- R6::R6Class(
                   if (length(final)>2) {
                     termslist[[length(termslist)+1]]<<-final
                     labslist[[length(labslist)+1]]<<-unlist(blist)
+                    groupslist[[length(groupslist)+1]]<<-tab$group[1]
+                    
                   }
                   return()
                 }
@@ -469,12 +472,13 @@ Syntax <- R6::R6Class(
                 tabs[[i]]<-tab[tab$group==i,]
               
               results<-list()
+              ### we run the recursive function for each group and for each term
               for (i in seq_along(tabs)) {
                 .results<-try_hard({
                   for (tt in terms)
                     .doit(tabs[[i]],term=tt)
                 })
-                if (.results$error)
+                if (.results$error!=FALSE)
                     self$warnings<-list(topic="defined",message=WARNS[["noindirect"]])
                 results[[i]]<-.results
               }
@@ -486,6 +490,8 @@ Syntax <- R6::R6Class(
               synt<-paste(plabs,pars,sep=":=",collapse = " ; ")
               private$.lav_indirect<-synt
               self$indirect_names<-as.list(fromb64(labs,self$vars))
+              if (is.something(self$options$multigroup))
+                self$indirect_names<-paste0("(",self$indirect_names,")",SUB[unlist(groupslist)])
               names(self$indirect_names)<-pars
             }
             
