@@ -53,8 +53,6 @@ Plotter <- R6::R6Class(
         
         nNodes<-length(nodeLabels)
         size<-size*exp(-nNodes/80)+1
-        ## for some reason we cannot do a do.call for semPlot::semPaths because
-        ## it fails in windows 10. So we call it directly every time
         
         options<-list(object = model,
                       layout = self$options$diag_type,
@@ -69,29 +67,33 @@ Plotter <- R6::R6Class(
                       , shapeMan=self$options$diag_shape
                       ,edge.label.cex =1.3)
 
-        res<-private$.semPaths(options)
+        ## for some reason we cannot do a do.call for semPlot::semPaths because
+        ## it fails in windows 10. So we call from private$.semPaths() so we can pass
+        ## options list
         
+        res<-private$.semPaths(options)
+        ## if it fails, we capture some common issue and re-run semPaths with more reasonable options
         redo<-FALSE
         if (is.something(res$error)) {
           if  (length(grep("Circle layout only supported",res$error,fixed = T))>0) {
-            private$.plotgroup$notes$addRow(1,list(info="Rotation set to `Exogenous Top`. Circle layout requires rotation to be `Exogenous Top` or `Exogenous Bottom`"))
+            private$.plotgroup$notes$addRow(1,list(info=PLOT_WARNS[["nocircle"]]))
             res$error<-NULL
             options[["rotation"]]<-1
             redo<-TRUE
           } 
           if  (length(grep("graph_from_edgelist",res$error,fixed = T))>0) {
-            private$.plotgroup$notes$addRow(1,list(info="Layout has been set to Circle"))
+            private$.plotgroup$notes$addRow(1,list(info=PLOT_WARNS[["circlelayout"]]))
             options[["layout"]]<-"circle"
             options[["rotation"]]<-1
             res$error<-NULL
             redo<-TRUE
           } 
           if  (length(grep("subscript out of",res$error,fixed = T))>0) {
-            res$error<-"The diagram cannot be displayed. Please try a different layout type"
+            res$error<-PLOT_WARNS[["fail"]]
             redo<-FALSE
           } 
           
-          
+          ## if we find something wrong and we fix it, we try again
           if (redo) {
             res<-private$.semPaths(options)
           }   
@@ -110,16 +112,21 @@ Plotter <- R6::R6Class(
         if (private$.plotgroup$notes$rowCount>0)
                private$.plotgroup$notes$setVisible(TRUE)
 
+        # at this point, we cool
+
         diags<-res$obj
 
         images<-private$.plotgroup$diagrams
-        
+        ## images are always a list with keys. They are defined in .r.yaml
+        ## if semPaths produced more than one plot, we put each of them traversing the images key
         if ("list" %in% class(diags))
           for (i in seq_along(images$itemKeys)) {
             image<-images$get(key = images$itemKeys[[i]])
             image$setState(list(plot = diags[[i]]))
           }
         else {
+          ## if semPaths produced one plot, we put it in key 0
+          
           image<-images$get(key = "0")
           image$setState(list(plot = diags))
         }
@@ -136,6 +143,11 @@ Plotter <- R6::R6Class(
     .operator=NULL,
     .semPaths=function(options) {
       ### we need this because semPaths does not work with do.call() in windows
+      ### semPaths produces a qgraph object and send it to graphical device (GD) right away.
+      ### we need graphics.off() to avoid semPaths to send the diagram to the GD
+      ### wihout graphics.off() windows will open a (frozen) R GD at this very moment, and show the diagram
+      ### linux and mac will fail to open it, but it still consume time for the operation
+      ## With this code, a qgraph object is passed, without interference with the GD
       res<-try_hard({
         graphics.off()
         semPlot::semPaths(object = options$object,
@@ -151,6 +163,8 @@ Plotter <- R6::R6Class(
                       shapeMan=options$shapeMan,
                       edge.label.cex =options$edge.label.cex)
       })
+      if (is.something(res$error))
+          self$warnings<-list(topic="diagram",message=res$error)
       return(res)
     }
 

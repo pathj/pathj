@@ -517,6 +517,7 @@ items:
                       - constraints
                       - data
                       - multigroup
+                      - varcov
 
              refs: semplot
              

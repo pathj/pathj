@@ -1022,7 +1022,8 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     "cov_y",
                                     "constraints",
                                     "data",
-                                    "multigroup")),
+                                    "multigroup",
+                                    "varcov")),
                             refs="semplot"))
                         self$add(jmvcore::Table$new(
                             options=options,
