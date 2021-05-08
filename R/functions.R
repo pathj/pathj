@@ -24,7 +24,9 @@ ginfo<-function(what=NULL,obj=NULL) {
   }
 }
 
-mark<-function(what=NULL,obj=NULL) {
+wmark<-function(what=NULL,obj=NULL) {
+  sink("C://Users/marcello/Documents/debug.log",append = T)
+  
   if (j_DEBUG) {
     if (!is.null(what))
       print(what)
@@ -35,6 +37,22 @@ mark<-function(what=NULL,obj=NULL) {
       print("#### end ###")
     }
   }
+  sink()
+}
+
+mark<-function(what=NULL,obj=NULL) {
+
+  if (j_DEBUG) {
+    if (!is.null(what))
+       print(what)
+    else print("you got here")
+    
+    if (!is.null(obj)) {
+       print(obj)
+      print("#### end ###")
+    }
+  }
+  
 }
 
 

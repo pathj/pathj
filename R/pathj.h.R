@@ -443,18 +443,21 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "pathjResults",
     inherit = jmvcore::Group,
     active = list(
+        model = function() private$..model,
         info = function() private$.items[["info"]],
         fit = function() private$.items[["fit"]],
         models = function() private$.items[["models"]],
         pathgroup = function() private$.items[["pathgroup"]],
         contraintsnotes = function() private$.items[["contraintsnotes"]]),
-    private = list(),
+    private = list(
+        ..model = NA),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
                 title="Path Analysis")
+            private$..model <- NULL
             self$add(jmvcore::Table$new(
                 options=options,
                 name="info",
@@ -1004,8 +1007,8 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 options=options,
                                 title="$key",
                                 renderFun=".showDiagram",
-                                width=800,
-                                height=600,
+                                width=700,
+                                height=500,
                                 clearWith=list(
                                     "diag_resid",
                                     "diag_paths",
@@ -1048,7 +1051,8 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="com", 
                         `type`="text", 
-                        `title`="Outcome"))))}))
+                        `title`="Outcome"))))},
+        .setModel=function(x) private$..model <- x))
 
 pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "pathjBase",
@@ -1129,6 +1133,7 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param formula (optional) the formula to use, see the examples
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$model} \tab \tab \tab \tab \tab The underlying \code{lavaan} object \cr
 #'   \code{results$info} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$fit$main} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$fit$constraints} \tab \tab \tab \tab \tab a table \cr

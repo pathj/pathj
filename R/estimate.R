@@ -174,7 +174,6 @@ Estimate <- R6::R6Class("Estimate",
                               ####
                             }
                             self$tab_r2<-end
-                            mark(end)
                             if (!self$options$r2test)
                               return()
                             
