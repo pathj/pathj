@@ -224,7 +224,12 @@ Datamatic <- R6::R6Class(
            labels[[i]] <- paste(levels[i+1], '- (', all,")")
          return(labels)
        },
-     .continuous_value=function(var,method,by=NULL) {
+
+ .continuous_value=function(var,method,by=NULL) {
+
+        if (is.null(method))
+           return(as.numeric(var))
+   
 
        if (method=="centered") 
          var<-scale(var,scale = F)  

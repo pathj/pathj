@@ -1203,21 +1203,6 @@ pathj <- function(
         stop("pathj requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(formula)) {
-        if (missing(dep))
-            dep <- pathjClass$private_methods$.marshalFormula(
-                formula=formula,
-                data=`if`( ! missing(data), data, NULL),
-                name="dep")
-        if (missing(factors))
-            factors <- pathjClass$private_methods$.marshalFormula(
-                formula=formula,
-                data=`if`( ! missing(data), data, NULL),
-                name="factors")
-        if (missing(covs))
-            covs <- pathjClass$private_methods$.marshalFormula(
-                formula=formula,
-                data=`if`( ! missing(data), data, NULL),
-                name="covs")
         if (missing(endogenous))
             endogenous <- pathjClass$private_methods$.marshalFormula(
                 formula=formula,
@@ -1228,6 +1213,16 @@ pathj <- function(
                 formula=formula,
                 data=`if`( ! missing(data), data, NULL),
                 name="endogenousTerms")
+        if (missing(factors))
+            factors <- pathjClass$private_methods$.marshalFormula(
+                formula=formula,
+                data=`if`( ! missing(data), data, NULL),
+                name="factors")
+        if (missing(covs))
+            covs <- pathjClass$private_methods$.marshalFormula(
+                formula=formula,
+                data=`if`( ! missing(data), data, NULL),
+                name="covs")
     }
 
     if ( ! missing(endogenous)) endogenous <- jmvcore::resolveQuo(jmvcore::enquo(endogenous))

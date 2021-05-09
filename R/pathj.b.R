@@ -19,6 +19,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .ready=NULL,
         .init = function() {
             ginfo("init")
+            mark(self$options$endogenous)
             ### check that we have enough information to run ####
             private$.ready<-readiness(self$options)
             if (!private$.ready$ready) {
@@ -148,8 +149,44 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plot(image$state$plot)
             return(TRUE)
 
+        },
+        .marshalFormula= function(formula, data, name) {
+            endogenous<-list()
+            endogenousTerms<-list()
+            j<-0
+            for (i in seq_along(formula)) {
+                if (lgrep("<|>|==|~~",formula[[i]]))
+                    warning("Constraints and defined parameters are ignored in `formula`. Please use `constraints` option")
+                else {
+                    j<-j+1
+                    line<-as.formula(formula[[i]])
+                    endogenous[[j]]<-as.character(line[[2]])
+                    endogenousTerms[[j]]<-jmvcore::decomposeFormula(expand.formula(as.formula(line)))
+                }
+            }
+            exogenous<-setdiff(unique(unlist(endogenousTerms)),endogenous)
+            allvars<-unlist(c(endogenous,exogenous))
+            if (name=="endogenous")
+                return(endogenous)
+            if (name=="endogenousTerms")
+                return(endogenousTerms)
+            if (name=="exogenous")
+                return(exogenous)
+            
+            data<-data[0,allvars]
+            
+            if (name=="covs") {
+                return(allvars[(!sapply(data, is.factor))])
+            }
+            if (name=="factors") {
+                data<-data[0,allvars]
+                return(allvars[(sapply(data, is.factor))])
+            }
+            
+            
+            
         }
-
+        
         
         
         

@@ -11,16 +11,15 @@ description:
     R:
         dontrun: true
 formula:
-   dep:
+   endogenous: 
+     custom: true
+   endogenousTerms: 
      custom: true
    factors: 
      custom: true
    covs: 
      custom: true
-   endogenous: 
-     custom: true
-   endogenousTerms: 
-     custom: true
+
    
 options:
     - name: data

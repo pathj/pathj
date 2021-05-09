@@ -7,7 +7,7 @@
 ### variable name. 
 ### It assumes that all factors are present in the data as K-1 new variables with appropriated constrast value as numeric variables. 
 ### each "dummy" variable in named `VAR{FACTOR_SYMBOL}k`` 
-### Inherit from Dispatch, which provides $warnings and $errors mechanism to store info. Requires the try_hard() function to catch errors
+### Inherit from Dispatch, which provides $warnings and $errors mechanisms to store info. Requires the try_hard() function to catch errors
 ##  naming convention: all objects containing lavaan syntax, objects that are needed to build objects that can be passed directly
 ##                     to lavaan are named $lav_*.   $lav_* objects contains B64 variable names 
 ##                     All object containing tables to be passed to the results init tables are called $tab_*. 
@@ -472,7 +472,7 @@ Syntax <- R6::R6Class(
                 tabs[[i]]<-tab[tab$group==i,]
               
               results<-list()
-              ### we run the recursive function for each group and for each term
+              ### we run the recursive function for each group and for each rhs term
               for (i in seq_along(tabs)) {
                 .results<-try_hard({
                   for (tt in terms)

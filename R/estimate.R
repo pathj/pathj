@@ -152,6 +152,11 @@ Estimate <- R6::R6Class("Estimate",
                             end$ci.upper<-1-(lower/end$var)
                             end$ci.lower<-1-(upper/end$var)
                             end$r2<-1-end$std.all
+                             for (i in seq_along(end$r2)) 
+                                    if (end$r2[[i]]>1 | end$r2[[i]]<0)  {
+                                      end$r2[[i]]<-NA
+                                      self$warnings<-list(topic="r2",message="Some R-square indexex cannot be computed for this model")
+                                    }
                             
                             if (self$options$r2ci=="fisher") {
                               ### https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3821705/
@@ -188,6 +193,13 @@ Estimate <- R6::R6Class("Estimate",
                                     sel<-(self$structure$lhs %in% unique(end$lhs) & self$structure$op=="~" & self$structure$group>0)
                                     .structure<-self$structure[sel,]
                                       for (i in seq_len(nrow(end))) {
+                                            if (is.na(end$r2[i]))  {
+                                              end$chisq[i]<-NaN   
+                                              end$df[i]<-NaN
+                                              end$pvalue[i]<-NaN
+                                              next()
+                                            }
+                                            
                                             sel<-(.structure$lhs==end$lhs[i] &  .structure$group==end$group[i])
                                            ..structure<-.structure[sel,]
                                             const<-paste(..structure$label,0,sep="==",collapse = " ; ")
