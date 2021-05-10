@@ -292,6 +292,7 @@ items:
                   - constraints
                   - data
                   - multigroup
+                  - varcov
                   
             columns:
                     - name: lgroup

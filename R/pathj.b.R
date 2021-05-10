@@ -187,6 +187,8 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         
         .formula = function() {
+            if (!is.something(private$.lav_machine))
+                  return("")
             paste0("list(",paste(sapply(private$.lav_machine$models(),function(m) paste0('"',m$value,'"')),collapse = ","),")")
             
         },

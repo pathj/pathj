@@ -777,7 +777,8 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "cov_y",
                                 "constraints",
                                 "data",
-                                "multigroup"),
+                                "multigroup",
+                                "varcov"),
                             columns=list(
                                 list(
                                     `name`="lgroup", 
