@@ -4,7 +4,7 @@ jamovi Path Analysis
 version 0.5.*
 
 Path analysis for *jamovi* based on lavaan, with jamovi output style and functions. Provides access to lavaan
-             estimation with restructuring of data and options for executing most common task in path analysis.
+             estimation with restructuring of data and options for executing most common tasks in path analysis.
              Path diagrams can also be requested.
 
 # Docs and help
