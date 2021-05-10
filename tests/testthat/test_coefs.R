@@ -9,7 +9,27 @@ mod<-pathj::pathj(formula=forms,
                   data=pathjdata,
                   indirect = T
 )
-mod
+obj<-mod$models$defined$asDF
+
+testthat::test_that("indiect effects",{
+  testthat::expect_equal(as.character(obj$lhs[3]),"IE3")        
+  testthat::expect_equal(obj$est[2],-0.004,tolerance=tol)        
+  testthat::expect_equal(obj$z[4],-1.1386,tolerance=tol)        
+  testthat::expect_equal(obj$ci.lower[3],-.1393,tolerance=tol)        
+  
+}
+)
+
+obj<-mod$models$coefficients$asDF
+
+testthat::test_that("regressions",{
+  testthat::expect_equal(as.character(obj$lhs[3]),"y1")        
+  testthat::expect_equal(obj$est[2],.9492,tolerance=tol)        
+  testthat::expect_equal(obj$z[4],-.1851,tolerance=tol)        
+  testthat::expect_equal(obj$ci.lower[3],.8376,tolerance=tol)        
+}
+)
+
 
 forms<-list("y1~x2+x1")
 mod<-pathj::pathj(formula=forms,
