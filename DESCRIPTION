@@ -5,7 +5,7 @@ Version: 0.4.0
 Author: Marcello Gallucci
 Maintainer: Marcello Gallucci <mcfanda@gmail.com>
 Description: Path analysis based on lavaan, with jamovi output style and functions. Provides access to lavaan
-             estimation with restructuring of data and options for executing most common task in path analysis.
+             estimation with restructuring of data and options for executing most common tasks in path analysis.
              Path diagrams can also be requested.
 License: GPL-2
 Encoding: UTF-8
