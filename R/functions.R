@@ -100,8 +100,8 @@ try_hard<-function(exp) {
 ####### models and formuals #########
 
 expand.formula<-function(aform) {
-            af<-paste(aform[[2]],paste(attr(terms(aform),"term.labels"),collapse = " + "),sep=" ~ ")
-            af<-as.formula(af)
+            af<-paste(aform[[2]],paste(attr(stats::terms(aform),"term.labels"),collapse = " + "),sep=" ~ ")
+            af<-stats::as.formula(af)
             af
 }
 
