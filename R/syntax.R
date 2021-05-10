@@ -177,7 +177,7 @@ Syntax <- R6::R6Class(
 
               ## now we start the filling of the tables to be used in the init of results
               .lav_structure<-private$.lav_structure
-              
+              mark(.lav_structure)
               ## fill some info to make nicer tables
                   .lav_structure$user<-ifelse(.lav_structure$exo==1,"Sample","Estim")
                   ## translate names
