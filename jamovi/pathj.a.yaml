@@ -4,7 +4,7 @@ title: Path Analysis
 menuGroup: SEM
 version: '0.0.1'
 jas: '1.2'
-export: true
+export: false
 completeWhenFilled: false
 description:
     main: Path Analysis
@@ -108,7 +108,7 @@ options:
     - name: r2test
       title: R-squared tests
       type: Bool
-      default: true
+      default: false
 
 
     - name: bootci

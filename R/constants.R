@@ -52,7 +52,7 @@ WARNS[["usercov"]]<-"Variances/Covariances specified by the user. The option  `F
 WARNS[["nocenterd"]]<-"Variables {vars} are not centered Consider using `Continuous Variables Scaling options` for easier interpretation of lower order effects"
 WARNS[["scoreineq"]]<-"Score Tests not available with inequality constraints"
 WARNS[["noindirect"]]<-"Indirect effects cannot be computed for this model"
-WARNS[["noIE"]]<-"`IE` label is reserved for indirect effects. Using it in defined parameters may create confusion and unexpected results."
+WARNS[["noreserved"]]<-"`{var}` label is reserved for indirect effects. Using it in defined parameters may create confusion and unexpected results."
 
 DATA_WARNS<-list()
 DATA_WARNS[["fac_to_cont"]]<-"Warming: continuous variable are defined as factor. Please make sure that each is a continuous variable."

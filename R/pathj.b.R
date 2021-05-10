@@ -19,7 +19,6 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .ready=NULL,
         .init = function() {
             ginfo("init")
-            mark(self$options$endogenous)
             ### check that we have enough information to run ####
             private$.ready<-readiness(self$options)
             if (!private$.ready$ready) {
@@ -172,7 +171,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 return(endogenousTerms)
             if (name=="exogenous")
                 return(exogenous)
-            
+
             data<-data[0,allvars]
             
             if (name=="covs") {
@@ -185,7 +184,41 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             
             
+        },
+        
+        .formula = function() {
+            paste0("list(",paste(sapply(private$.lav_machine$models(),function(m) paste0('"',m$value,'"')),collapse = ","),")")
+            
+        },
+        
+        .sourcifyOption = function(option) {
+            
+            name <- option$name
+            value <- option$value
+            
+            if (!is.something(value))
+                return('')
+            
+            if (option$name %in% c('factors', 'endogenous', 'covs', 'endogenousTerms'))
+                return('')
+            
+            if (name =='scaling') {
+                vec<-sourcifyList(option,"none")
+                return(vec)
+            }
+            if (name =='contrasts') {
+                vec<-sourcifyList(option,"simple")
+                return(vec)
+            }
+            if (name =='varcov') {
+                vec<-lapply(self$options$varcov, function(v) c(v$i1,v$i2))
+                vec=paste0("varcov=list(",paste(vec,collapse = ","),")",collapse = "")
+                return(vec)
+            }
+            
+            super$.sourcifyOption(option)
         }
+        
         
         
         

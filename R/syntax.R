@@ -82,7 +82,6 @@ Syntax <- R6::R6Class(
           active=list(
            ### inherited warnings and errors are overriden to check specific message to change, and then passed to super 
            warnings=function(obj) {
-             
              if (missing(obj))
                return(private$.warnings)
              if (is.null(obj))
@@ -319,10 +318,10 @@ Syntax <- R6::R6Class(
                     else {
                        check<-grep("^IE",estim)
                        if (length(check)>0)
-                         self$warnings<-list(topic="defined",message=glue:glue(WARNS[["noreseved"]],var="IE"))
+                         self$warnings<-list(topic="defined",message=glue::glue(WARNS[["noreserved"]],var="IE"))
                        check<-grep("^dp",estim)
                        if (length(check)>0)
-                         self$warnings<-list(topic="defined",message=glue:glue(WARNS[["noreseved"]],var="dp"))
+                         self$warnings<-list(topic="defined",message=glue::glue(WARNS[["noreserved"]],var="dp"))
                     }
                     estim
               })
@@ -383,7 +382,8 @@ Syntax <- R6::R6Class(
 
             },
             .check_varcov=function() {
-
+              
+              
               varcov64<-tob64(self$options$varcov)
               ## we need to check for single variable pair, when a term is null
               sel<-unlist(sapply(varcov64, function(vc) !any(unlist(sapply(vc,is.null)))))

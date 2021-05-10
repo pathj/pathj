@@ -95,6 +95,10 @@ Datamatic <- R6::R6Class(
        
        nLevels <- length(levels)
        
+       if (is.null(type))
+         type<-"simple"
+       
+
        if (type == 'simple') {
          dummy <- stats::contr.treatment(levels)
          dimnames(dummy) <- NULL
@@ -156,6 +160,9 @@ Datamatic <- R6::R6Class(
 
          nLevels <- length(levels)
          labels <- list()
+         
+         if (is.null(type))
+             type<-"simple"
          
          if (type == 'simple') {
            for (i in seq_len(nLevels-1))
