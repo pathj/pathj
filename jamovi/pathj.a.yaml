@@ -207,14 +207,6 @@ options:
             `'repeated'` or `'polynomial'`
 
 
-    - name: showRealNames
-      title: Names in estimates table
-      type: Bool
-      default: true
-      description:
-          R: >
-            `TRUE` or `FALSE` (default), provide raw names of the contrasts variables
-
 
     - name: showContrastCode
       title: Contrast Coefficients tables

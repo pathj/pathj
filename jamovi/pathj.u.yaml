@@ -434,8 +434,6 @@ children:
             template:
               type: ComboBox
       - type: CheckBox
-        name: showRealNames
-      - type: CheckBox
         name: showContrastCode
 
   - type: CollapseBox
