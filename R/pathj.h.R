@@ -21,7 +21,6 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             intercepts = TRUE,
             indirect = FALSE,
             contrasts = NULL,
-            showRealNames = TRUE,
             showContrastCode = FALSE,
             scaling = NULL,
             endogenousTerms = list(
@@ -168,10 +167,6 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                 "repeated",
                                 "polynomial"),
                             default="simple"))))
-            private$..showRealNames <- jmvcore::OptionBool$new(
-                "showRealNames",
-                showRealNames,
-                default=TRUE)
             private$..showContrastCode <- jmvcore::OptionBool$new(
                 "showContrastCode",
                 showContrastCode,
@@ -338,7 +333,6 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..intercepts)
             self$.addOption(private$..indirect)
             self$.addOption(private$..contrasts)
-            self$.addOption(private$..showRealNames)
             self$.addOption(private$..showContrastCode)
             self$.addOption(private$..scaling)
             self$.addOption(private$..endogenousTerms)
@@ -377,7 +371,6 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         intercepts = function() private$..intercepts$value,
         indirect = function() private$..indirect$value,
         contrasts = function() private$..contrasts$value,
-        showRealNames = function() private$..showRealNames$value,
         showContrastCode = function() private$..showContrastCode$value,
         scaling = function() private$..scaling$value,
         endogenousTerms = function() private$..endogenousTerms$value,
@@ -415,7 +408,6 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..intercepts = NA,
         ..indirect = NA,
         ..contrasts = NA,
-        ..showRealNames = NA,
         ..showContrastCode = NA,
         ..scaling = NA,
         ..endogenousTerms = NA,
