@@ -95,6 +95,10 @@ Datamatic <- R6::R6Class(
        
        nLevels <- length(levels)
        
+       if (is.null(type))
+         type<-"simple"
+       
+
        if (type == 'simple') {
          dummy <- stats::contr.treatment(levels)
          dimnames(dummy) <- NULL
@@ -156,6 +160,9 @@ Datamatic <- R6::R6Class(
 
          nLevels <- length(levels)
          labels <- list()
+         
+         if (is.null(type))
+             type<-"simple"
          
          if (type == 'simple') {
            for (i in seq_len(nLevels-1))
@@ -224,7 +231,12 @@ Datamatic <- R6::R6Class(
            labels[[i]] <- paste(levels[i+1], '- (', all,")")
          return(labels)
        },
-     .continuous_value=function(var,method,by=NULL) {
+
+ .continuous_value=function(var,method,by=NULL) {
+
+        if (is.null(method))
+           return(as.numeric(var))
+   
 
        if (method=="centered") 
          var<-scale(var,scale = F)  

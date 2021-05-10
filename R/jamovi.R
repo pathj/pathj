@@ -150,7 +150,6 @@ j.add_warnings<-function(atable,adispatch,atopic) {
       for (i in seq_along(adispatch$warnings[[atopic]]))
                atable$setNote(i,adispatch$warnings[[atopic]][[i]])
 
-    
   atable$setVisible(TRUE)
   
 }

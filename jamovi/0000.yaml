@@ -17,6 +17,22 @@ analyses:
     menuSubgroup: pathj
     menuTitle: Path Analysis
     description: Path Analysis
+datasets:
+  - name: pathjdata
+    path: pathjdata.csv
+    description: Example data for PATHj tests
+    tags:
+      - GLM
+      - Curvilinear effects
+  - name: coopmedmod
+    path: coopmedmod.csv
+    description: >-
+      Cooperative behavior experiment from Muller D, Judd CM, Yzerbyt VY (2005).
+      When moderation is mediated and mediation is moderated. JPSP, 89(6),852-63
+    tags:
+      - Mediation
+      - Conditional mediation
+      - Moderation
 usesNative: true
 minApp: 1.8.0
 

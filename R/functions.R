@@ -11,6 +11,15 @@ is.something<- function(x,...) UseMethod(".is.something")
 .is.something.logical<-function(obj) !is.na(obj)
 
 
+lgrep<-function(...) {
+  
+  if (length(grep(...))>0)
+    TRUE
+  else
+    FALSE
+  
+}
+
 
 
 ginfo<-function(what=NULL,obj=NULL) {

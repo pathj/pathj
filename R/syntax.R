@@ -7,7 +7,7 @@
 ### variable name. 
 ### It assumes that all factors are present in the data as K-1 new variables with appropriated constrast value as numeric variables. 
 ### each "dummy" variable in named `VAR{FACTOR_SYMBOL}k`` 
-### Inherit from Dispatch, which provides $warnings and $errors mechanism to store info. Requires the try_hard() function to catch errors
+### Inherit from Dispatch, which provides $warnings and $errors mechanisms to store info. Requires the try_hard() function to catch errors
 ##  naming convention: all objects containing lavaan syntax, objects that are needed to build objects that can be passed directly
 ##                     to lavaan are named $lav_*.   $lav_* objects contains B64 variable names 
 ##                     All object containing tables to be passed to the results init tables are called $tab_*. 
@@ -82,7 +82,6 @@ Syntax <- R6::R6Class(
           active=list(
            ### inherited warnings and errors are overriden to check specific message to change, and then passed to super 
            warnings=function(obj) {
-             
              if (missing(obj))
                return(private$.warnings)
              if (is.null(obj))
@@ -319,10 +318,10 @@ Syntax <- R6::R6Class(
                     else {
                        check<-grep("^IE",estim)
                        if (length(check)>0)
-                         self$warnings<-list(topic="defined",message=glue:glue(WARNS[["noreseved"]],var="IE"))
+                         self$warnings<-list(topic="defined",message=glue::glue(WARNS[["noreserved"]],var="IE"))
                        check<-grep("^dp",estim)
                        if (length(check)>0)
-                         self$warnings<-list(topic="defined",message=glue:glue(WARNS[["noreseved"]],var="dp"))
+                         self$warnings<-list(topic="defined",message=glue::glue(WARNS[["noreserved"]],var="dp"))
                     }
                     estim
               })
@@ -383,7 +382,8 @@ Syntax <- R6::R6Class(
 
             },
             .check_varcov=function() {
-
+              
+              
               varcov64<-tob64(self$options$varcov)
               ## we need to check for single variable pair, when a term is null
               sel<-unlist(sapply(varcov64, function(vc) !any(unlist(sapply(vc,is.null)))))
@@ -472,7 +472,7 @@ Syntax <- R6::R6Class(
                 tabs[[i]]<-tab[tab$group==i,]
               
               results<-list()
-              ### we run the recursive function for each group and for each term
+              ### we run the recursive function for each group and for each rhs term
               for (i in seq_along(tabs)) {
                 .results<-try_hard({
                   for (tt in terms)

@@ -148,8 +148,78 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plot(image$state$plot)
             return(TRUE)
 
-        }
+        },
+        .marshalFormula= function(formula, data, name) {
+            endogenous<-list()
+            endogenousTerms<-list()
+            j<-0
+            for (i in seq_along(formula)) {
+                if (lgrep("<|>|==|~~",formula[[i]]))
+                    warning("Constraints and defined parameters are ignored in `formula`. Please use `constraints` option")
+                else {
+                    j<-j+1
+                    line<-as.formula(formula[[i]])
+                    endogenous[[j]]<-as.character(line[[2]])
+                    endogenousTerms[[j]]<-jmvcore::decomposeFormula(expand.formula(as.formula(line)))
+                }
+            }
+            exogenous<-setdiff(unique(unlist(endogenousTerms)),endogenous)
+            allvars<-unlist(c(endogenous,exogenous))
+            if (name=="endogenous")
+                return(endogenous)
+            if (name=="endogenousTerms")
+                return(endogenousTerms)
+            if (name=="exogenous")
+                return(exogenous)
 
+            data<-data[0,allvars]
+            
+            if (name=="covs") {
+                return(allvars[(!sapply(data, is.factor))])
+            }
+            if (name=="factors") {
+                data<-data[0,allvars]
+                return(allvars[(sapply(data, is.factor))])
+            }
+            
+            
+            
+        },
+        
+        .formula = function() {
+            paste0("list(",paste(sapply(private$.lav_machine$models(),function(m) paste0('"',m$value,'"')),collapse = ","),")")
+            
+        },
+        
+        .sourcifyOption = function(option) {
+            
+            name <- option$name
+            value <- option$value
+            
+            if (!is.something(value))
+                return('')
+            
+            if (option$name %in% c('factors', 'endogenous', 'covs', 'endogenousTerms'))
+                return('')
+            
+            if (name =='scaling') {
+                vec<-sourcifyList(option,"none")
+                return(vec)
+            }
+            if (name =='contrasts') {
+                vec<-sourcifyList(option,"simple")
+                return(vec)
+            }
+            if (name =='varcov') {
+                vec<-lapply(self$options$varcov, function(v) c(v$i1,v$i2))
+                vec=paste0("varcov=list(",paste(vec,collapse = ","),")",collapse = "")
+                return(vec)
+            }
+            
+            super$.sourcifyOption(option)
+        }
+        
+        
         
         
         
