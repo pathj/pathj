@@ -59,7 +59,6 @@ Syntax <- R6::R6Class(
                 private$.check_models()
                 ### check if there are interactions and warn if variables are not centered
                 private$.check_interactions()
-                mark(self$interactions)
                 ### check and build constraints and defined parameter lavaan directives
                 private$.check_constraints()
                 ### check and build lavaan directives to free covariances
