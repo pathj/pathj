@@ -19,6 +19,7 @@ Estimate <- R6::R6Class("Estimate",
                           },
                           estimate=function(data) {
                             
+                            
                             ## prepare the options based on Syntax definitions
                             lavoptions<-list(model = private$.lav_structure, 
                                              data = data,

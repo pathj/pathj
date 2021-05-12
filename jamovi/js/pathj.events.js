@@ -131,6 +131,13 @@ var cleanRecursiveTerms= function(ui,context) {
 
     for (var i = 0; i < endogenous.length; i++)
         endogenousTerms[i]=removeFromList(endogenous[i],endogenousTerms[i],context,1);
+
+    for (var i = 0; i < endogenousTerms.length; i++) {
+       for (var j = 0; j < endogenousTerms[i].length; j++) {
+         endogenousTerms[i][j].sort();
+       }
+      
+    }
         
     ui.endogenousTerms.setValue(endogenousTerms);
     storeComponent("endogenousTerms",endogenousTerms,context);
