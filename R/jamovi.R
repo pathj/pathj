@@ -11,7 +11,10 @@ tob64<- function(x,...) UseMethod(".tob64")
     obj<-jmvcore::toB64(obj)
   } else {
     for (r in ref) {
-      obj<-gsub(r,jmvcore::toB64(r),obj,fixed = T)
+      reg<-paste0("(?<=[\\s*~=]|^)",r,"(?=[\\s*~=]|$)")
+      mark(obj)
+      obj<-stringr::str_replace_all(obj,reg,jmvcore::toB64(r))
+      mark(obj)
     }
   }
   obj
