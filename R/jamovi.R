@@ -12,9 +12,7 @@ tob64<- function(x,...) UseMethod(".tob64")
   } else {
     for (r in ref) {
       reg<-paste0("(?<=[\\s*~=]|^)",r,"(?=[\\s*~=]|$)")
-      mark(obj)
       obj<-stringr::str_replace_all(obj,reg,jmvcore::toB64(r))
-      mark(obj)
     }
   }
   obj
