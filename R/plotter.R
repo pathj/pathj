@@ -143,13 +143,8 @@ Plotter <- R6::R6Class(
     .operator=NULL,
     .semPaths=function(options) {
       ### we need this because semPaths does not work with do.call() in windows
-      ### semPaths produces a qgraph object and send it to graphical device (GD) right away.
-      ### we need graphics.off() to avoid semPaths to send the diagram to the GD
-      ### wihout graphics.off() windows will open a (frozen) R GD at this very moment, and show the diagram
-      ### linux and mac will fail to open it, but it still consume time for the operation
-      ## With this code, a qgraph object is passed, without interference with the GD
-      res<-try_hard({
-        graphics.off()
+        res<-try_hard({
+        
         semPlot::semPaths(object = options$object,
                       layout =options$layout,
                       residuals = options$residuals,
@@ -161,7 +156,8 @@ Plotter <- R6::R6Class(
                       sizeMan2=options$sizeMan2,
                       curve=options$curve,
                       shapeMan=options$shapeMan,
-                      edge.label.cex =options$edge.label.cex)
+                      edge.label.cex =options$edge.label.cex,
+                      DoNotPlot=TRUE)
       })
       if (is.something(res$error))
           self$warnings<-list(topic="diagram",message=res$error)

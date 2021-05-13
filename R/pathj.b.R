@@ -108,7 +108,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             } 
             ## fit info
              j.fill_table(self$results$info,lav_machine$tab_info)
-
+            
              ## fit indices
              self$results$fit$indices$setRow(rowNo=1,lav_machine$tab_fitindices)
              
