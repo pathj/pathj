@@ -160,14 +160,22 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                               shapeMan=options$shapeMan,
                               edge.label.cex =options$edge.label.cex)
             )
-            if (is.something(res$error)) {
+            note<-FALSE
+            if (!isFALSE(res$error)) {
                  self$results$pathgroup$notes$addRow("err",list(info=res$error))
-                 self$results$pathgroup$notes$setVisible(TRUE)
+                 note<-TRUE
             }
-            if (is.something(res$warning)) {
+            if (!isFALSE(res$warning)) {
                 self$results$pathgroup$notes$addRow("war",list(info=res$warning))
-                self$results$pathgroup$notes$setVisible(TRUE)
+                note<-TRUE
             }
+
+            if (note)
+                self$results$pathgroup$notes$setVisible(TRUE)
+            else
+                self$results$pathgroup$notes$setVisible(FALSE)
+            
+            
             return(TRUE)
 
         },
