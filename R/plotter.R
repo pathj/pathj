@@ -88,10 +88,17 @@ Plotter <- R6::R6Class(
         nNodes<-length(nodeLabels)
         size<-size*exp(-nNodes/80)+1
         
+        layout<-self$options$diag_type
+        rotation<-as.numeric(self$options$diag_rotate)
+        if (layout %in% c("circle") & rotation %in% c(2,4)) {
+            rotation<-1
+            self$warnings<-list(topic="diagram",message=PLOT_WARNS[["rotation"]])
+        }
+        
         self$semPathsOptions<-list(
-                      layout = self$options$diag_type,
+                      layout = layout,
                       residuals = self$options$diag_resid,
-                      rotation = as.numeric(self$options$diag_rotate),
+                      rotation = rotation ,
                       intercepts = F
                       ,nodeLabels=nodeLabels
                       ,whatLabels=labs

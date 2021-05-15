@@ -527,7 +527,7 @@ items:
              title: ""
              visible: false
              columns:
-                  - name: info
+                  - name: message
                     type: text
                     title: "Model diagram notes"
 

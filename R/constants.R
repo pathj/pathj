@@ -63,7 +63,8 @@ ERRS[["nolatent"]]<-"Latent variables are not allowed in pathj. Please use anoth
 ERRS[["noluck"]]<-"The model cannot be estimated. Please refine the model"
 
 PLOT_WARNS<-list()
-PLOT_WARNS[["nocircle"]]<-"Rotation set to `Exogenous Top`. Circle layout requires rotation to be `Exogenous Top` or `Exogenous Bottom`"
+PLOT_WARNS[["nocircle"]]<-"Circle layout requires rotation to be `Exogenous Top` or `Exogenous Bottom`"
+PLOT_WARNS[["rotation"]]<-"Circle layout requires rotation to be `Exogenous Top` or `Exogenous Bottom`. Rotation has been set to `Exogenous Top` "
 PLOT_WARNS[["circlelayout"]]<-"Layout has been set to Circle"
 PLOT_WARNS[["fail"]]<-"The diagram cannot be displayed. Please try a different layout type"
 

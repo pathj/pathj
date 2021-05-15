@@ -137,6 +137,12 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             ## diagrams
             private$.plot_machine$preparePlots()   
+            if (is.something(private$.plot_machine$warnings$diagram)) {
+                 for (i in seq_along(private$.plot_machine$warnings$diagram))
+                        self$results$pathgroup$notes$addRow(i,list(message=private$.plot_machine$warnings$diagram[[i]]))
+                  self$results$pathgroup$notes$setVisible(TRUE)
+            }
+            
             self$results$.setModel(lav_machine$model)
         },
  
@@ -161,21 +167,36 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                               edge.label.cex =options$edge.label.cex)
             )
             note<-FALSE
+            
             if (!isFALSE(res$error)) {
-                 self$results$pathgroup$notes$addRow("err",list(info=res$error))
+                if  (length(grep("Circle layout only supported",res$error,fixed = T))>0) {
+                    res$error<-PLOT_WARNS[["nocircle"]]
+                    note<-TRUE
+                } 
+                if  (length(grep("graph_from_edgelist",res$error,fixed = T))>0) {
+                    res$error<-PLOT_WARNS[["nocircle"]]
+                    note<-TRUE
+                } 
+                if  (length(grep("subscript out of",res$error,fixed = T))>0) {
+                    res$error<-PLOT_WARNS[["fail"]]
+                    note<-TRUE
+                }
+            }
+            
+            
+            
+            if (!isFALSE(res$error)) {
+                 self$results$pathgroup$notes$addRow("err",list(message=res$error))
                  note<-TRUE
             }
             if (!isFALSE(res$warning)) {
-                self$results$pathgroup$notes$addRow("war",list(info=res$warning))
+                self$results$pathgroup$notes$addRow("war",list(message=res$warning))
                 note<-TRUE
             }
 
             if (note)
                 self$results$pathgroup$notes$setVisible(TRUE)
-            else
-                self$results$pathgroup$notes$setVisible(FALSE)
-            
-            
+
             return(TRUE)
 
         },

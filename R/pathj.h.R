@@ -1025,7 +1025,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             visible=FALSE,
                             columns=list(
                                 list(
-                                    `name`="info", 
+                                    `name`="message", 
                                     `type`="text", 
                                     `title`="Model diagram notes"))))}))$new(options=options))
             self$add(jmvcore::Table$new(
