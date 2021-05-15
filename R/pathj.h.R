@@ -29,8 +29,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             diag_paths = "est",
             diag_resid = FALSE,
             diag_labsize = "medium",
-            diag_rotate = "2",
-            diag_type = "tree2",
+            diag_rotate = "1",
+            diag_type = "circle",
             diag_shape = "rectangle",
             diag_abbrev = "0",
             varcov = NULL,
@@ -234,17 +234,17 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "2",
                     "3",
                     "4"),
-                default="2")
+                default="1")
             private$..diag_type <- jmvcore::OptionList$new(
                 "diag_type",
                 diag_type,
                 options=list(
-                    "tree2",
-                    "tree",
                     "circle",
                     "circle2",
+                    "tree2",
+                    "tree",
                     "spring"),
-                default="tree2")
+                default="circle")
             private$..diag_shape <- jmvcore::OptionList$new(
                 "diag_shape",
                 diag_shape,
