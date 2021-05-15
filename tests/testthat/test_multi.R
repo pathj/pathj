@@ -8,10 +8,12 @@ forms<-list("y1~y2+x2+x1","y2~x1+ x2")
 mod<-pathj::pathj(formula=forms,
                   data=pathjdata,
                   indirect = T,
-                  multigroup = "groups_b"
+                  multigroup = "groups_b",
+                  diagram=T
+                  
 )
-obj<-mod$models$defined$asDF
 
+mod
 testthat::test_that("indiect effects",{
   testthat::expect_equal(as.character(obj$lhs[3]),"IE3")        
   testthat::expect_equal(obj$est[2],.0743,tolerance=tol)        
