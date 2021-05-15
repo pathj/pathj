@@ -4,6 +4,7 @@ Plotter <- R6::R6Class(
   class=FALSE,
   inherit = Dispatch,
   public=list(
+      semPathsOptions=NULL,
       initialize=function(options,datamatic,operator,resultsplots) {
             super$initialize(options=options,vars=unlist(c(options$endogenous,options$factors,options$covs)))
             private$.plotgroup<-resultsplots
@@ -39,6 +40,39 @@ Plotter <- R6::R6Class(
         par<-model@ParTable
         model@ParTable<-sapply(par, function(x) x[check],simplify = F)
         ### end ###
+      
+        
+        ## prepare the semPlotModel object to be passed to .rendefun where
+        ## semPaths will do the actual diagrams
+        
+        ## At the moment (mid-2021) semPaths invokes the graphical device even when DoNotPlot is TRUE,
+        ## which causes a window to pop up in windows and mac when run in jamovi. So, we need to prepare a semPlot object 
+        ## here and make the actual plot in the .renderfun of pathj.b.R with semPaths. 
+        ## for multigroup, we trick the .renderfun semPaths() to believe that there's always only one group
+        ## per call, because the .renderfun is called for each group.
+        
+        
+        sm<-semPlot::semPlotModel(model)
+        groups<-unique(sm@Pars$group)
+        images<-private$.plotgroup$diagrams
+        
+        
+        if (all(groups=="")) {
+          image<-images$get(key = "0")
+          image$setState(list(semModel = sm))
+          } else {
+          for (i in seq_along(images$itemKeys)) {
+            image<-images$get(key = images$itemKeys[[i]])
+            .sm<-sm
+            .sm@Pars<-.sm@Pars[.sm@Pars$group==groups[i],]
+             image$setState(list(semModel = .sm))
+          }
+
+          }
+
+        ### images are set ####
+        
+        ## now we prepare the options for semPaths
 
         labs<-self$options$diag_paths
         nodeLabels<-model@pta$vnames$ov.num[[1]]
@@ -54,7 +88,7 @@ Plotter <- R6::R6Class(
         nNodes<-length(nodeLabels)
         size<-size*exp(-nNodes/80)+1
         
-        options<-list(object = model,
+        self$semPathsOptions<-list(
                       layout = self$options$diag_type,
                       residuals = self$options$diag_resid,
                       rotation = as.numeric(self$options$diag_rotate),
@@ -66,71 +100,9 @@ Plotter <- R6::R6Class(
                       , curve=2
                       , shapeMan=self$options$diag_shape
                       ,edge.label.cex =1.3)
-
-        ## for some reason we cannot do a do.call for semPlot::semPaths because
-        ## it fails in windows 10. So we call from private$.semPaths() so we can pass
-        ## options list
         
-        res<-private$.semPaths(options)
-        ## if it fails, we capture some common issue and re-run semPaths with more reasonable options
-        redo<-FALSE
-        if (is.something(res$error)) {
-          if  (length(grep("Circle layout only supported",res$error,fixed = T))>0) {
-            private$.plotgroup$notes$addRow(1,list(info=PLOT_WARNS[["nocircle"]]))
-            res$error<-NULL
-            options[["rotation"]]<-1
-            redo<-TRUE
-          } 
-          if  (length(grep("graph_from_edgelist",res$error,fixed = T))>0) {
-            private$.plotgroup$notes$addRow(1,list(info=PLOT_WARNS[["circlelayout"]]))
-            options[["layout"]]<-"circle"
-            options[["rotation"]]<-1
-            res$error<-NULL
-            redo<-TRUE
-          } 
-          if  (length(grep("subscript out of",res$error,fixed = T))>0) {
-            res$error<-PLOT_WARNS[["fail"]]
-            redo<-FALSE
-          } 
-          
-          ## if we find something wrong and we fix it, we try again
-          if (redo) {
-            res<-private$.semPaths(options)
-          }   
-          if (!isFALSE(res$warning))
-            private$.plotgroup$notes$addRow("war",list(info=res$warning))
-          
-          if (!isFALSE(res$error)) {
-            private$.plotgroup$notes$addRow("err",list(info=res$error))
-            private$.plotgroup$notes$setVisible(TRUE)
-            private$.plotgroup$diagrams$setVisible(FALSE)
-            
-            return()
-          }
-        }
+
         
-        if (private$.plotgroup$notes$rowCount>0)
-               private$.plotgroup$notes$setVisible(TRUE)
-
-        # at this point, we cool
-
-        diags<-res$obj
-
-        images<-private$.plotgroup$diagrams
-        ## images are always a list with keys. They are defined in .r.yaml
-        ## if semPaths produced more than one plot, we put each of them traversing the images key
-        if ("list" %in% class(diags))
-          for (i in seq_along(images$itemKeys)) {
-            image<-images$get(key = images$itemKeys[[i]])
-            image$setState(list(plot = diags[[i]]))
-          }
-        else {
-          ## if semPaths produced one plot, we put it in key 0
-          
-          image<-images$get(key = "0")
-          image$setState(list(plot = diags))
-        }
-
         return()
       }
       
@@ -144,7 +116,6 @@ Plotter <- R6::R6Class(
     .semPaths=function(options) {
       ### we need this because semPaths does not work with do.call() in windows
         res<-try_hard({
-        
         semPlot::semPaths(object = options$object,
                       layout =options$layout,
                       residuals = options$residuals,
@@ -158,9 +129,11 @@ Plotter <- R6::R6Class(
                       shapeMan=options$shapeMan,
                       edge.label.cex =options$edge.label.cex,
                       DoNotPlot=TRUE)
+
       })
       if (is.something(res$error))
           self$warnings<-list(topic="diagram",message=res$error)
+      
       return(res)
     }
 

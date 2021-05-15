@@ -1,5 +1,5 @@
-j_DEBUG=F
-j_INFO=F
+j_DEBUG=T
+j_INFO=T
 
 
 INTERACTION_SYMBOL="__XX__XX__"

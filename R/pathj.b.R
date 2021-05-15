@@ -143,9 +143,31 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .showDiagram=function(image,ggtheme, theme, ...) {
             if (self$options$diagram==FALSE) 
                 return()
-            if (!is.something(image$state$plot))
+            if (!is.something(image$state$semModel))
                  return()
-            plot(image$state$plot)
+            options<-private$.plot_machine$semPathsOptions
+            res<-try_hard(
+            semPlot::semPaths(object = image$state$semModel,
+                              layout =options$layout,
+                              residuals = options$residuals,
+                              rotation = options$rotation,
+                              intercepts = options$intercepts,
+                              nodeLabels= options$nodeLabels,
+                              whatLabels=options$whatLabels,
+                              sizeMan = options$sizeMan,
+                              sizeMan2=options$sizeMan2,
+                              curve=options$curve,
+                              shapeMan=options$shapeMan,
+                              edge.label.cex =options$edge.label.cex)
+            )
+            if (is.something(res$error)) {
+                 self$results$pathgroup$notes$addRow("err",list(info=res$error))
+                 self$results$pathgroup$notes$setVisible(TRUE)
+            }
+            if (is.something(res$warning)) {
+                self$results$pathgroup$notes$addRow("war",list(info=res$warning))
+                self$results$pathgroup$notes$setVisible(TRUE)
+            }
             return(TRUE)
 
         },
