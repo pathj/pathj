@@ -13,7 +13,8 @@ mod<-pathj::pathj(formula=forms,
                   
 )
 
-mod
+obj<-mod$models$defined$asDF
+
 testthat::test_that("indiect effects",{
   testthat::expect_equal(as.character(obj$lhs[3]),"IE3")        
   testthat::expect_equal(obj$est[2],.0743,tolerance=tol)        
