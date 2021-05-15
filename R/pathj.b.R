@@ -161,6 +161,24 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                               edge.label.cex =options$edge.label.cex)
             )
             note<-FALSE
+            
+            if (!isFALSE(res$error)) {
+                if  (length(grep("Circle layout only supported",res$error,fixed = T))>0) {
+                    res$error<-PLOT_WARNS[["nocircle"]]
+                    note<-TRUE
+                } 
+                if  (length(grep("graph_from_edgelist",res$error,fixed = T))>0) {
+                    res$error<-PLOT_WARNS[["nocircle"]]
+                    note<-TRUE
+                } 
+                if  (length(grep("subscript out of",res$error,fixed = T))>0) {
+                    res$error<-PLOT_WARNS[["fail"]]
+                    note<-TRUE
+                }
+            }
+            
+            
+            
             if (!isFALSE(res$error)) {
                  self$results$pathgroup$notes$addRow("err",list(info=res$error))
                  note<-TRUE
