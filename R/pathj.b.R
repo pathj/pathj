@@ -104,7 +104,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                       self$results$info$setNote(i,warns[["main"]][[i]])
 
             if (is.something(lav_machine$errors)) {
-                    stop(paste(lav_machine$errors,collapse = "\n\n"))
+                    stop(paste(lav_machine$errors,collapse = "; "))
             } 
             ## fit info
              j.fill_table(self$results$info,lav_machine$tab_info)

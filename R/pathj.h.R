@@ -521,7 +521,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="constraints",
-                            title="Contraints Score Tests",
+                            title="Constraints Score Tests",
                             visible=FALSE,
                             clearWith=list(
                                 "endogenous",

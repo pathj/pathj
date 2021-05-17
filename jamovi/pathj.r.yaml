@@ -68,7 +68,7 @@ items:
                       format: zto,pvalue
 
           - name: constraints
-            title: Contraints Score Tests
+            title: Constraints Score Tests
             type: Table
             visible: false
             clearWith:

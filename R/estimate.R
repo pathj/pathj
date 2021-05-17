@@ -153,6 +153,7 @@ Estimate <- R6::R6Class("Estimate",
                             end$ci.upper<-1-(lower/end$var)
                             end$ci.lower<-1-(upper/end$var)
                             end$r2<-1-end$std.all
+                            mark(end)
                              for (i in seq_along(end$r2)) 
                                     if (end$r2[[i]]>1 | end$r2[[i]]<0)  {
                                       end$r2[[i]]<-NA

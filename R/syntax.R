@@ -103,7 +103,7 @@ Syntax <- R6::R6Class(
                return()
              check<-length(grep("infinite or missing",obj,fixed = T)>0) 
              if (check) 
-               obj<-ERRS[["noluck"]]
+               super$errors<-ERRS[["noluck"]]
              
              super$errors<-obj
            }
