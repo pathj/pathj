@@ -38,6 +38,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             cov_x = TRUE,
             constraints = list(),
             syntax = NULL,
+            code = NULL,
             constraints_examples = FALSE,
             showlabels = FALSE,
             scoretest = TRUE,
@@ -287,7 +288,12 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     NULL))
             private$..syntax <- jmvcore::OptionString$new(
                 "syntax",
-                syntax)
+                syntax,
+                hidden=TRUE)
+            private$..code <- jmvcore::OptionString$new(
+                "code",
+                code,
+                hidden=TRUE)
             private$..constraints_examples <- jmvcore::OptionBool$new(
                 "constraints_examples",
                 constraints_examples,
@@ -353,6 +359,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..cov_x)
             self$.addOption(private$..constraints)
             self$.addOption(private$..syntax)
+            self$.addOption(private$..code)
             self$.addOption(private$..constraints_examples)
             self$.addOption(private$..showlabels)
             self$.addOption(private$..scoretest)
@@ -392,6 +399,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         cov_x = function() private$..cov_x$value,
         constraints = function() private$..constraints$value,
         syntax = function() private$..syntax$value,
+        code = function() private$..code$value,
         constraints_examples = function() private$..constraints_examples$value,
         showlabels = function() private$..showlabels$value,
         scoretest = function() private$..scoretest$value,
@@ -430,6 +438,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..cov_x = NA,
         ..constraints = NA,
         ..syntax = NA,
+        ..code = NA,
         ..constraints_examples = NA,
         ..showlabels = NA,
         ..scoretest = NA,

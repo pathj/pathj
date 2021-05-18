@@ -8,13 +8,32 @@ const events = {
     loaded: function(ui) {
         let $contents = ui.view.$el;
          console.log("load");
-         let newinput="<textarea id='syntax' style='width:100%; height:200px'></textarea>";
-         let $syn=$contents.find('input[type=text]').replaceWith(newinput);
-         let $syn2=$contents.find('#syntax');
+//         let newinput="<textarea id='syntax' spellcheck=false style='width:100%; height:200px'></textarea>";
+//          let $syn=$contents.find('input[type=text]').replaceWith(newinput);
+//          let $syn2=$contents.find('#syntax');
+//           $contents.on("change", "#syntax" , function(ss) {
+//		       console.log(this.val());
+//           console.log("syn changed");
 
-         console.log($syn2);
+//         });
+//         console.log($syn);
+//         console.log($syn2);
+        console.log("ok");
+
      },
         
+    syntax_creating: function(ui, event) {
+        let $element = ui.syntax.$el;
+        console.log("creating syntx");
+        let newinput="<textarea id='syntax' spellcheck=false style='width:100%; height:200px'></textarea>";
+        $element.append(newinput);
+        $element.find("textarea").on("change",function(event) {
+          syntax_changed(ui,event);
+        });
+        console.log("end creating");    
+      
+    } ,   
+
 
     onChange_factors: function(ui) {
          updateSuppliers(ui,this);
@@ -73,10 +92,24 @@ const events = {
       console.log("varcovsup update");
       
     },
+    onUpdate_syntax: function(ui) {
+      console.log("syntax update");
+      
+    },
 
+    onChange_syntax: function(ui) {
+      console.log("syntax change");
+      
+    }
 
 };
 
+
+var   syntax_changed= function(ui, event) {
+        let $element = ui.syntax.$el;
+        let value=$element.find("textarea").val()
+        ui.code.setValue(value);
+        } ;   
 
 
 var initializeAll = function(ui, context) {

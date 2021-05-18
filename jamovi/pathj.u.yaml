@@ -416,23 +416,22 @@ children:
               type: ComboBox
       - type: CheckBox
         name: showContrastCode
-
-
   - type: CollapseBox
     label: Syntax
     collapsed: true
     stretchFactor: 1
     children:
-        - type: LayoutBox
-          margin: large
-          stretchFactor: 1
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
+        children:
+          - type: CustomControl
+            stretchFactor: 1
+            name: syntax
+            events:
+              creating:  './pathj.events::syntax_creating'
+              updated: './pathj.events::syntax_changed'
 
-          children:
-            - type: TextBox
-              stretchFactor: 1
-              name: syntax
-              format: string
-              
   - type: CollapseBox
     label: Continuous Variables Scaling
     collapsed: true

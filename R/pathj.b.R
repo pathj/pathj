@@ -19,7 +19,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .ready=NULL,
         .init = function() {
             ginfo("init")
-            wmark("syntax",self$options$syntax)
+            mark("syntax",self$options$code)
             ### check that we have enough information to run ####
             private$.ready<-readiness(self$options)
             if (!private$.ready$ready) {

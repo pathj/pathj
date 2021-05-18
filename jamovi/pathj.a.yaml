@@ -434,6 +434,10 @@ options:
 
     - name: syntax
       type: String
+      hidden: true
+    - name: code
+      type: String
+      hidden: true
 
 
     - name: constraints_examples
