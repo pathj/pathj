@@ -5,6 +5,16 @@ const events = {
       console.log("general update");
       initializeAll(ui, this);
     },
+    loaded: function(ui) {
+        let $contents = ui.view.$el;
+         console.log("load");
+         let newinput="<textarea id='syntax' style='width:100%; height:200px'></textarea>";
+         let $syn=$contents.find('input[type=text]').replaceWith(newinput);
+         let $syn2=$contents.find('#syntax');
+
+         console.log($syn2);
+     },
+        
 
     onChange_factors: function(ui) {
          updateSuppliers(ui,this);
