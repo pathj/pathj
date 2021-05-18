@@ -37,6 +37,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             cov_y = TRUE,
             cov_x = TRUE,
             constraints = list(),
+            syntax = NULL,
             constraints_examples = FALSE,
             showlabels = FALSE,
             scoretest = TRUE,
@@ -284,6 +285,9 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 template=jmvcore::OptionString$new(
                     "constraints",
                     NULL))
+            private$..syntax <- jmvcore::OptionString$new(
+                "syntax",
+                syntax)
             private$..constraints_examples <- jmvcore::OptionBool$new(
                 "constraints_examples",
                 constraints_examples,
@@ -348,6 +352,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..cov_y)
             self$.addOption(private$..cov_x)
             self$.addOption(private$..constraints)
+            self$.addOption(private$..syntax)
             self$.addOption(private$..constraints_examples)
             self$.addOption(private$..showlabels)
             self$.addOption(private$..scoretest)
@@ -386,6 +391,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         cov_y = function() private$..cov_y$value,
         cov_x = function() private$..cov_x$value,
         constraints = function() private$..constraints$value,
+        syntax = function() private$..syntax$value,
         constraints_examples = function() private$..constraints_examples$value,
         showlabels = function() private$..showlabels$value,
         scoretest = function() private$..scoretest$value,
@@ -423,6 +429,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..cov_y = NA,
         ..cov_x = NA,
         ..constraints = NA,
+        ..syntax = NA,
         ..constraints_examples = NA,
         ..showlabels = NA,
         ..scoretest = NA,

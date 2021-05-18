@@ -431,6 +431,11 @@ options:
           R: >
             a list of lists specifying the models random effects.          
 
+
+    - name: syntax
+      type: String
+
+
     - name: constraints_examples
       type: Bool
       title: Show Examples
