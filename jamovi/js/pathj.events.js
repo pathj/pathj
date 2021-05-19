@@ -1,4 +1,63 @@
 const DEBUG=true;
+const css = `
+
+#run {
+                                 padding:5px; 
+		                             float: right;
+		                             text-align: right; 
+		                             width: 21px ;
+                                 height: 21px ;
+                                 border-radius: 2px ;
+                                 background-size: auto 80% ;
+                                 background-position: center ;
+                                 background-repeat: no-repeat ;
+                                 background-image:url('data:image/svg+xml;base64,PHN2ZyBpZD0ic3ZnMiIgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjQiIHdpZHRoPSIyNCIgdmVyc2lvbj0iMS4xIiB4bWxuczpjYz0iaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbnMjIiB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iIHZpZXdCb3g9IjAgMCAyNCAyNCI+PG1ldGFkYXRhIGlkPSJtZXRhZGF0YTEwIj48cmRmOlJERj48Y2M6V29yayByZGY6YWJvdXQ9IiI+PGRjOmZvcm1hdD5pbWFnZS9zdmcreG1sPC9kYzpmb3JtYXQ+PGRjOnR5cGUgcmRmOnJlc291cmNlPSJodHRwOi8vcHVybC5vcmcvZGMvZGNtaXR5cGUvU3RpbGxJbWFnZSIvPjxkYzp0aXRsZS8+PC9jYzpXb3JrPjwvcmRmOlJERj48L21ldGFkYXRhPjxwYXRoIGlkPSJwYXRoNCIgZmlsbD0iIzJhOGEyYSIgZD0ibTMgMjJ2LTIwbDE4IDEwLTE4IDEweiIvPjwvc3ZnPg=='
+)
+}
+
+#run:hover {
+  background-color: #EEEEEE ;
+  cursor:pointer;
+}
+
+#run:active {
+  background-color: green ;
+  cursor:pointer;
+}
+  
+#editor-box {
+  
+  width:490px; 
+  height: 300px; 
+  border: solid 1px black;
+  background-color:white
+  
+}
+
+#syntax {
+   resize: none; 
+   width:95%;
+   height:80%; 
+   padding:10px; 
+   border-color: white;
+   outline: none;
+   border-top: 1px solid #ebf5fb ;
+
+}
+
+#syntax:focus {
+ border-color: white;
+ outline: none;
+ border-top: 1px solid  #2471a3  ;
+}
+
+`
+
+let node = document.createElement('style');
+node.innerHTML = css;
+document.body.appendChild(node);
+
+
 
 const events = {
     update: function(ui) {
@@ -7,31 +66,41 @@ const events = {
     },
     loaded: function(ui) {
         let $contents = ui.view.$el;
-         console.log("load");
-//         let newinput="<textarea id='syntax' spellcheck=false style='width:100%; height:200px'></textarea>";
-//          let $syn=$contents.find('input[type=text]').replaceWith(newinput);
-//          let $syn2=$contents.find('#syntax');
-//           $contents.on("change", "#syntax" , function(ss) {
-//		       console.log(this.val());
-//           console.log("syn changed");
-
-//         });
-//         console.log($syn);
-//         console.log($syn2);
-        console.log("ok");
-
      },
-        
+    
     syntax_creating: function(ui, event) {
         let $element = ui.syntax.$el;
-        console.log("creating syntx");
-        let newinput="<textarea id='syntax' spellcheck=false style='width:100%; height:200px'></textarea>";
-        $element.append(newinput);
-        $element.find("textarea").on("change",function(event) {
-          syntax_changed(ui,event);
-        });
-        console.log("end creating");    
-      
+        let box = 
+            `
+            <div id="editor-box" >
+  		         <div id="toolbar">
+		               <div id="run"  title="Update"></div>
+		           </div>
+
+		           <div id="editor" style="height:90%; width:100%">
+		           <textarea id='syntax' spellcheck=false></textarea>
+                 <div id="info" style="padding:5px; text-align: right;">Ctrl + Shift + Enter to update</div>
+
+		           </div>
+
+            </div>
+            `;
+
+            $element.append(box);
+            let $syntax_editor=$element.find("textarea");
+           
+          $element.find("#run").on("click", (event) => {
+                syntax_changed(ui, this);
+          });
+          $syntax_editor.on('keydown', (event) => {
+
+            if (event.keyCode === 13 && (event.metaKey || event.ctrlKey) && event.shiftKey) {
+                // ctrl+shift+enter
+                syntax_changed(ui),this;
+                event.stopPropagation();
+            }
+          });
+
     } ,   
 
 
@@ -72,6 +141,7 @@ const events = {
 
      onChange_endogenousTerms: function(ui) {
       cleanRecursiveTerms(ui,this);
+      compose_syntax(ui,this);
     },
 
 
@@ -83,8 +153,7 @@ const events = {
       console.log("I did not do anything");
     },
     onChange_varcovSupplier: function(ui) {
-      console.log("varcovsup change");
-       let values = this.itemsToValues(ui.varcovSupplier.value());
+        let values = this.itemsToValues(ui.varcovSupplier.value());
         this.checkPairsValue(ui.varcov, values);
       
     },
@@ -105,17 +174,13 @@ const events = {
 };
 
 
-var   syntax_changed= function(ui, event) {
-        let $element = ui.syntax.$el;
-        let value=$element.find("textarea").val()
-        ui.code.setValue(value);
-        } ;   
-
 
 var initializeAll = function(ui, context) {
     
     updateSuppliers(ui,context);
     prepareEndogenousTerms(ui,context);
+    let syntax=context.cloneArray(ui.code.value(), []);
+    syntax_set_value(ui,syntax);
 
 };
 
@@ -131,6 +196,9 @@ var updateSuppliers= function(ui,context) {
     var indList = factorsList.concat(covariatesList);
     var endogenousList = context.cloneArray(ui.endogenous.value(), []);
     var allList = factorsList.concat(covariatesList).concat(endogenousList);
+    var fromsyntax=context.workspace.vars
+    console.log("fromsyntax")
+    console.log(fromsyntax);
     ui.endogenousSupplier.setValue(context.valuesToItems(allList, FormatDef.variable));
     ui.varcovSupplier.setValue(context.valuesToItems(allList, FormatDef.variable));
     context.workspace.endogenousSupplierList=allList;
@@ -155,7 +223,6 @@ var prepareEndogenousTerms= function(ui,context) {
          var aList = endogenousTerms[i] === undefined ? [] : endogenousTerms[i] ;
              okList.push(aList);
      }
-      console.log(okList);
       ui.endogenousTerms.setValue(okList);    
       
      // we give a label for each endogeneous model
@@ -202,7 +269,6 @@ var cleanEndogenousTerms= function(ui,context) {
     if (diff.hasChanged) {
       for (var i = 0; i < endogenous.length; i++) 
            for (var j = 0; j < diff.removed.length; j++) {
-                console.log(diff.removed[j]);
                 endogenousTerms[i]=removeFromList(diff.removed[j],endogenousTerms[i],context,1);
            }
            
@@ -263,6 +329,78 @@ var updateContrasts = function(ui, context) {
     ui.contrasts.setValue(list3);
 };
 
+
+
+// syntax production thing 
+var syntax_set_value = function(ui,value) {
+
+  let $syntax=ui.syntax.$el.find("textarea")
+  
+  if (typeof(value)=="string") {
+     $syntax.val(value);
+    
+  } else {
+    
+  let string=value.join("\n")
+  $syntax.val(string);
+    
+  }
+
+};
+
+var compose_syntax = function(ui,context) {
+
+    var endogenous = context.cloneArray(ui.endogenous.value(), []);
+    var endogenousModels = context.cloneArray(ui.endogenousTerms.value(), []);
+    let strings=[];
+    for (let i = 0; i < endogenousModels.length; i++) {
+      strings[i]=endogenous[i]+"~"+endogenousModels[i].join("+")
+    }
+    syntax_set_value(ui,strings);
+
+};
+
+
+var   syntax_changed= function(ui, context) {
+        let $element = ui.syntax.$el;
+        let value=$element.find("textarea").val()
+        let valuelist=value.split(/\r?\n/)
+        const vars=syntax_get_vars(value);
+        context.workspace.vars=vars;
+        var covs=[];
+        var astring="";
+        for (var i = 0; i < valuelist.length; i++) {
+           astring=valuelist[i]
+           let abit=astring.split("~~")
+           if (abit.length>1) {
+              for (var j = 0; j < abit.length; j++) {
+                var twobit=abit[j].split("*");
+                if (twobit.length===2) {
+                       abit[j]=twobit[twobit.length-1];
+                  }
+                } 
+                console.log(abit)
+              let arr={i1: abit[0], i2: abit[1]};
+              covs.push(arr);
+             }
+        }
+        let covariables = context.itemsToValues(ui.varcovSupplier.value());
+        let ucovs=unique(covs);
+        ui.varcov.setValue(ucovs);
+        context.checkPairsValue(ui.varcov, covariables);
+        ui.code.setValue(value);
+        } ;   
+
+const syntax_get_vars=function(str) {
+
+    const words = str.split(/[\+\~=:\n]/);
+    var results=[];
+    for (var i = 0; i < words.length; i++) {
+      if (words[i].length>0) 
+          results.push(words[i])
+    }
+    return(results);
+}
 
 
 // helper functions
@@ -334,7 +472,7 @@ var unique=function(arr) {
     var u = {}, a = [];
     for(var i = 0, l = arr.length; i < l; ++i){
         var prop=ssort(JSON.stringify(arr[i]));
-        if(!u.hasOwnProperty(prop) && arr[i].length>0) {
+        if(!u.hasOwnProperty(prop) && prop.length>0) {
             a.push(arr[i]);
             u[prop] = 1;
         }
@@ -343,7 +481,7 @@ var unique=function(arr) {
 };
 
 var ssort= function(str){
-  str = str.replace(/[`\[\]"\\\/]/gi, '');
+  str = str.replace(/[`\[\]"\\\/\:\{\}]/gi, '');
   var arr = str.split(',');
   var sorted = arr.sort();
   return sorted.join('');
@@ -492,55 +630,7 @@ var log=function(obj) {
       console.log(obj);
 };
 
-var dlog=function(obj) {
-    if (DEBUG)
-      console.log(obj);
-};
 
-var flashMGridOptionListControl = function(widget,note=false) {
-        var i =widget.getSelectedRowIndices();
-        if (i.length==0) i=0;
-        widget.controls[i].controls[1].$el[0].style.backgroundColor="#ffcccc";
-        widget.controls[i].controls[1].$el[0].style.borderColor="red";
-        if (note!==false)
-           note.$el[0].style.visibility="visible";
-        
-
-};
-
-var unflashMGridOptionListControl = function(widget,note=false) {
-        var i =widget.getSelectedRowIndices();
-        if (i.length==0) i=0;
-        widget.controls[i].controls[1].$el[0].style.backgroundColor="white";
-        widget.controls[i].controls[1].$el[0].style.borderColor="rgb(46,138,199)";
-        if (note!==false)
-           note.$el[0].style.visibility="hidden";
-};
-
-var   cleanInteractions= function(quantum,cosmos,context){
-  if (quantum===undefined)
-    return(cosmos);
-    
-  var deny= context.getCombinations(quantum)  
-  for (var i=0; i < deny.length; i++) {
-    if (deny[i].length==1) {
-      deny.splice(i, 1);
-      i -= 1;
-    }
-  }
-  cosmos=context.cloneArray(cosmos)
-  for (var j=0; j< cosmos.length; j++) {
-    for (var i=0; i < deny.length; i++) {
-      if (FormatDef.term.contains(cosmos[j],deny[i])) {
-        cosmos.splice(j,1);
-        j -= 1;
-        break;
-      }
-  }
-}
- return cosmos;
-  
-};
 
 
 module.exports = events;
