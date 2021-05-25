@@ -211,7 +211,7 @@ Syntax <- R6::R6Class(
               
               ### intercepts table
               self$tab_intercepts<-.lav_structure[.lav_structure$op=="~1",]
-              if (nrow(self$tab_intercepts)==0) self$intercepts<-NULL
+              if (nrow(self$tab_intercepts)==0) self$tab_intercepts<-NULL
               
               ### info contains the info table, with some loose information about the model
               alist<-list()
