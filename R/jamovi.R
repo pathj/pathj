@@ -63,7 +63,7 @@ bogusfromb64<-function(obj,ref=NULL) fromb64(obj,ref=ref)
 ######### tables #########
 
 
-j.init_table<-function(table,obj,ci=FALSE,ciroot="",ciformat="{}% Confidence Intervals",ciwidth,indent=NULL) {
+j.init_table<-function(table,obj,ci=FALSE,ciroot="",ciformat="{}% Confidence Intervals",ciwidth,indent=NULL,spaceby=NULL) {
 
   square<-length(dim(obj))>1
   if (ci) {
@@ -72,20 +72,7 @@ j.init_table<-function(table,obj,ci=FALSE,ciroot="",ciformat="{}% Confidence Int
     table$getColumn(l)$setSuperTitle(jmvcore::format(ciformat, ciwidth))
     table$getColumn(u)$setSuperTitle(jmvcore::format(ciformat, ciwidth))
   }
-  if (square)
-     for (i in seq_len(nrow(obj))) {
-         table$addRow(rowKey=i,obj[i,])
-     }
-  else
-    for (i in seq_along(obj)) 
-      table$addRow(rowKey=i,obj[[i]])
-
-  if (!is.null(indent)) {
-    trows<-1:i
-    rows<-trows[indent]
-    for (j in rows)
-      table$addFormat(rowKey=j,col=1,jmvcore::Cell.INDENTED)
-  }
+  j.fill_table(table,obj,append=T,spaceby=spaceby)
 
 }
 j.init_table_append<-function(table,obj, indent=NULL) {
@@ -112,27 +99,33 @@ j.fill_table<-function(table,obj, fixNA=TRUE,append=FALSE,spaceby=NULL,start=1) 
   last<-start-1
   if (append)  last<-table$rowCount
   
+
   FUNC<-function(i,w) table$setRow(rowNo=i,w)
   if (append)   FUNC<-function(i,w) table$addRow(rowKey=i,w)
 
-  square<-(length(dim(obj))>1)
-  if (square)
-           for (i in seq_len(nrow(obj))) {
-              t<-obj[i,]
+  if (inherits(obj,"data.frame")) 
+      obj<-lapply(1:nrow(obj),function(i) obj[i,])
+  
+   onames<-unlist(unique(lapply(obj,names)))
+  
+
+   for (i in seq_along(obj)) {
+              t<-obj[[i]]
               if (fixNA) 
                   t[which(is.na(t))]<-""
               FUNC(i+last,t)
-           }
-   else 
-     for (i in seq_along(obj)) {
-       t<-obj[[i]]
-       if (fixNA) 
-         t[which(is.na(t))]<-""
-       FUNC(i+last,t)
    }
+  
+  if ("..space.." %in% onames)
+              spaceby<-"..space.."
+   
   if (is.something(spaceby)) {
-    col<-obj[,spaceby]
-    rows<-unlist(lapply(unique(col),function(x) min(which(col==x))))
+
+    col<-lapply(obj,function(x) x[[spaceby]])
+    rows<-unlist(lapply(unlist(unique(col)),function(x) min(which(col==x))))
+    mark(spaceby)
+    
+    mark("space",rows)
     for (j in rows)
       table$addFormat(rowNo=j+last,col=1,jmvcore::Cell.BEGIN_GROUP)
     

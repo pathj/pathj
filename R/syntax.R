@@ -146,8 +146,10 @@ Syntax <- R6::R6Class(
                 fixed.x=self$options$cov_x,
                 meanstructure = TRUE  ### this is needed for semPaths to work also with multigroups
               )
-              if (is.something(self$multigroup))
+              if (is.something(self$multigroup)) {
                 lavoptions[["ngroups"]]<-self$multigroup$nlevels
+                lavoptions[["group.equal"]]<-unlist(self$options$group.equal)
+                }
               
               results<-try_hard({
                 do.call(lavaan::lavaanify, lavoptions)

@@ -96,9 +96,26 @@ Estimate <- R6::R6Class("Estimate",
                             ff<-lavaan::fitmeasures(self$model)
                             alist<-list()
                             if (ff[["df"]]>0)
-                              alist[[1]]<-list(label="User Model",chisq=ff[["chisq"]],df=ff[["df"]],pvalue=ff[["pvalue"]])
-                            try(alist[[length(alist)+1]]<-list(label="Baseline Model",chisq=ff[["baseline.chisq"]],df=ff[["baseline.df"]],pvalue=ff[["baseline.pvalue"]]))
+                              alist[[1]]<-list(label="User Model",
+                                               chisq=ff[["chisq"]],
+                                               df=ff[["df"]],
+                                               pvalue=ff[["pvalue"]],
+                                               ..space..=1)
+                            try(alist[[length(alist)+1]]<-list(
+                                                        label="Baseline Model",
+                                                        chisq=ff[["baseline.chisq"]],
+                                                        df=ff[["baseline.df"]],
+                                                        pvalue=ff[["baseline.pvalue"]],
+                                                        ..space..=1))
                             self$tab_fitindices<-as.list(ff)
+
+                            
+                            if (is.something(self$multigroup)) {
+                               alist[[length(alist)+1]]<-list(label="Groups statistics",chisq="",df="",pvalue="",..space..=2)
+                               results<-self$multitest()
+                               for (r in seq_along(results))
+                                   alist[[length(alist)+1]]<-results[[r]]
+                            }
                             
                             self$tab_fit<-alist
                             
@@ -114,7 +131,8 @@ Estimate <- R6::R6Class("Estimate",
                             alist[[length(alist)+1]]<-c(info="",value="")
                             
                             self$tab_info<-alist
-                            if (is.something(self$constraints)) {
+
+                            if (length(grep("==|<|>",private$.lav_structure$op))) {
                               check<-sapply(self$constraints,function(con) length(grep("<|>",con$value))>0,simplify = T)
                               if (any(check)) {
                                 self$warnings<-list(topic="main",message=WARNS[["scoreineq"]])
@@ -131,12 +149,16 @@ Estimate <- R6::R6Class("Estimate",
                                 if (self$options$cumscoretest) {
                                   names(tab$cumulative)<-c("lhs","op","rhs","chisq","df","pvalue")
                                   tab$cumulative$type<-"Cumulative"
-                                  self$constfit<-rbind(self$constfit,tab$cumulative)
+                                  self$tab_constfit<-rbind(self$tab_constfit,tab$cumulative)
                                 }
+                                
+                                self$tab_constfit$lhs<-gsub(".","",self$tab_constfit$lhs,fixed = T)
+                                self$tab_constfit$rhs<-gsub(".","",self$tab_constfit$rhs,fixed = T)
+                                
                                 self$tab_fit[[length(self$tab_fit)+1]]<-list(label="Constraints Score Test",
                                                                      chisq=tab$test$X2,
                                                                      df=tab$test$df,
-                                                                     pvalue=tab$test$p.value)
+                                                                     pvalue=tab$test$p.value,..space..=3)
                                 
                                 
                               }
@@ -144,6 +166,42 @@ Estimate <- R6::R6Class("Estimate",
                             
                             ginfo("Estimation is done...")
                           }, # end of private function estimate
+                          
+                          multitest=function() {
+                            
+                            tab<-self$structure
+                            gstat<-self$model@test$standard$stat.group
+                            ### compute df for each group ###
+                            sel<-grep("==|<|>",private$.lav_structure$op)
+                            con<-private$.lav_structure[sel,]
+                            con$lhs<-gsub(".","",con$lhs,fixed=T)
+                            con$rhs<-gsub(".","",con$rhs,fixed=T)
+                            fixed<-unique(c(con$lhs,con$rhs))
+                            g<-tab[tab$label %in% fixed,"group"]
+                            df<-table(g)
+                            groups<-1:self$multigroup$nlevels
+                            dfs<-sapply(groups, function(g) ifelse(hasName(df,g),df[[as.character(g)]],0)) 
+
+                            
+                            lapply(groups, function(g) {
+                              df<-dfs[g]
+                              if (df>0) {
+                                chisq=gstat[g]
+                                pvalue=pchisq(gstat[g], df=dfs[g], lower.tail=FALSE)
+                              } else {
+                                chisq=0
+                                pvalue=1
+                              }
+                              list(
+                                  label=paste("Group",g),
+                                  chisq=chisq,
+                                  df=df,
+                                  pvalue=pvalue,
+                                  ..space..=2
+                              )
+                            })
+                                                        
+                          },
                           
                           computeR2=function(end) {
                             
@@ -153,11 +211,10 @@ Estimate <- R6::R6Class("Estimate",
                             end$ci.upper<-1-(lower/end$var)
                             end$ci.lower<-1-(upper/end$var)
                             end$r2<-1-end$std.all
-                            mark(end)
                              for (i in seq_along(end$r2)) 
                                     if (end$r2[[i]]>1 | end$r2[[i]]<0)  {
                                       end$r2[[i]]<-NA
-                                      self$warnings<-list(topic="r2",message="Some R-square indexex cannot be computed for this model")
+                                      self$warnings<-list(topic="r2",message="Some R-square index cannot be computed for this model")
                                     }
                             
                             if (self$options$r2ci=="fisher") {
