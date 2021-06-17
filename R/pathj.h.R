@@ -491,7 +491,8 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 active = list(
                     main = function() private$.items[["main"]],
                     constraints = function() private$.items[["constraints"]],
-                    indices = function() private$.items[["indices"]]),
+                    indices = function() private$.items[["indices"]],
+                    indices2 = function() private$.items[["indices2"]]),
                 private = list(),
                 public=list(
                     initialize=function(options) {
@@ -628,7 +629,50 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     `name`="rmsea.pvalue", 
                                     `title`="RMSEA p", 
                                     `type`="number", 
-                                    `format`="zto,pvalue"))))}))$new(options=options))
+                                    `format`="zto,pvalue"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="indices2",
+                            title="Fit Indices",
+                            clearWith=list(
+                                "endogenous",
+                                "covs",
+                                "factors",
+                                "ciType",
+                                "contrasts",
+                                "cov_y",
+                                "constraints"),
+                            columns=list(
+                                list(
+                                    `name`="cfi", 
+                                    `title`="CFI", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="tli", 
+                                    `title`="TLI", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="rni", 
+                                    `title`="RNI", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="gfi", 
+                                    `title`="GFI", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="agfi", 
+                                    `title`="adj. GFI", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="pgfi", 
+                                    `title`="pars. GFI", 
+                                    `type`="number", 
+                                    `format`="zto"))))}))$new(options=options))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(

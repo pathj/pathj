@@ -40,8 +40,10 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
 
             
-            #### parameter fit indices table ####
+            #### parameter fit indices tables ####
             j.init_table(self$results$fit$indices,"",ci=T,ciroot="rmsea.",ciformat='RMSEA {}% CI',ciwidth=self$options$ciWidth)
+            j.init_table(self$results$fit$indices2,"",ci=F)
+            
             ### prepare r2 table
             j.init_table(self$results$models$r2,
                          lav_machine$tab_r2,
@@ -129,8 +131,9 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ## fit info
              j.fill_table(self$results$info,lav_machine$tab_info)
             
-             ## fit indices
+             ## fit indices tables
              self$results$fit$indices$setRow(rowNo=1,lav_machine$tab_fitindices)
+             self$results$fit$indices2$setRow(rowNo=1,lav_machine$tab_fitindices)
              
              ## constraints fit test
              

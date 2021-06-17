@@ -157,6 +157,47 @@ items:
                       type: number
                       format: zto,pvalue
 
+          - name: indices2
+            title: Fit Indices
+            type: Table
+            clearWith:
+                  - endogenous
+                  - covs
+                  - factors
+                  - ciType
+                  - contrasts
+                  - cov_y
+                  - constraints
+            columns:
+
+                    - name:  cfi
+                      title: CFI
+                      type: number
+                      format: zto
+
+                    - name:  tli
+                      title: TLI
+                      type: number
+                      format: zto
+
+                    - name:  rni
+                      title: RNI
+                      type: number
+                      format: zto
+                    - name:  gfi
+                      title: GFI
+                      type: number
+                      format: zto
+                    - name: agfi
+                      title:  "adj. GFI"
+                      type: number
+                      format: zto
+                    - name: pgfi
+                      title:  "pars. GFI"
+                      type: number
+                      format: zto
+                      
+
 
   - name: models
     title: "Estimates"
