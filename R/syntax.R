@@ -401,31 +401,38 @@ Syntax <- R6::R6Class(
 
             },
             .factorlist=function(terms,factorslen) {
-              mark("iniz",terms)
-              .terms<-list()
-              for (f in names(factorslen)) {
+              ### this child function takes care of the micro-comp of the dummy names
+              .factorize=function(.term) {
+                .terms<-NULL
+                if (.term %in% names(factorslen)) {
+                  cont<-paste0(.term,FACTOR_SYMBOL,1:factorslen[[.term]])
+                  for (cc in cont)
+                    .terms<-c(.terms,cc)
+                } else
+                  .terms<-c(.terms,.term)
+                .terms
+              }
+              
+              
+                results<-list()
                 for (i in seq_along(terms)) {
                   term<-terms[[i]]
-                  mark(term)
-                  ind<-which(term==f)
-                  mark(ind)
-                  for (j in ind) {
-                    for (k in seq_len(factorslen[[f]])) {
-                      .term<-term
-                      .term[[j]]<-paste0(trimws(.term[[j]]),FACTOR_SYMBOL,k)
-                       terms[[i]]<-.term
-                    }
+                  if (length(term)==1) {
+                    results<-c(results,.factorize(term))
+                  } else {
+                    long_term<-sapply(term,function(aterm) {
+                      .factorize(aterm)        
+                    })
+                    int<-expand.grid(as.list(long_term),stringsAsFactors = F)
+                    results<-c(results,lapply(seq_len(nrow(int)), function(i) unlist(int[i,])))
                   }
                 }
-              }
-              mark("end",terms)
-              terms  
+                results
             },
             .indirect=function() {
 
               if (!self$options$indirect)
                         return()
-
               ## first, we update the lavaanified structure table
               private$.make_structure()
               tab<-private$.lav_structure

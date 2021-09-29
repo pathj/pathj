@@ -26,6 +26,7 @@ Datamatic <- R6::R6Class(
 
     },
     cleandata=function(data,interactions=NULL) {
+      
       data64 <- jmvcore::naOmit(data)
       names(data64)<-tob64(names(data))
       for (cont in self$continuous) {

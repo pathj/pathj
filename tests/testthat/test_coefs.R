@@ -10,8 +10,8 @@ mod<-pathj::pathj(formula=forms,
                   indirect = T
 )
 obj<-mod$models$defined$asDF
-
-testthat::test_that("indiect effects",{
+obj
+testthat::test_that("indirect effects",{
   testthat::expect_equal(as.character(obj$lhs[3]),"IE3")        
   testthat::expect_equal(obj$est[2],-0.004,tolerance=tol)        
   testthat::expect_equal(obj$z[4],-1.1386,tolerance=tol)        
@@ -47,5 +47,20 @@ testthat::test_that("random exo",{
   testthat::expect_equal(obj$ci.upper[1],1.1173,tolerance=tol)        
   testthat::expect_equal(obj2,1,tolerance=tol)        
   
+}
+)
+
+forms<-list("y1~groups_a*groups_b")
+mod<-pathj::pathj(formula=forms,
+                  data=pathjdata,
+                  indirect = T
+)
+mod
+
+obj<-mod$models$coefficients$asDF
+testthat::test_that("categorical interactions",{
+  testthat::expect_equal(as.character(obj$rhs[4]),"groups_a1:groups_b1")        
+  testthat::expect_equal(obj$std.all[5],.1433,tolerance=tol)        
+  testthat::expect_equal(obj$ci.upper[1],1.5845,tolerance=tol)        
 }
 )
