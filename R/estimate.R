@@ -18,8 +18,6 @@ Estimate <- R6::R6Class("Estimate",
                             self$ciwidth<-options$ciWidth/100
                           },
                           estimate=function(data) {
-                            
-                            
                             ## prepare the options based on Syntax definitions
                             lavoptions<-list(model = private$.lav_structure, 
                                              data = data,
@@ -34,10 +32,10 @@ Estimate <- R6::R6Class("Estimate",
                             if (self$options$estimator=="ML") {
                               lavoptions[["likelihood"]]<-self$options$likelihood
                             }
-                            
-                            
+                            ginfo("estimating the model...")
                             ## estimate the models
                             results<-try_hard({do.call(lavaan::lavaan,lavoptions)  })
+                            ginfo("done")
                             
                             
 

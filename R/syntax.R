@@ -401,22 +401,24 @@ Syntax <- R6::R6Class(
 
             },
             .factorlist=function(terms,factorslen) {
+              mark("iniz",terms)
               .terms<-list()
               for (f in names(factorslen)) {
-                for (term in terms) {
+                for (i in seq_along(terms)) {
+                  term<-terms[[i]]
+                  mark(term)
                   ind<-which(term==f)
-                  for (i in ind) {
-                    for (j in seq_len(factorslen[[f]])) {
+                  mark(ind)
+                  for (j in ind) {
+                    for (k in seq_len(factorslen[[f]])) {
                       .term<-term
-                      .term[[i]]<-paste0(trimws(.term[[i]]),FACTOR_SYMBOL,j)
-                      .terms[[length(.terms)+1]]<-.term
+                      .term[[j]]<-paste0(trimws(.term[[j]]),FACTOR_SYMBOL,k)
+                       terms[[i]]<-.term
                     }
                   }
-                  if (length(ind)==0)
-                    .terms[[length(.terms)+1]]<-trimws(term)
                 }
-                terms<-.terms
               }
+              mark("end",terms)
               terms  
             },
             .indirect=function() {

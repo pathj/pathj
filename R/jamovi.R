@@ -123,9 +123,6 @@ j.fill_table<-function(table,obj, fixNA=TRUE,append=FALSE,spaceby=NULL,start=1) 
 
     col<-lapply(obj,function(x) x[[spaceby]])
     rows<-unlist(lapply(unlist(unique(col)),function(x) min(which(col==x))))
-    mark(spaceby)
-    
-    mark("space",rows)
     for (j in rows)
       table$addFormat(rowNo=j+last,col=1,jmvcore::Cell.BEGIN_GROUP)
     
