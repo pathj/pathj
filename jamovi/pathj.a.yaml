@@ -325,7 +325,7 @@ options:
         - name: "4"
           title: Exog. right
 
-      default: "1"
+      default: "2"
       description:
           R: >
              Choose the diagram labels
@@ -333,19 +333,18 @@ options:
       title: Type
       type: List
       options:
+        - name:  "tree"
+          title: Tree-like
+        - name:  "tree2"
+          title: Tree-like alt.
         - name: "circle"
           title: Circle
         - name: "circle2"
           title: Circle alt.
-
-        - name:  "tree2"
-          title: Tree-like
-        - name:  "tree"
-          title: Tree-like alt.
         - name: "spring"
           title: Spring
 
-      default: "circle"
+      default: "tree"
       description:
           R: >
              Choose the diagram labels
@@ -482,6 +481,20 @@ options:
       description:
           R: >
              Choose the diagram labels
+
+
+    - name: group.equal
+      type: NMXList
+      options:
+          - name: intercepts
+            title: Intercepts
+          - name: residuals
+            title: Residual variances
+          - name: residual.covariances
+            title: Residual covariances
+          - name: regressions
+            title: regression coefficients
+      default:
 
 
 

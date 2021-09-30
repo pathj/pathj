@@ -29,8 +29,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             diag_paths = "est",
             diag_resid = FALSE,
             diag_labsize = "medium",
-            diag_rotate = "1",
-            diag_type = "circle",
+            diag_rotate = "2",
+            diag_type = "tree",
             diag_shape = "rectangle",
             diag_abbrev = "0",
             varcov = NULL,
@@ -42,7 +42,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             scoretest = TRUE,
             cumscoretest = FALSE,
             estimator = "ML",
-            likelihood = "normal", ...) {
+            likelihood = "normal",
+            group.equal = NULL, ...) {
 
             super$initialize(
                 package="pathj",
@@ -234,17 +235,17 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "2",
                     "3",
                     "4"),
-                default="1")
+                default="2")
             private$..diag_type <- jmvcore::OptionList$new(
                 "diag_type",
                 diag_type,
                 options=list(
+                    "tree",
+                    "tree2",
                     "circle",
                     "circle2",
-                    "tree2",
-                    "tree",
                     "spring"),
-                default="circle")
+                default="tree")
             private$..diag_shape <- jmvcore::OptionList$new(
                 "diag_shape",
                 diag_shape,
@@ -317,6 +318,15 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "normal",
                     "wishart"),
                 default="normal")
+            private$..group.equal <- jmvcore::OptionNMXList$new(
+                "group.equal",
+                group.equal,
+                options=list(
+                    "intercepts",
+                    "residuals",
+                    "residual.covariances",
+                    "regressions"),
+                default=NULL)
 
             self$.addOption(private$..endogenous)
             self$.addOption(private$..factors)
@@ -354,6 +364,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..cumscoretest)
             self$.addOption(private$..estimator)
             self$.addOption(private$..likelihood)
+            self$.addOption(private$..group.equal)
         }),
     active = list(
         endogenous = function() private$..endogenous$value,
@@ -391,7 +402,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         scoretest = function() private$..scoretest$value,
         cumscoretest = function() private$..cumscoretest$value,
         estimator = function() private$..estimator$value,
-        likelihood = function() private$..likelihood$value),
+        likelihood = function() private$..likelihood$value,
+        group.equal = function() private$..group.equal$value),
     private = list(
         ..endogenous = NA,
         ..factors = NA,
@@ -428,7 +440,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..scoretest = NA,
         ..cumscoretest = NA,
         ..estimator = NA,
-        ..likelihood = NA)
+        ..likelihood = NA,
+        ..group.equal = NA)
 )
 
 pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -478,7 +491,8 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 active = list(
                     main = function() private$.items[["main"]],
                     constraints = function() private$.items[["constraints"]],
-                    indices = function() private$.items[["indices"]]),
+                    indices = function() private$.items[["indices"]],
+                    indices2 = function() private$.items[["indices2"]]),
                 private = list(),
                 public=list(
                     initialize=function(options) {
@@ -521,7 +535,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="constraints",
-                            title="Contraints Score Tests",
+                            title="Constraints Score Tests",
                             visible=FALSE,
                             clearWith=list(
                                 "endogenous",
@@ -615,7 +629,50 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     `name`="rmsea.pvalue", 
                                     `title`="RMSEA p", 
                                     `type`="number", 
-                                    `format`="zto,pvalue"))))}))$new(options=options))
+                                    `format`="zto,pvalue"))))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="indices2",
+                            title="Fit Indices",
+                            clearWith=list(
+                                "endogenous",
+                                "covs",
+                                "factors",
+                                "ciType",
+                                "contrasts",
+                                "cov_y",
+                                "constraints"),
+                            columns=list(
+                                list(
+                                    `name`="cfi", 
+                                    `title`="CFI", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="tli", 
+                                    `title`="TLI", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="rni", 
+                                    `title`="RNI", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="gfi", 
+                                    `title`="GFI", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="agfi", 
+                                    `title`="adj. GFI", 
+                                    `type`="number", 
+                                    `format`="zto"),
+                                list(
+                                    `name`="pgfi", 
+                                    `title`="pars. GFI", 
+                                    `type`="number", 
+                                    `format`="zto"))))}))$new(options=options))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(

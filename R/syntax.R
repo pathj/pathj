@@ -103,7 +103,7 @@ Syntax <- R6::R6Class(
                return()
              check<-length(grep("infinite or missing",obj,fixed = T)>0) 
              if (check) 
-               obj<-ERRS[["noluck"]]
+               super$errors<-ERRS[["noluck"]]
              
              super$errors<-obj
            }
@@ -146,8 +146,10 @@ Syntax <- R6::R6Class(
                 fixed.x=self$options$cov_x,
                 meanstructure = TRUE  ### this is needed for semPaths to work also with multigroups
               )
-              if (is.something(self$multigroup))
+              if (is.something(self$multigroup)) {
                 lavoptions[["ngroups"]]<-self$multigroup$nlevels
+                lavoptions[["group.equal"]]<-unlist(self$options$group.equal)
+                }
               
               results<-try_hard({
                 do.call(lavaan::lavaanify, lavoptions)
@@ -211,7 +213,7 @@ Syntax <- R6::R6Class(
               
               ### intercepts table
               self$tab_intercepts<-.lav_structure[.lav_structure$op=="~1",]
-              if (nrow(self$tab_intercepts)==0) self$intercepts<-NULL
+              if (nrow(self$tab_intercepts)==0) self$tab_intercepts<-NULL
               
               ### info contains the info table, with some loose information about the model
               alist<-list()
@@ -399,29 +401,38 @@ Syntax <- R6::R6Class(
 
             },
             .factorlist=function(terms,factorslen) {
-              .terms<-list()
-              for (f in names(factorslen)) {
-                for (term in terms) {
-                  ind<-which(term==f)
-                  for (i in ind) {
-                    for (j in seq_len(factorslen[[f]])) {
-                      .term<-term
-                      .term[[i]]<-paste0(trimws(.term[[i]]),FACTOR_SYMBOL,j)
-                      .terms[[length(.terms)+1]]<-.term
-                    }
-                  }
-                  if (length(ind)==0)
-                    .terms[[length(.terms)+1]]<-trimws(term)
-                }
-                terms<-.terms
+              ### this child function takes care of the micro-comp of the dummy names
+              .factorize=function(.term) {
+                .terms<-NULL
+                if (.term %in% names(factorslen)) {
+                  cont<-paste0(.term,FACTOR_SYMBOL,1:factorslen[[.term]])
+                  for (cc in cont)
+                    .terms<-c(.terms,cc)
+                } else
+                  .terms<-c(.terms,.term)
+                .terms
               }
-              terms  
+              
+              
+                results<-list()
+                for (i in seq_along(terms)) {
+                  term<-terms[[i]]
+                  if (length(term)==1) {
+                    results<-c(results,.factorize(term))
+                  } else {
+                    long_term<-sapply(term,function(aterm) {
+                      .factorize(aterm)        
+                    })
+                    int<-expand.grid(as.list(long_term),stringsAsFactors = F)
+                    results<-c(results,lapply(seq_len(nrow(int)), function(i) unlist(int[i,])))
+                  }
+                }
+                results
             },
             .indirect=function() {
 
               if (!self$options$indirect)
                         return()
-
               ## first, we update the lavaanified structure table
               private$.make_structure()
               tab<-private$.lav_structure

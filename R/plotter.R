@@ -92,7 +92,11 @@ Plotter <- R6::R6Class(
         rotation<-as.numeric(self$options$diag_rotate)
         if (layout %in% c("circle") & rotation %in% c(2,4)) {
             rotation<-1
-            self$warnings<-list(topic="diagram",message=PLOT_WARNS[["rotation"]])
+            self$warnings<-list(topic="diagram",message=glue::glue(PLOT_WARNS[["rotation"]],var="Circle"))
+        }
+        if (layout %in% c("tree2") & rotation %in% c(2,4)) {
+          rotation<-1
+          self$warnings<-list(topic="diagram",message=glue::glue(PLOT_WARNS[["rotation"]],var="Tree-alternative"))
         }
         
         self$semPathsOptions<-list(

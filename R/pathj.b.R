@@ -40,24 +40,46 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
 
             
-            #### parameter fit indices table ####
+            #### parameter fit indices tables ####
             j.init_table(self$results$fit$indices,"",ci=T,ciroot="rmsea.",ciformat='RMSEA {}% CI',ciwidth=self$options$ciWidth)
+            j.init_table(self$results$fit$indices2,"",ci=F)
+            
             ### prepare r2 table
-            j.init_table(self$results$models$r2,lav_machine$tab_r2,ci=T,ciwidth=self$options$ciWidth)
+            j.init_table(self$results$models$r2,
+                         lav_machine$tab_r2,
+                         ci=T,
+                         ciwidth=self$options$ciWidth,
+                         spaceby="lgroup")
             
             #### parameter estimates table ####
-            j.init_table(self$results$models$coefficients,lav_machine$tab_coefficients,ci=T,ciwidth=self$options$ciWidth)
+            j.init_table(self$results$models$coefficients,
+                         lav_machine$tab_coefficients,
+                         ci=T,
+                         ciwidth=self$options$ciWidth,
+                         spaceby="group")
 
             ### prepare var cov table ###
-            j.init_table(self$results$models$correlations,lav_machine$tab_covariances,ci=T,ciwidth=self$options$ciWidth)
+            j.init_table(self$results$models$correlations,
+                         lav_machine$tab_covariances,
+                         ci=T,
+                         ciwidth=self$options$ciWidth,
+                         spaceby="group")
             
 
             ### prepare defined params ###
-            j.init_table(self$results$models$defined,lav_machine$tab_defined,ci=T,ciwidth=self$options$ciWidth)
+            j.init_table(self$results$models$defined,
+                         lav_machine$tab_defined,
+                         ci=T,
+                         ciwidth=self$options$ciWidth,
+                         spaceby="group")
 
             ### prepare intercepts ###
             if (self$options$showintercepts)
-                 j.init_table(self$results$models$intercepts,lav_machine$tab_intercepts,ci=T,ciwidth=self$options$ciWidth)
+                 j.init_table(self$results$models$intercepts,
+                              lav_machine$tab_intercepts,
+                              ci=T,
+                              ciwidth=self$options$ciWidth,
+                              spaceby="group")
             
             # #### contrast tables ####
              if (length(self$options$factors)>0) {
@@ -104,22 +126,24 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                       self$results$info$setNote(i,warns[["main"]][[i]])
 
             if (is.something(lav_machine$errors)) {
-                    stop(paste(lav_machine$errors,collapse = "\n\n"))
+                    stop(paste(lav_machine$errors,collapse = "; "))
             } 
             ## fit info
              j.fill_table(self$results$info,lav_machine$tab_info)
             
-             ## fit indices
+             ## fit indices tables
              self$results$fit$indices$setRow(rowNo=1,lav_machine$tab_fitindices)
+             self$results$fit$indices2$setRow(rowNo=1,lav_machine$tab_fitindices)
              
-             ## fit test
-             j.fill_table(self$results$fit$main,lav_machine$tab_fit,append=T)
-
              ## constraints fit test
              
              j.fill_table(self$results$fit$constraints,lav_machine$tab_constfit,append=T, spaceby="type")
 
 
+             ## fit test
+             j.fill_table(self$results$fit$main,lav_machine$tab_fit,append=T)
+             
+             
             ### parameters estimates ####
             j.fill_table(self$results$models$coefficients,lav_machine$tab_coefficients)
 
