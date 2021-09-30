@@ -64,3 +64,5 @@ testthat::test_that("categorical interactions",{
   testthat::expect_equal(obj$ci.upper[1],1.5845,tolerance=tol)        
 }
 )
+
+
