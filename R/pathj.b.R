@@ -133,7 +133,10 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
              ## fit indices tables
              self$results$fit$indices$setRow(rowNo=1,lav_machine$tab_fitindices)
+             j.add_warnings(self$results$fit$indices,lav_machine,"tab_fitindices")
+             
              self$results$fit$indices2$setRow(rowNo=1,lav_machine$tab_fitindices)
+             j.add_warnings(self$results$fit$indices2,lav_machine,"tab_fitindices")
              
              ## constraints fit test
              
