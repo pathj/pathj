@@ -91,31 +91,39 @@ Estimate <- R6::R6Class("Estimate",
                             
                             #### fit tests ###
                             alist<-list()
-                            ff<-lavaan::fitmeasures(self$model)
-                            alist<-list()
-                            if (ff[["df"]]>0)
-                              alist[[1]]<-list(label="User Model",
+                            results<-try_hard(lavaan::fitmeasures(self$model))
+                     
+                            if (is.something(results$obj)) {
+                                    ff<-results$obj
+                                    alist<-list()
+                                    if (ff[["df"]]>0)
+                                        alist[[1]]<-list(label="User Model",
                                                chisq=ff[["chisq"]],
                                                df=ff[["df"]],
                                                pvalue=ff[["pvalue"]],
                                                ..space..=1)
-                            try(alist[[length(alist)+1]]<-list(
+                                    try(alist[[length(alist)+1]]<-list(
                                                         label="Baseline Model",
                                                         chisq=ff[["baseline.chisq"]],
                                                         df=ff[["baseline.df"]],
                                                         pvalue=ff[["baseline.pvalue"]],
                                                         ..space..=1))
-                            self$tab_fitindices<-as.list(ff)
+                                    self$tab_fitindices<-as.list(ff)
 
                             
-                            if (is.something(self$multigroup)) {
-                               alist[[length(alist)+1]]<-list(label="Groups statistics",chisq="",df="",pvalue="",..space..=2)
-                               results<-self$multitest()
-                               for (r in seq_along(results))
-                                   alist[[length(alist)+1]]<-results[[r]]
+                                    if (is.something(self$multigroup)) {
+                                       alist[[length(alist)+1]]<-list(label="Groups statistics",chisq="",df="",pvalue="",..space..=2)
+                                       multitests<-self$multitest()
+                                       for (r in seq_along(multitests))
+                                            alist[[length(alist)+1]]<-multitests[[r]]
+                                    }
+                                    self$tab_fit<-alist
+                                    
+                            } else {
+                              self$warnings<-list(topic="tab_fitindices",message=results$warning)
+                              self$warnings<-list(topic="tab_fitindices",message=results$error)
                             }
                             
-                            self$tab_fit<-alist
                             
                             # fit indices
                             alist<-list()
