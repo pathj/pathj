@@ -76,7 +76,6 @@ Estimate <- R6::R6Class("Estimate",
                             
                             ## collect defined parameters table
                             self$tab_defined<-.lav_params[.lav_params$op==":=",]
-                            mark(self$tab_defined)
                             if (nrow(self$tab_defined)==0) self$tab_defined<-NULL
                             
                             # prepare and comput R2 and collect a table for them
@@ -93,7 +92,7 @@ Estimate <- R6::R6Class("Estimate",
                             #### fit tests ###
                             alist<-list()
                             results<-try_hard(lavaan::fitmeasures(self$model))
-                            mark(results)
+                     
                             if (is.something(results$obj)) {
                                     ff<-results$obj
                                     alist<-list()

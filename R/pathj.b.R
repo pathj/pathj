@@ -34,6 +34,9 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ### fill the info table ###
             j.init_table(self$results$info,lav_machine$tab_info)
             j.init_table_append(self$results$info,lav_machine$models())
+            mark(self$results$info,lav_machine$varcov)
+            
+            j.init_table_append(self$results$info,lav_machine$varcov)
             j.init_table_append(self$results$info,lav_machine$constraints)
             j.init_table_append(self$results$info,lav_machine$defined)
             

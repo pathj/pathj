@@ -32,6 +32,7 @@ Syntax <- R6::R6Class(
               options=NULL,
               constraints=NULL,
               defined=NULL,
+              varcov=list(),
               hasInteractions=FALSE,
               interactions=list(),
               factorinfo=NULL,
@@ -344,7 +345,6 @@ Syntax <- R6::R6Class(
                      for (name in names(self$contrasts_names))
                        realconsts[[i]]<-gsub(name,self$contrasts_names[[name]],realconsts[[i]],fixed=TRUE)
               }
-              
               ## now we translate realestims to be passed to estimation with correct names, B64ed and interaction/factor aware
               for (i in seq_along(realestims)) {
                   estim<-realestims[[i]]
@@ -393,9 +393,12 @@ Syntax <- R6::R6Class(
               factorinfo64<-self$factorinfo
               names(factorinfo64)<-tob64(names(factorinfo64))
               varcov64<-private$.factorlist(varcov64,factorinfo64)
+              ## here we fill the list of varcov for the syntax and for the info table
               res<-lapply(varcov64, function(vc) {
                 if (length(vc)==2) {
-                        private$.lav_defined[[length(private$..lav_defined)+1]]<-paste(vc[[1]],vc[[2]],sep = "~~")
+                        private$.lav_defined[[length(private$.lav_defined)+1]]<-paste(vc[[1]],vc[[2]],sep = "~~")
+                        self$varcov[[length(self$varcov)+1]]<-list(info="Model",
+                                                                   value=paste(fromb64(vc[[1]]),fromb64(vc[[2]]),sep = "~~"))
                 }
               })
 
