@@ -98,9 +98,9 @@ Plotter <- R6::R6Class(
           rotation<-1
           self$warnings<-list(topic="diagram",message=glue::glue(PLOT_WARNS[["rotation"]],var="Tree-alternative"))
         }
-        
+
         self$semPathsOptions<-list(
-                      layout = layout,
+                      layout = private$.layout(),
                       residuals = self$options$diag_resid,
                       rotation = rotation ,
                       intercepts = F
@@ -108,7 +108,7 @@ Plotter <- R6::R6Class(
                       ,whatLabels=labs
                       ,sizeMan = size
                       ,sizeMan2=size/2
-                      , curve=2
+                      , curve=1
                       , shapeMan=self$options$diag_shape
                       ,edge.label.cex =1.3)
         
@@ -128,7 +128,7 @@ Plotter <- R6::R6Class(
       ### we need this because semPaths does not work with do.call() in windows
         res<-try_hard({
         semPlot::semPaths(object = options$object,
-                      layout =options$layout,
+                      layout =private$.layout(),
                       residuals = options$residuals,
                       rotation = options$rotation,
                       intercepts = options$intercepts,
@@ -146,6 +146,42 @@ Plotter <- R6::R6Class(
           self$warnings<-list(topic="diagram",message=res$error)
       
       return(res)
+    },
+    .layout=function() {
+      
+      if (self$options$diag_type!="mediation")
+        return(self$options$diag_type)
+      
+      ie<-private$.operator$ieffects
+      
+      if (is.null(ie))
+         return("tree")
+
+      fit<-private$.operator$model  
+      pt<-fit@ParTable
+      lhs<-pt$lhs[pt$op!=":="]
+      xcoo<-sapply(unique(lhs), function(x) {
+        max((unlist(lapply(ie, function(xx) which(xx==x)))))
+      })
+      xcoo[!is.finite(xcoo)]<-1
+     
+      
+      q<-cbind(seq_along(xcoo),order(xcoo))
+      orig_order<-q[order(q[,2]),1]
+      xcoo<-xcoo[order(xcoo)]
+      if (length(unique(xcoo))==length(xcoo)) {
+        ycoo<-rep(.80,length(xcoo))
+        ycoo[xcoo==min(xcoo)]<-ycoo[xcoo==max(xcoo)]<-.2
+      } else {
+        ycoo<-unlist(lapply(unique(xcoo), function(x) {
+          nvars<-length(xcoo[xcoo==x])
+          1:nvars/(nvars+1)
+        }))
+      }
+      p<-cbind(x=xcoo,y=ycoo)
+      p<-p[orig_order,]
+      p
+      
     }
 
   ) # end of private

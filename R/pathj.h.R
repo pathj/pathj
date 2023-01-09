@@ -28,9 +28,10 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             diagram = FALSE,
             diag_paths = "est",
             diag_resid = FALSE,
+            diag_offset_labs = FALSE,
             diag_labsize = "medium",
             diag_rotate = "2",
-            diag_type = "tree",
+            diag_type = "mediation",
             diag_shape = "rectangle",
             diag_abbrev = "0",
             varcov = NULL,
@@ -218,6 +219,10 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "diag_resid",
                 diag_resid,
                 default=FALSE)
+            private$..diag_offset_labs <- jmvcore::OptionBool$new(
+                "diag_offset_labs",
+                diag_offset_labs,
+                default=FALSE)
             private$..diag_labsize <- jmvcore::OptionList$new(
                 "diag_labsize",
                 diag_labsize,
@@ -240,12 +245,13 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "diag_type",
                 diag_type,
                 options=list(
+                    "mediation",
                     "tree",
                     "tree2",
                     "circle",
                     "circle2",
                     "spring"),
-                default="tree")
+                default="mediation")
             private$..diag_shape <- jmvcore::OptionList$new(
                 "diag_shape",
                 diag_shape,
@@ -349,6 +355,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..diagram)
             self$.addOption(private$..diag_paths)
             self$.addOption(private$..diag_resid)
+            self$.addOption(private$..diag_offset_labs)
             self$.addOption(private$..diag_labsize)
             self$.addOption(private$..diag_rotate)
             self$.addOption(private$..diag_type)
@@ -388,6 +395,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         diagram = function() private$..diagram$value,
         diag_paths = function() private$..diag_paths$value,
         diag_resid = function() private$..diag_resid$value,
+        diag_offset_labs = function() private$..diag_offset_labs$value,
         diag_labsize = function() private$..diag_labsize$value,
         diag_rotate = function() private$..diag_rotate$value,
         diag_type = function() private$..diag_type$value,
@@ -426,6 +434,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..diagram = NA,
         ..diag_paths = NA,
         ..diag_resid = NA,
+        ..diag_offset_labs = NA,
         ..diag_labsize = NA,
         ..diag_rotate = NA,
         ..diag_type = NA,
@@ -1067,6 +1076,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     "diag_type",
                                     "diag_shape",
                                     "diag_abbrev",
+                                    "diag_offset_labs",
                                     "contrasts",
                                     "endogenousTerms",
                                     "cov_y",

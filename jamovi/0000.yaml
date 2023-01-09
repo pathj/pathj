@@ -1,12 +1,12 @@
 ---
 title: Path Analysis
 name: pathj
-version: 1.0.0
+version: 1.1.0
 jms: '1.0'
 authors:
   - Marcello Gallucci
 maintainer: Marcello Gallucci <mcfanda@gmail.com>
-date: 2021-1-1
+date: 2022-1-1
 type: R
 description: Path Analysis based on lavaan
 analyses:
