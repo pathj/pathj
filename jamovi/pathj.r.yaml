@@ -553,6 +553,8 @@ items:
                       - diag_type
                       - diag_shape
                       - diag_abbrev
+                      - diag_offset_labs
+
                       - contrasts
                       - endogenousTerms
                       - cov_y

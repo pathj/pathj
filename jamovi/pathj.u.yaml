@@ -303,6 +303,10 @@ children:
               - type: CheckBox
                 name: diag_resid
                 enable: (diagram)
+              - type: CheckBox
+                name: diag_offset_labs
+                enable: (diagram)
+                
       - type: LayoutBox
         margin: large
         stretchFactor: 1
@@ -420,7 +424,6 @@ children:
                 type: CheckBox
                 optionName: group.equal
                 optionPart: residual.covariances
-
   - type: CollapseBox
     label: Factors Coding
     collapsed: true

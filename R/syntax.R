@@ -38,6 +38,7 @@ Syntax <- R6::R6Class(
               factorinfo=NULL,
               contrasts_names=NULL,
               multigroup=NULL,
+              ieffects=NULL,
               indirect_names=NULL,
               initialize=function(options,datamatic) {
                 super$initialize(options=options,vars=unlist(c(options$endogenous,options$factors,options$covs)))
@@ -434,8 +435,6 @@ Syntax <- R6::R6Class(
             },
             .indirect=function() {
 
-              if (!self$options$indirect)
-                        return()
               ## first, we update the lavaanified structure table
               private$.make_structure()
               tab<-private$.lav_structure
@@ -499,6 +498,14 @@ Syntax <- R6::R6Class(
               pars<-sapply(labslist,paste,collapse="*")
               if (!is.something(pars))
                 return()
+              ### we need this for the plotter layout "mediation"
+              mark(termslist)
+              self$ieffects<-termslist
+              
+              ## if not required, get out
+              if (!self$options$indirect)
+                return()
+              
               labs<-sapply(termslist,paste,collapse=" \U21d2 ")
               plabs<-paste0("IE",1:length(pars))
               synt<-paste(plabs,pars,sep=":=",collapse = " ; ")

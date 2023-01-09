@@ -34,8 +34,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ### fill the info table ###
             j.init_table(self$results$info,lav_machine$tab_info)
             j.init_table_append(self$results$info,lav_machine$models())
-            mark(self$results$info,lav_machine$varcov)
-            
+           
             j.init_table_append(self$results$info,lav_machine$varcov)
             j.init_table_append(self$results$info,lav_machine$constraints)
             j.init_table_append(self$results$info,lav_machine$defined)
@@ -182,8 +181,8 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (!is.something(image$state$semModel))
                  return()
             options<-private$.plot_machine$semPathsOptions
-            res<-try_hard(
-            semPlot::semPaths(object = image$state$semModel,
+      #      res<-try_hard({
+            sp<-semPlot::semPaths(image$state$semModel,
                               layout =options$layout,
                               residuals = options$residuals,
                               rotation = options$rotation,
@@ -194,10 +193,23 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                               sizeMan2=options$sizeMan2,
                               curve=options$curve,
                               shapeMan=options$shapeMan,
-                              edge.label.cex =options$edge.label.cex)
-            )
+                              edge.label.cex =options$edge.label.cex,
+                              doNotPlot=TRUE,
+                              style = "ram")
+            
+            if (self$options$diag_offset_labs)
+                sp$graphAttributes$Edges$edge.label.position<-rep(.60,length(sp$graphAttributes$Edges$edge.label.position))
+            
+            sp$graphAttributes$Edges$lty[sp$Edgelist$bidirectional]<-2
+            sp$graphAttributes$Edges$curve[sp$Edgelist$bidirectional]<-.6
+            
+            plot(sp)
+            
+       #     }
+      #      )
             note<-FALSE
             
+       return(TRUE)     
             if (!isFALSE(res$error)) {
                 if  (length(grep("Circle layout only supported",res$error,fixed = T))>0) {
                     res$error<-PLOT_WARNS[["nocircle"]]
