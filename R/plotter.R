@@ -99,6 +99,7 @@ Plotter <- R6::R6Class(
           self$warnings<-list(topic="diagram",message=glue::glue(PLOT_WARNS[["rotation"]],var="Tree-alternative"))
         }
 
+        
         self$semPathsOptions<-list(
                       layout = private$.layout(),
                       residuals = self$options$diag_resid,
@@ -125,6 +126,7 @@ Plotter <- R6::R6Class(
     .plotgroup=NULL,
     .operator=NULL,
     .semPaths=function(options) {
+
       ### we need this because semPaths does not work with do.call() in windows
         res<-try_hard({
         semPlot::semPaths(object = options$object,
