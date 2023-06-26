@@ -10,6 +10,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             factors = NULL,
             covs = NULL,
             multigroup = NULL,
+            tests = NULL,
             se = "standard",
             r2ci = "fisher",
             r2test = FALSE,
@@ -87,6 +88,14 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ordinal"),
                 permitted=list(
                     "factor"),
+                default=NULL)
+            private$..tests <- jmvcore::OptionNMXList$new(
+                "tests",
+                tests,
+                options=list(
+                    "Satorra.Bentler",
+                    "Yuan.Bentler",
+                    "Satterthwaite"),
                 default=NULL)
             private$..se <- jmvcore::OptionList$new(
                 "se",
@@ -338,6 +347,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..factors)
             self$.addOption(private$..covs)
             self$.addOption(private$..multigroup)
+            self$.addOption(private$..tests)
             self$.addOption(private$..se)
             self$.addOption(private$..r2ci)
             self$.addOption(private$..r2test)
@@ -378,6 +388,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         factors = function() private$..factors$value,
         covs = function() private$..covs$value,
         multigroup = function() private$..multigroup$value,
+        tests = function() private$..tests$value,
         se = function() private$..se$value,
         r2ci = function() private$..r2ci$value,
         r2test = function() private$..r2test$value,
@@ -417,6 +428,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..factors = NA,
         ..covs = NA,
         ..multigroup = NA,
+        ..tests = NA,
         ..se = NA,
         ..r2ci = NA,
         ..r2test = NA,
@@ -1132,6 +1144,7 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 revision = revision,
                 pause = NULL,
                 completeWhenFilled = FALSE,
-                requiresMissings = FALSE)
+                requiresMissings = FALSE,
+                weightsSupport = 'auto')
         }))
 

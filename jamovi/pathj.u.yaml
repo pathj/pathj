@@ -161,6 +161,21 @@ children:
             children:
               - type: CheckBox
                 name: r2test
+              - name: tests_Satorra.Bentler
+                type: CheckBox
+                optionPart: Satorra.Bentler
+                optionName: tests
+              - name: tests_Yuan.Bentler
+                type: CheckBox
+                optionPart: Yuan.Bentler
+                optionName: tests
+              - name: tests_Satterthwaite
+                type: CheckBox
+                optionPart: Satterthwaite
+                optionName: tests
+                
+
+
   - type: CollapseBox
     label: Parameters Options
     collapsed: true

@@ -77,6 +77,18 @@ options:
           R: factor defining groups for multigroup analysis
 
 
+    - name: tests
+      type: NMXList
+      options:
+          - name:  Satorra.Bentler
+            title: Satorra-Bentler
+          - name:  Yuan.Bentler
+            title: Yuan Bentler
+          - name:  Satterthwaite
+            title: Satterthwaite
+      default:
+
+
     - name: se
       title: Standard errors
       type: List
@@ -84,9 +96,9 @@ options:
         - name: standard
           title: Standard
         - name: robust.sem
-          title: Robust
+          title: Robust (Conventional)
         - name: robust.huber.white
-          title: Pseudo ML
+          title: Robust (Huber-White)
         - name: boot
           title: Bootstrap
       default: standard
@@ -464,7 +476,7 @@ options:
       type: List
       options:
         - name:  ML
-          title: Maximum Lik
+          title: Maximum Likelihood
         - name: GLS 
           title: Generalized least squares
         - name: WLS 
@@ -473,6 +485,7 @@ options:
           title: Diagonally weighted LS
         - name: ULS
           title: Unweighted LS
+          
       default: ML
       description:
           R: >
