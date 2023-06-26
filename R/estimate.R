@@ -102,14 +102,36 @@ Estimate <- R6::R6Class("Estimate",
                                                df=ff[["df"]],
                                                pvalue=ff[["pvalue"]],
                                                ..space..=1)
-                                    try(alist[[length(alist)+1]]<-list(
-                                                        label="Baseline Model",
-                                                        chisq=ff[["baseline.chisq"]],
-                                                        df=ff[["baseline.df"]],
-                                                        pvalue=ff[["baseline.pvalue"]],
-                                                        ..space..=1))
+                                    
                                     self$tab_fitindices<-as.list(ff)
+                                    
+                                    if (is.something(self$options$tests)) {
+                                      
+                                      tests<-lavaan::lavTest(self$model,test = unlist(self$options$tests))
+                                      ## if only an additional test is required, lavaan produces a list
+                                      ## of properties of one test, not a list of tests
+                                      if (length(tests)>5) tests<-list(tests)
 
+                                      for (i in seq_along(tests)) {
+                                        t<-tests[[i]]
+                                        
+                                        label  <-  strsplit(t$test,".",fixed = T)[[1]]
+                                        label<-paste(lapply(label,function(x) stringr::str_to_title(x)),collapse = "-")
+                                        chisq  <-  t$stat
+                                        df     <-  t$df
+                                        p      <-  t$pvalue
+                                        alist[[length(alist)+1]]<-list(label=label,chisq=chisq,df=df,pvalue=p)
+                                      }
+                                      
+                                    }
+
+                                    try(alist[[length(alist)+1]]<-list(
+                                      label="Baseline Model",
+                                      chisq=ff[["baseline.chisq"]],
+                                      df=ff[["baseline.df"]],
+                                      pvalue=ff[["baseline.pvalue"]],
+                                      ..space..=1))
+                                    
                             
                                     if (is.something(self$multigroup)) {
                                        alist[[length(alist)+1]]<-list(label="Groups statistics",chisq="",df="",pvalue="",..space..=2)
@@ -187,8 +209,6 @@ Estimate <- R6::R6Class("Estimate",
                             df<-table(g)
                             groups<-1:self$multigroup$nlevels
                             dfs<-sapply(groups, function(g) ifelse(hasName(df,g),df[[as.character(g)]],0)) 
-
-                            
                             lapply(groups, function(g) {
                               df<-dfs[g]
                               if (df>0) {
