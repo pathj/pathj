@@ -1,7 +1,7 @@
 # pathj: A Suite for Path Analysis
 
 jamovi Path Analysis 
-version > 0.7.*
+version > 1.*.*
 
 Path analysis for *jamovi* based on lavaan, with jamovi output style and functions. Provides access to lavaan
              estimation with restructuring of data and options for executing most common tasks in path analysis.
