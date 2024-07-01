@@ -190,7 +190,7 @@ j.add_warnings<-function(atable,adispatch,atopic=NULL) {
         atable$setError(paste(adispatch$warnings[[atopic]],collapse = "; "))
   else
       for (i in seq_along(adispatch$warnings[[atopic]]))
-               atable$setNote(i,adispatch$warnings[[atopic]][[i]])
+               atable$setNote(paste0("n",i),adispatch$warnings[[atopic]][[i]])
 
   atable$setVisible(TRUE)
   
