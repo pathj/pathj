@@ -99,7 +99,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 j.init_table(self$results$contraintsnotes,CONT_EXAMPLES,indent=-1)
                 j.init_table_append(self$results$contraintsnotes,DP_EXAMPLES,indent=-1)
                 j.init_table_append(self$results$contraintsnotes,SY_EXAMPLES,indent=-1)
-                self$results$contraintsnotes$setNote(1,CONT_NOTE)
+                self$results$contraintsnotes$setNote("1",CONT_NOTE)
             }
             
             private$.lav_machine<-lav_machine
@@ -125,7 +125,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             warns<-lav_machine$warnings
             if (is.something(warns[["main"]]))
                 for (i in seq_along(warns[["main"]]))
-                      self$results$info$setNote(i,warns[["main"]][[i]])
+                      self$results$info$setNote(paste0("n",i),warns[["main"]][[i]])
 
             if (is.something(lav_machine$errors)) {
                     stop(paste(lav_machine$errors,collapse = "; "))

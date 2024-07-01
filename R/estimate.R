@@ -54,7 +54,8 @@ Estimate <- R6::R6Class("Estimate",
                               level = self$ciwidth,
                               boot.ci.type = self$options$bootci
                             )
-                            
+
+                                                      
                             ## we need some info initialized by Syntax regarding the parameters properties
                             .lav_structure<-private$.lav_structure
                              sel<-grep("==|<|>",.lav_structure$op,invert = T)
