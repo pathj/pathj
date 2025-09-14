@@ -17,6 +17,7 @@ analyses:
     menuSubgroup: pathj
     menuTitle: Path Analysis
     description: Path Analysis
+    category: analyses
 datasets:
   - name: pathjdata
     path: pathjdata.csv

@@ -196,7 +196,52 @@ items:
                       title:  "pars. GFI"
                       type: number
                       format: zto
-                      
+
+
+  - name: diagnostics
+    title: "Model Diagnostics"
+    type: Group
+    visible: (modindices)
+    clearWith:
+                  - endogenousTerms
+    items:
+          - name: modindices
+            title: Modification Indices
+            type: Table
+            visible: (modindices)
+            clearWith:
+                  - endogenous
+                  - covs
+                  - factors
+                  - constraints
+                  - cov_y
+                  - multigroup
+                  - modindices
+                  - miMin
+            columns:
+                    - name: lgroup
+                      title: Group
+                      type: text
+                      visible: (multigroup)
+                      combineBelow: true
+                    - name: lhs
+                      title: LHS
+                      type: text
+                    - name: op
+                      title: ""
+                      type: text
+                    - name: rhs
+                      title: RHS
+                      type: text
+                    - name: mi
+                      title: MI
+                      type: number
+                    - name: epc
+                      title: EPC
+                      type: number
+                    - name: sepc.all
+                      title: "SEPC"
+                      type: number
 
 
   - name: models

@@ -11,6 +11,7 @@ Estimate <- R6::R6Class("Estimate",
                           tab_fitindices=NULL,
                           ciwidth=NULL,
                           tab_constfit=NULL,
+                          tab_mi=NULL,
                           initialize=function(options,datamatic) {
                             super$initialize(
                               options=options,
@@ -193,6 +194,37 @@ Estimate <- R6::R6Class("Estimate",
                               }
                             } # end of checking constraints
                             
+                            # modification indices (diagnostics)
+                            if (isTRUE(self$options$modindices)) {
+                              mires <- try_hard({ lavaan::modindices(self$model) })
+                              if (isFALSE(mires$error)) {
+                                mi <- mires$obj
+                                # threshold filter
+                                if (is.something(self$options$miMin))
+                                  mi <- mi[!is.na(mi$mi) & mi$mi >= self$options$miMin, , drop=FALSE]
+                                # add group label if multigroup
+                                if (is.something(self$multigroup)) {
+                                  mi$lgroup <- self$multigroup$levels[mi$group]
+                                } else {
+                                  mi$lgroup <- "1"
+                                }
+                                # decode names
+                                mi$lhs <- fromb64(mi$lhs, self$vars)
+                                mi$rhs <- fromb64(mi$rhs, self$vars)
+                                # keep relevant columns if present
+                                keep <- c("lgroup","lhs","op","rhs","mi","epc","sepc.all")
+                                cols <- intersect(keep, names(mi))
+                                mi <- mi[, cols, drop=FALSE]
+                                # order by MI descending
+                                if ("mi" %in% names(mi))
+                                  mi <- mi[order(-mi$mi), , drop=FALSE]
+                                self$tab_mi <- mi
+                              } else {
+                                self$warnings <- list(topic="modindices", message = mires$warning)
+                                self$warnings <- list(topic="modindices", message = mires$error)
+                              }
+                            }
+
                             ginfo("Estimation is done...")
                           }, # end of private function estimate
                           

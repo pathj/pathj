@@ -180,18 +180,28 @@ j.fill_table<-function(table,obj, fixNA=TRUE, append=FALSE, spaceby=NULL, start=
 }
 
 j.add_warnings<-function(atable,adispatch,atopic=NULL) {
-  
+  # Normalize and attach warnings/errors as UTF-8 strings to a table
   if (is.null(atopic)) atopic<-atable$name
-  
-  if (!is.something(adispatch$warnings[[atopic]]))
+
+  w <- adispatch$warnings[[atopic]]
+  if (!is.something(w))
        return()
-  
+
+  # flatten, coerce to character, force utf-8, drop NA
+  w <- unlist(w, use.names = FALSE)
+  w <- as.character(w)
+  w[is.na(w)] <- ""
+  w <- vapply(w, enc2utf8, FUN.VALUE = character(1))
+  w <- w[nchar(w) > 0]
+
+  if (length(w) == 0)
+    return()
+
   if (atable$rowCount==0)
-        atable$setError(paste(adispatch$warnings[[atopic]],collapse = "; "))
+        atable$setError(paste(w, collapse = "; "))
   else
-      for (i in seq_along(adispatch$warnings[[atopic]]))
-               atable$setNote(i,adispatch$warnings[[atopic]][[i]])
+      for (i in seq_along(w))
+               atable$setNote(as.character(i), w[[i]])
 
   atable$setVisible(TRUE)
-  
 }

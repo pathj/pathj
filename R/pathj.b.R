@@ -82,6 +82,13 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                               ci=T,
                               ciwidth=self$options$ciWidth,
                               spaceby="group")
+
+            ### model diagnostics: modification indices ###
+            # init with current content (likely none at init)
+            j.init_table(self$results$diagnostics$modindices,
+                         lav_machine$tab_mi,
+                         ci=F,
+                         spaceby="lgroup")
             
             # #### contrast tables ####
              if (length(self$options$factors)>0) {
@@ -123,9 +130,16 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             lav_machine$estimate(data)
 
             warns<-lav_machine$warnings
-            if (is.something(warns[["main"]]))
-                for (i in seq_along(warns[["main"]]))
-                      self$results$info$setNote(paste0("n",i),warns[["main"]][[i]])
+            if (is.something(warns[["main"]])) {
+                notes <- warns[["main"]]
+                notes <- unlist(notes, use.names = FALSE)
+                notes <- as.character(notes)
+                notes[is.na(notes)] <- ""
+                notes <- vapply(notes, enc2utf8, FUN.VALUE = character(1))
+                notes <- notes[nchar(notes) > 0]
+                for (i in seq_along(notes))
+                      self$results$info$setNote(paste0("n",i), notes[[i]])
+            }
 
             if (is.something(lav_machine$errors)) {
                     stop(paste(lav_machine$errors,collapse = "; "))
@@ -147,7 +161,11 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
              ## fit test
              j.fill_table(self$results$fit$main,lav_machine$tab_fit,append=T)
-             
+
+             ## diagnostics: modification indices
+             j.fill_table(self$results$diagnostics$modindices, lav_machine$tab_mi, append=TRUE)
+             j.add_warnings(self$results$diagnostics$modindices, lav_machine, "modindices")
+
              
             ### parameters estimates ####
             j.fill_table(self$results$models$coefficients,lav_machine$tab_coefficients)

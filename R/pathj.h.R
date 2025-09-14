@@ -11,6 +11,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             covs = NULL,
             multigroup = NULL,
             tests = NULL,
+            modindices = FALSE,
+            miMin = 4,
             se = "standard",
             r2ci = "fisher",
             r2test = FALSE,
@@ -97,6 +99,15 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "Yuan.Bentler",
                     "Satterthwaite"),
                 default=NULL)
+            private$..modindices <- jmvcore::OptionBool$new(
+                "modindices",
+                modindices,
+                default=FALSE)
+            private$..miMin <- jmvcore::OptionNumber$new(
+                "miMin",
+                miMin,
+                default=4,
+                min=0)
             private$..se <- jmvcore::OptionList$new(
                 "se",
                 se,
@@ -348,6 +359,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..covs)
             self$.addOption(private$..multigroup)
             self$.addOption(private$..tests)
+            self$.addOption(private$..modindices)
+            self$.addOption(private$..miMin)
             self$.addOption(private$..se)
             self$.addOption(private$..r2ci)
             self$.addOption(private$..r2test)
@@ -389,6 +402,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         covs = function() private$..covs$value,
         multigroup = function() private$..multigroup$value,
         tests = function() private$..tests$value,
+        modindices = function() private$..modindices$value,
+        miMin = function() private$..miMin$value,
         se = function() private$..se$value,
         r2ci = function() private$..r2ci$value,
         r2test = function() private$..r2test$value,
@@ -429,6 +444,8 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..covs = NA,
         ..multigroup = NA,
         ..tests = NA,
+        ..modindices = NA,
+        ..miMin = NA,
         ..se = NA,
         ..r2ci = NA,
         ..r2test = NA,
@@ -472,6 +489,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         model = function() private$..model,
         info = function() private$.items[["info"]],
         fit = function() private$.items[["fit"]],
+        diagnostics = function() private$.items[["diagnostics"]],
         models = function() private$.items[["models"]],
         pathgroup = function() private$.items[["pathgroup"]],
         contraintsnotes = function() private$.items[["contraintsnotes"]]),
@@ -694,6 +712,64 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     `title`="pars. GFI", 
                                     `type`="number", 
                                     `format`="zto"))))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    modindices = function() private$.items[["modindices"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="diagnostics",
+                            title="Model Diagnostics",
+                            clearWith=list(
+                    "endogenousTerms"))
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="modindices",
+                            title="Modification Indices",
+                            visible="(modindices)",
+                            clearWith=list(
+                                "endogenous",
+                                "covs",
+                                "factors",
+                                "constraints",
+                                "cov_y",
+                                "multigroup",
+                                "modindices",
+                                "miMin"),
+                            columns=list(
+                                list(
+                                    `name`="lgroup", 
+                                    `title`="Group", 
+                                    `type`="text", 
+                                    `visible`="(multigroup)", 
+                                    `combineBelow`=TRUE),
+                                list(
+                                    `name`="lhs", 
+                                    `title`="LHS", 
+                                    `type`="text"),
+                                list(
+                                    `name`="op", 
+                                    `title`="", 
+                                    `type`="text"),
+                                list(
+                                    `name`="rhs", 
+                                    `title`="RHS", 
+                                    `type`="text"),
+                                list(
+                                    `name`="mi", 
+                                    `title`="MI", 
+                                    `type`="number"),
+                                list(
+                                    `name`="epc", 
+                                    `title`="EPC", 
+                                    `type`="number"),
+                                list(
+                                    `name`="sepc.all", 
+                                    `title`="SEPC", 
+                                    `type`="number"))))}))$new(options=options))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(

@@ -272,6 +272,28 @@ children:
             children:
               - type: CheckBox
                 name: cov_x
+
+  - type: CollapseBox
+    label: Model Diagnostics
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: LayoutBox
+        margin: large
+        style: inline
+        children:
+          - type: Label
+            label: Modification Indices
+            margin: large
+            style: list
+            children:
+              - type: CheckBox
+                name: modindices
+              - type: TextBox
+                name: miMin
+                label: Minimum MI
+                format: number
+                enable: (modindices)
   - type: CollapseBox
     label: Path Diagram
     collapsed: true

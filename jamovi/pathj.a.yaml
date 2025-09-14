@@ -89,6 +89,24 @@ options:
       default:
 
 
+    - name: modindices
+      title: Modification Indices
+      type: Bool
+      default: false
+      description:
+          R: >
+            TRUE or FALSE (default). When TRUE, compute and display lavaan modification indices.
+
+    - name: miMin
+      title: Minimum MI
+      type: Number
+      default: 4
+      min: 0
+      description:
+          R: >
+            Minimum modification index threshold for inclusion in the table.
+
+
     - name: se
       title: Standard errors
       type: List
