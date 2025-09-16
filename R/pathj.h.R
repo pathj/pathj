@@ -34,7 +34,6 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             pcurve_linetype = "solid",
             pcurve_lwd = 1.2,
             pcurve_palette = "default",
-            pcurve_ci = FALSE,
             diag_paths = "est",
             diag_resid = FALSE,
             diag_offset_labs = FALSE,
@@ -261,10 +260,6 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "default",
                     "okabeito"),
                 default="default")
-            private$..pcurve_ci <- jmvcore::OptionBool$new(
-                "pcurve_ci",
-                pcurve_ci,
-                default=FALSE)
             private$..diag_paths <- jmvcore::OptionList$new(
                 "diag_paths",
                 diag_paths,
@@ -468,7 +463,6 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         pcurve_linetype = function() private$..pcurve_linetype$value,
         pcurve_lwd = function() private$..pcurve_lwd$value,
         pcurve_palette = function() private$..pcurve_palette$value,
-        pcurve_ci = function() private$..pcurve_ci$value,
         diag_paths = function() private$..diag_paths$value,
         diag_resid = function() private$..diag_resid$value,
         diag_offset_labs = function() private$..diag_offset_labs$value,
@@ -516,7 +510,6 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..pcurve_linetype = NA,
         ..pcurve_lwd = NA,
         ..pcurve_palette = NA,
-        ..pcurve_ci = NA,
         ..diag_paths = NA,
         ..diag_resid = NA,
         ..diag_offset_labs = NA,
@@ -1324,3 +1317,4 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresMissings = FALSE,
                 weightsSupport = 'auto')
         }))
+

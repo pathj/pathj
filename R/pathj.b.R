@@ -354,7 +354,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     v
                 }
                 rows <- list()
-                show_ci <- isTRUE(try(self$options$pcurve_ci, silent=TRUE))
+                show_ci <- FALSE
                 for (i in seq_len(nrow(tab))) {
                     # derive group label robustly: prefer lgroup, else map numeric group via mg$levels
                     if ("lgroup" %in% names(tab)) {
@@ -387,7 +387,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             abs_lo <- min(abs(zlo_n), abs(zhi_n))
                             pu <- 2 * stats::pnorm(-abs_lo)
                             pl <- 2 * stats::pnorm(-abs_hi)
-                            rows[[length(rows)+1]] <- list(group=g, lhs=tab$lhs[i], rhs=tab$rhs[i], n=n, p=p, p_l=pl, p_u=pu, beta=tab$beta[i])
+                            rows[[length(rows)+1]] <- list(group=g, lhs=tab$lhs[i], rhs=tab$rhs[i], n=n, p=p, beta=tab$beta[i])
                         } else {
                             rows[[length(rows)+1]] <- list(group=g, lhs=tab$lhs[i], rhs=tab$rhs[i], n=n, p=p, beta=tab$beta[i])
                         }
@@ -436,13 +436,9 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     labs <- levels(d$lab)
                     vals <- rep(okabeito, length.out=length(labs))
                     names(vals) <- labs
-                    p <- p + ggplot2::scale_color_manual(values = vals) +
-                             ggplot2::scale_fill_manual(values = vals)
+                    p <- p + ggplot2::scale_color_manual(values = vals)
                 }
-                if (isTRUE(show_ci) && all(c("p_l","p_u") %in% names(d))) {
-                    p <- p + ggplot2::geom_ribbon(data=d, ggplot2::aes(x=n, ymin=p_l, ymax=p_u, fill=lab, group=lab), alpha=0.15, inherit.aes=FALSE) +
-                            ggplot2::guides(fill = "none")
-                }
+                
                 p <- p + ggplot2::geom_line(data=d, ggplot2::aes(x = n, y = p, color = lab, group = lab), linetype=.lt, size=.lw) +
                         ggplot2::geom_point(data=d, ggplot2::aes(x = n, y = p, color = lab, group = lab), size = 2)
                 print(p)

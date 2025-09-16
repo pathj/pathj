@@ -535,8 +535,4 @@ children:
             label: Line width
             format: number
             enable: (pgraphs)
-          - type: CheckBox
-            name: pcurve_ci
-            label: Show 95% CI
-            enable: (pgraphs)
   
