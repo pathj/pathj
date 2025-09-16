@@ -29,6 +29,11 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             endogenousTerms = list(
                 list()),
             diagram = FALSE,
+            pgraphs = FALSE,
+            pcurve_sizes = '50, 100, 200, 500',
+            pcurve_linetype = "solid",
+            pcurve_lwd = 1.2,
+            pcurve_palette = "default",
             diag_paths = "est",
             diag_resid = FALSE,
             diag_offset_labs = FALSE,
@@ -226,6 +231,35 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "diagram",
                 diagram,
                 default=FALSE)
+            private$..pgraphs <- jmvcore::OptionBool$new(
+                "pgraphs",
+                pgraphs,
+                default=FALSE)
+            private$..pcurve_sizes <- jmvcore::OptionString$new(
+                "pcurve_sizes",
+                pcurve_sizes,
+                default='50, 100, 200, 500')
+            private$..pcurve_linetype <- jmvcore::OptionList$new(
+                "pcurve_linetype",
+                pcurve_linetype,
+                options=list(
+                    "solid",
+                    "dashed",
+                    "dotted"),
+                default="solid")
+            private$..pcurve_lwd <- jmvcore::OptionNumber$new(
+                "pcurve_lwd",
+                pcurve_lwd,
+                min=0.2,
+                max=5,
+                default=1.2)
+            private$..pcurve_palette <- jmvcore::OptionList$new(
+                "pcurve_palette",
+                pcurve_palette,
+                options=list(
+                    "default",
+                    "okabeito"),
+                default="default")
             private$..diag_paths <- jmvcore::OptionList$new(
                 "diag_paths",
                 diag_paths,
@@ -376,6 +410,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..scaling)
             self$.addOption(private$..endogenousTerms)
             self$.addOption(private$..diagram)
+            self$.addOption(private$..pgraphs)
             self$.addOption(private$..diag_paths)
             self$.addOption(private$..diag_resid)
             self$.addOption(private$..diag_offset_labs)
@@ -419,6 +454,11 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         scaling = function() private$..scaling$value,
         endogenousTerms = function() private$..endogenousTerms$value,
         diagram = function() private$..diagram$value,
+        pgraphs = function() private$..pgraphs$value,
+        pcurve_sizes = function() private$..pcurve_sizes$value,
+        pcurve_linetype = function() private$..pcurve_linetype$value,
+        pcurve_lwd = function() private$..pcurve_lwd$value,
+        pcurve_palette = function() private$..pcurve_palette$value,
         diag_paths = function() private$..diag_paths$value,
         diag_resid = function() private$..diag_resid$value,
         diag_offset_labs = function() private$..diag_offset_labs$value,
@@ -461,6 +501,11 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..scaling = NA,
         ..endogenousTerms = NA,
         ..diagram = NA,
+        ..pgraphs = NA,
+        ..pcurve_sizes = NA,
+        ..pcurve_linetype = NA,
+        ..pcurve_lwd = NA,
+        ..pcurve_palette = NA,
         ..diag_paths = NA,
         ..diag_resid = NA,
         ..diag_offset_labs = NA,
@@ -492,6 +537,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         diagnostics = function() private$.items[["diagnostics"]],
         models = function() private$.items[["models"]],
         pathgroup = function() private$.items[["pathgroup"]],
+        pgraphs = function() private$.items[["pgraphs"]],
         contraintsnotes = function() private$.items[["contraintsnotes"]]),
     private = list(
         ..model = NA),
@@ -1183,6 +1229,45 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     `name`="message", 
                                     `type`="text", 
                                     `title`="Model diagram notes"))))}))$new(options=options))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    pcurves = function() private$.items[["pcurves"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="pgraphs",
+                            title="P-Value Graphs",
+                            clearWith=list(
+                    "endogenous",
+                    "cov_y",
+                    "constraints",
+                    "varcov",
+                    "data",
+                    "multigroup"))
+                        self$add(jmvcore::Array$new(
+                            options=options,
+                            name="pcurves",
+                            title="P-Value Curves",
+                            visible="(pgraphs)",
+                            template=jmvcore::Image$new(
+                                options=options,
+                                title="$key",
+                                renderFun=".plotPvalues",
+                                width=900,
+                                height=500,
+                                clearWith=list(
+                                    "endogenous",
+                                    "covs",
+                                    "factors",
+                                    "multigroup",
+                                    "constraints",
+                                    "endogenousTerms",
+                                    "data",
+                                    "varcov",
+                                    "cov_y"))))}))$new(options=options))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="contraintsnotes",
@@ -1223,4 +1308,3 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresMissings = FALSE,
                 weightsSupport = 'auto')
         }))
-

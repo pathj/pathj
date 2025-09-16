@@ -509,3 +509,36 @@ children:
             stretchFactor: 0.5
             template:
               type: ComboBox
+
+  - type: CollapseBox
+    label: P-Value Graphs
+    collapsed: true
+    stretchFactor: 1
+    style: list
+    children:
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
+        children:
+          - type: CheckBox
+            name: pgraphs
+            label: Show p-value graphs
+          - type: TextBox
+            name: pcurve_sizes
+            label: Sample sizes
+            format: text
+            enable: (pgraphs)
+            stretchFactor: 1
+          - type: ComboBox
+            name: pcurve_palette
+            label: Palette
+            enable: (pgraphs)
+          - type: ComboBox
+            name: pcurve_linetype
+            label: Line type
+            enable: (pgraphs)
+          - type: TextBox
+            name: pcurve_lwd
+            label: Line width
+            format: number
+            enable: (pgraphs)

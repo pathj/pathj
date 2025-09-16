@@ -113,6 +113,22 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             private$.data_machine<-data_machine
             plot_machine$initPlots()
             private$.plot_machine<-plot_machine 
+
+            ## init p-graphs images per group (separate panels)
+            if (self$options$pgraphs) {
+                images <- self$results$pgraphs$pcurves
+                if (is.something(data_machine$multigroup))  {
+                    for (level in data_machine$multigroup$levels) {
+                        images$addItem(level)
+                        images$get(key = level)$setTitle(paste(data_machine$multigroup$var, "=", level))
+                        images$get(key = level)$setState(list(gkey = level))
+                    }
+                } else {
+                    images$addItem("All")
+                    images$get(key = "All")$setTitle("")
+                    images$get(key = "All")$setState(list(gkey = NULL))
+                }
+            }
             
             
         },
@@ -256,9 +272,298 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             if (note)
                 self$results$pathgroup$notes$setVisible(TRUE)
-
+            
             return(TRUE)
 
+        },
+        .plotPvalues=function(image, ggtheme, theme, ...) {
+            if (self$options$pgraphs==FALSE)
+                return()
+
+            dm <- private$.data_machine
+            lavm <- private$.lav_machine
+            # work with a plain data.frame copy of the source data
+            alldata <- as.data.frame(self$data)
+            mg <- dm$multigroup
+
+            .sizesFor <- function(N) {
+                base <- c(50, 100, 200, 500)
+                ss <- base[base <= N]
+                if (length(ss) == 0) {
+                    ss <- unique(round(c(max(5, floor(N*0.33)), max(6, floor(N*0.66)), N)))
+                    ss <- ss[ss <= N]
+                }
+                unique(sort(ss))
+            }
+
+            ## New: project p-values from standardized effects without resampling
+            {
+                # parse sizes from options (comma/space separated), fallback to defaults
+                .parseSizes <- function(s) {
+                    if (is.null(s) || length(s) == 0) return(c(50,100,200,500))
+                    s <- as.character(s)
+                    parts <- unlist(strsplit(s, "[,;\t\n\r ]+"))
+                    v <- suppressWarnings(as.numeric(parts))
+                    v <- unique(sort(v[is.finite(v) & v >= 2]))
+                    if (length(v) == 0) v <- c(50,100,200,500)
+                    v
+                }
+                sizes <- .parseSizes(try(self$options$pcurve_sizes, silent=TRUE))
+                tab <- lavm$tab_coefficients
+                if (is.something(tab)) {
+                    tab$z <- suppressWarnings(as.numeric(tab$z))
+                    tab <- tab[is.finite(tab$z), , drop=FALSE]
+                    # capture standardized beta for labelling
+                    if ("std.all" %in% names(tab))
+                        tab$beta <- suppressWarnings(as.numeric(tab$std.all))
+                    else
+                        tab$beta <- NA_real_
+                }
+                if (!is.something(tab) || nrow(tab)==0) {
+                    jmvcore::reject("Model has no regression coefficients to plot")
+                    return()
+                }
+                # group sizes
+                nobs <- try(lavaan::lavInspect(lavm$model, "nobs"), silent=TRUE)
+                nmap <- list()
+                if (inherits(nobs, "try-error")) {
+                    nmap[["All"]] <- nrow(as.data.frame(self$data))
+                } else if (is.list(nobs)) {
+                    for (nm in names(nobs)) nmap[[nm]] <- as.numeric(nobs[[nm]])
+                } else if (length(nobs) > 1 && is.something(mg)) {
+                    for (i in seq_along(mg$levels)) nmap[[mg$levels[[i]]]] <- as.numeric(nobs[[i]])
+                } else if (length(nobs) == 1) {
+                    nmap[["All"]] <- as.numeric(nobs)
+                }
+
+                rows <- list()
+                for (i in seq_len(nrow(tab))) {
+                    g <- if ("lgroup" %in% names(tab)) as.character(tab$lgroup[i]) else "All"
+                    Nobs <- suppressWarnings(as.numeric(nmap[[g]]))
+                    # Guard against missing/invalid group sizes causing NA in if() condition
+                    if (length(Nobs) == 0 || is.na(Nobs) || !is.finite(Nobs) || Nobs <= 1) next
+                    z0 <- as.numeric(tab$z[i])
+                    for (n in sizes) {
+                        zn <- z0 * sqrt(n / Nobs)
+                        p <- 2 * stats::pnorm(-abs(zn))
+                        rows[[length(rows)+1]] <- list(group=g, lhs=tab$lhs[i], rhs=tab$rhs[i], n=n, p=p, beta=tab$beta[i])
+                    }
+                }
+                d <- if (length(rows)>0) do.call(rbind, lapply(rows, as.data.frame, stringsAsFactors=FALSE)) else NULL
+                if (is.null(d) || nrow(d)==0) {
+                    jmvcore::reject("Could not compute projected p-values")
+                    return()
+                }
+                d$p <- pmin(pmax(as.numeric(d$p), 0), 1)
+                d$n <- as.numeric(d$n)
+                d <- d[order(d$n), , drop=FALSE]
+                # label with beta per path (same within a group)
+                fmtb <- function(x) ifelse(is.finite(x), sprintf("%.3f", x), "NA")
+                d$lab <- paste0(d$rhs, " \u2192 ", d$lhs, " (\u03B2=", fmtb(as.numeric(d$beta)), ")")
+
+                baseBreaks <- sizes
+                brks <- baseBreaks
+
+                # filter per-image group
+                ttl <- "Mean p-values vs Sample Size"
+                if (is.something(mg) && !is.null(image$state$gkey)) {
+                    d <- d[d$group == image$state$gkey, , drop=FALSE]
+                    ttl <- paste0(image$state$gkey, ": Mean p-values vs Sample Size")
+                }
+                # line style options
+                .lt <- try(as.character(self$options$pcurve_linetype), silent=TRUE)
+                if (!is.character(.lt) || length(.lt) == 0 || ! .lt[1] %in% c("solid","dashed","dotted")) .lt <- "solid"
+                .lw <- try(as.numeric(self$options$pcurve_lwd), silent=TRUE)
+                if (!is.finite(.lw) || .lw <= 0) .lw <- 1.2
+
+                p <- ggplot2::ggplot() +
+                     ggplot2::scale_x_continuous(breaks = brks) +
+                     ggplot2::scale_y_continuous(limits = c(0, 1)) +
+                     ggplot2::geom_hline(ggplot2::aes(yintercept = 0.05, linetype = "p = 0.05"), color = "red", show.legend = TRUE) +
+                     ggplot2::scale_linetype_manual(values = c("p = 0.05" = "dashed"), name = "") +
+                     ggplot2::labs(x = "Sample size (n)", y = "Mean p-value", color = "Predictor", title = ttl) +
+                     ggplot2::theme_minimal(base_size = 12)
+                # palette option
+                .pal <- try(as.character(self$options$pcurve_palette), silent=TRUE)
+                if (is.character(.pal) && length(.pal) > 0 && .pal[1] == "okabeito") {
+                    okabeito <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+                    p <- p + ggplot2::scale_color_manual(values = okabeito)
+                }
+                p <- p + ggplot2::geom_line(data=d, ggplot2::aes(x = n, y = p, color = lab, group = lab), linetype=.lt, size=.lw) +
+                        ggplot2::geom_point(data=d, ggplot2::aes(x = n, y = p, color = lab, group = lab), size = 2)
+                print(p)
+                return(TRUE)
+            }
+
+            out <- list()
+            reps <- 5
+
+            if (is.something(mg)) {
+                # resolve the grouping column name robustly
+                possibles <- unique(c(mg$var, mg$var64, try(jmvcore::toB64(mg$var), silent=TRUE), try(jmvcore::fromB64(mg$var64), silent=TRUE)))
+                possibles <- as.character(possibles[!is.na(possibles)])
+                gvar <- possibles[possibles %in% names(alldata)][1]
+                if (!is.something(gvar)) {
+                    # fallback to no-group plot
+                    mg <- NULL
+                }
+            }
+
+            if (is.something(mg)) {
+                # robustly determine group levels from the actual data
+                gvec <- alldata[[gvar]]
+                gfac <- as.factor(gvec)
+                tab <- table(gfac)
+                levs <- names(tab)             # only levels present in the subset
+                if (length(levs) == 0) {
+                    # fallback to no-group plot
+                    mg <- NULL
+                } else {
+                    counts <- as.integer(tab)
+                    Nmin <- min(counts)
+                sizes <- .sizesFor(Nmin)
+                sizes <- sizes[sizes >= 2]     # avoid zero or one
+                    if (length(sizes) == 0) {
+                        # fallback to no-group plot
+                        mg <- NULL
+                    }
+                }
+            }
+
+            if (is.something(mg)) {
+                for (n in sizes) {
+                    for (r in seq_len(reps)) {
+                        # Sample n per group and bind
+                        subsets <- lapply(levs, function(l) {
+                            rows <- (!is.na(gfac)) & (gfac == l)
+                            d <- alldata[rows, , drop=FALSE]
+                            if (nrow(d) < n) return(NULL)
+                            d[sample.int(nrow(d), n), , drop=FALSE]
+                        })
+                        if (any(vapply(subsets, is.null, TRUE)))
+                            next()
+                        sub <- do.call(rbind, subsets)
+                        csub <- dm$cleandata(sub, lavm$interactions)
+                        est <- Estimate$new(self$options, dm)
+                        res <- try_hard({ est$estimate(csub) })
+                        if (res$error != FALSE)
+                            next()
+                        tab <- est$tab_coefficients
+                        if (!is.something(tab))
+                            next()
+                        df <- data.frame(group = tab$lgroup, lhs = tab$lhs, rhs = tab$rhs,
+                                         p = tab$pvalue, n = n, stringsAsFactors = FALSE)
+                        out[[length(out)+1]] <- df
+                    }
+                }
+            } else {
+                N <- nrow(alldata)
+                sizes <- .sizesFor(N)
+                sizes <- sizes[sizes >= 2]
+                for (n in sizes) {
+                    if (N < n) next
+                    for (r in seq_len(reps)) {
+                        sub <- alldata[sample.int(N, n), , drop=FALSE]
+                        csub <- dm$cleandata(sub, lavm$interactions)
+                        est <- Estimate$new(self$options, dm)
+                        res <- try_hard({ est$estimate(csub) })
+                        if (res$error != FALSE)
+                            next()
+                        tab <- est$tab_coefficients
+                        if (!is.something(tab))
+                            next()
+                        df <- data.frame(group = "All", lhs = tab$lhs, rhs = tab$rhs,
+                                         p = tab$pvalue, n = n, stringsAsFactors = FALSE)
+                        out[[length(out)+1]] <- df
+                    }
+                }
+            }
+
+            if (length(out) == 0) {
+                # Fallback: use full-sample estimates so the user sees something
+                tab <- lavm$tab_coefficients
+                if (!is.something(tab)) {
+                    jmvcore::reject("Model has no regression coefficients to plot")
+                    return()
+                }
+                if (is.something(mg) && is.something(gvar) && gvar %in% names(alldata)) {
+                    gfac <- as.factor(alldata[[gvar]])
+                    gtab <- table(gfac)
+                    nper <- as.integer(gtab)
+                    names(nper) <- names(gtab)
+                    # align counts to the labels used in the coefficients table
+                    labs <- as.character(tab$lgroup)
+                    nval <- nper[match(labs, names(nper))]
+                    # replace unresolved with total N (best effort)
+                    nval[is.na(nval)] <- sum(!is.na(gfac))
+                    df <- data.frame(group = tab$lgroup, lhs = tab$lhs, rhs = tab$rhs,
+                                     p = tab$pvalue, n = as.integer(nval), stringsAsFactors = FALSE)
+                } else {
+                    N <- nrow(alldata)
+                    df <- data.frame(group = "All", lhs = tab$lhs, rhs = tab$rhs,
+                                     p = tab$pvalue, n = as.integer(N), stringsAsFactors = FALSE)
+                }
+                out[[1]] <- df
+            }
+
+            d_raw <- do.call(rbind, out)
+            # guard against zeros/negatives from underflow
+            eps <- .Machine$double.xmin
+            d_raw$p[!is.finite(d_raw$p) | is.na(d_raw$p)] <- NA
+            d_raw <- d_raw[!is.na(d_raw$p) & is.finite(d_raw$p), , drop=FALSE]
+            # summarise across replicates to get mean
+            if (nrow(d_raw) > 0) {
+                key <- d_raw[c("group","lhs","rhs","n")]
+                id <- interaction(key, drop=TRUE)
+                pmean <- tapply(d_raw$p, id, mean, na.rm=TRUE)
+                keyu <- unique(key[match(names(pmean), as.character(id)),])
+                d <- data.frame(keyu, p=as.numeric(pmean))
+                d <- d[order(d$n), , drop=FALSE]
+                # label each line as 'lhs <- rhs'
+                d$lab <- paste(d$lhs, "<-", d$rhs)
+            } else {
+                d <- d_raw
+            }
+            if (nrow(d) == 0) {
+                jmvcore::reject("No valid p-values computed for any subsample")
+                return()
+            }
+
+            ttl <- "Mean p-values vs Sample Size"
+
+            baseBreaks <- c(50, 100, 200, 500)
+            if (nrow(d) > 0) {
+                brks <- baseBreaks[baseBreaks >= min(d$n) & baseBreaks <= max(d$n)]
+                if (length(brks) == 0) brks <- sort(unique(d$n))
+            } else {
+                brks <- baseBreaks
+            }
+
+            # If this image is keyed to a specific group, filter to it
+            if (is.something(mg) && !is.null(image$state$gkey)) {
+                d <- d[d$group == image$state$gkey, , drop=FALSE]
+                ttl <- paste0(image$state$gkey, ": Mean p-values vs Sample Size")
+            }
+
+            # Build a base plot: X = sample size (n), Y = mean p-value
+            p <- ggplot2::ggplot() +
+                 ggplot2::scale_x_continuous(breaks = brks) +
+                 ggplot2::scale_y_continuous(limits = c(0, 1)) +
+                 ggplot2::geom_hline(ggplot2::aes(yintercept = 0.05, linetype = "p = 0.05"), color = "red", show.legend = TRUE) +
+                 ggplot2::scale_linetype_manual(values = c("p = 0.05" = "dashed"), name = "") +
+                 ggplot2::labs(x = "Sample size (n)", y = "Mean p-value", color = "Predictor", title = ttl) +
+                 ggplot2::theme_minimal(base_size = 12)
+
+            if (nrow(d) > 0) {
+                # draw mean line (no CI bars)
+                p <- p + ggplot2::geom_line(data=d, ggplot2::aes(x = n, y = p, color = lab, group = lab)) +
+                        ggplot2::geom_point(data=d, ggplot2::aes(x = n, y = p, color = lab, group = lab))
+            } else {
+                p <- p + ggplot2::annotate("text", x = min(brks, na.rm=TRUE), y = 0.2, label = "No valid p-values to plot", hjust = 0)
+            }
+
+            print(p)
+            return(TRUE)
         },
         .marshalFormula= function(formula, data, name) {
             endogenous<-list()
