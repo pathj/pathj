@@ -355,7 +355,18 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
                 rows <- list()
                 for (i in seq_len(nrow(tab))) {
-                    g <- if ("lgroup" %in% names(tab)) as.character(tab$lgroup[i]) else "All"
+                    # derive group label robustly: prefer lgroup, else map numeric group via mg$levels
+                    if ("lgroup" %in% names(tab)) {
+                        g <- as.character(tab$lgroup[i])
+                    } else if ("group" %in% names(tab) && is.something(mg)) {
+                        gi <- suppressWarnings(as.integer(tab$group[i]))
+                        if (is.finite(gi) && gi >= 1 && gi <= length(mg$levels))
+                            g <- as.character(mg$levels[[gi]])
+                        else
+                            g <- "All"
+                    } else {
+                        g <- "All"
+                    }
                     Nobs <- .getNobs(g)
                     # Guard against missing/invalid group sizes causing NA in if() condition
                     if (length(Nobs) == 0 || is.na(Nobs) || !is.finite(Nobs) || Nobs <= 1) next
