@@ -521,8 +521,7 @@ children:
             name: pcurve_sizes
             label: Sample sizes
             format: text
-            enable: (pgraphs)
-            stretchFactor: 1
+            visible: (pgraphs)
           - type: ComboBox
             name: pcurve_palette
             label: Palette
