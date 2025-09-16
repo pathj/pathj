@@ -404,13 +404,14 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 .lw <- try(as.numeric(self$options$pcurve_lwd), silent=TRUE)
                 if (!is.finite(.lw) || .lw <= 0) .lw <- 1.2
 
+                cap <- paste0("Sample sizes: ", paste(sizes, collapse=", "))
                 p <- ggplot2::ggplot() +
-                     ggplot2::scale_x_continuous(breaks = brks) +
-                     ggplot2::scale_y_continuous(limits = c(0, 1)) +
-                     ggplot2::geom_hline(ggplot2::aes(yintercept = 0.05, linetype = "p = 0.05"), color = "red", show.legend = TRUE) +
-                     ggplot2::scale_linetype_manual(values = c("p = 0.05" = "dashed"), name = "") +
-                     ggplot2::labs(x = "Sample size (n)", y = "Mean p-value", color = "Predictor", title = ttl) +
-                     ggplot2::theme_minimal(base_size = 12)
+                      ggplot2::scale_x_continuous(breaks = brks) +
+                      ggplot2::scale_y_continuous(limits = c(0, 1)) +
+                      ggplot2::geom_hline(ggplot2::aes(yintercept = 0.05, linetype = "p = 0.05"), color = "red", show.legend = TRUE) +
+                      ggplot2::scale_linetype_manual(values = c("p = 0.05" = "dashed"), name = "") +
+                      ggplot2::labs(x = "Sample size (n)", y = "Mean p-value", color = "Predictor", title = ttl, caption = cap) +
+                      ggplot2::theme_minimal(base_size = 12)
                 # palette option
                 .pal <- try(as.character(self$options$pcurve_palette), silent=TRUE)
                 if (is.character(.pal) && length(.pal) > 0 && .pal[1] == "okabeito") {
