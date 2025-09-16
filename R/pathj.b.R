@@ -371,20 +371,10 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     # Guard against missing/invalid group sizes causing NA in if() condition
                     if (length(Nobs) == 0 || is.na(Nobs) || !is.finite(Nobs) || Nobs <= 1) next
                     z0 <- as.numeric(tab$z[i])
-                    zlo0 <- z0 - 1.96
-                    zhi0 <- z0 + 1.96
                     for (n in sizes) {
-                        sq <- sqrt(n / Nobs)
-                        zn <- z0 * sq
-                        # CI for projected z based on z0 +- 1.96 at Nobs
-                        zlo_n <- zlo0 * sq
-                        zhi_n <- zhi0 * sq
-                        abs_hi <- max(abs(zlo_n), abs(zhi_n))
-                        abs_lo <- min(abs(zlo_n), abs(zhi_n))
+                        zn <- z0 * sqrt(n / Nobs)
                         p  <- 2 * stats::pnorm(-abs(zn))
-                        pu <- 2 * stats::pnorm(-abs_lo)  # upper band = larger p (smaller |z|)
-                        pl <- 2 * stats::pnorm(-abs_hi)  # lower band = smaller p (larger |z|)
-                        rows[[length(rows)+1]] <- list(group=g, lhs=tab$lhs[i], rhs=tab$rhs[i], n=n, p=p, p_l=pl, p_u=pu, beta=tab$beta[i])
+                        rows[[length(rows)+1]] <- list(group=g, lhs=tab$lhs[i], rhs=tab$rhs[i], n=n, p=p, beta=tab$beta[i])
                     }
                 }
                 d <- if (length(rows)>0) do.call(rbind, lapply(rows, as.data.frame, stringsAsFactors=FALSE)) else NULL
@@ -393,8 +383,6 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     return()
                 }
                 d$p <- pmin(pmax(as.numeric(d$p), 0), 1)
-                if ("p_l" %in% names(d)) d$p_l <- pmin(pmax(as.numeric(d$p_l), 0), 1)
-                if ("p_u" %in% names(d)) d$p_u <- pmin(pmax(as.numeric(d$p_u), 0), 1)
                 d$n <- as.numeric(d$n)
                 d <- d[order(d$n), , drop=FALSE]
                 # label with beta per path (same within a group)
@@ -428,16 +416,10 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 .pal <- try(as.character(self$options$pcurve_palette), silent=TRUE)
                 if (is.character(.pal) && length(.pal) > 0 && .pal[1] == "okabeito") {
                     okabeito <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-                    p <- p + ggplot2::scale_color_manual(values = okabeito) +
-                             ggplot2::scale_fill_manual(values = okabeito)
-                }
-                # draw 95% CI ribbons beneath lines
-                if (all(c("p_l","p_u") %in% names(d))) {
-                    p <- p + ggplot2::geom_ribbon(data=d, ggplot2::aes(x=n, ymin=p_l, ymax=p_u, fill=lab, group=lab), alpha=0.15, inherit.aes=FALSE)
+                    p <- p + ggplot2::scale_color_manual(values = okabeito)
                 }
                 p <- p + ggplot2::geom_line(data=d, ggplot2::aes(x = n, y = p, color = lab, group = lab), linetype=.lt, size=.lw) +
                         ggplot2::geom_point(data=d, ggplot2::aes(x = n, y = p, color = lab, group = lab), size = 2)
-                p <- p + ggplot2::guides(fill = "none")
                 print(p)
                 return(TRUE)
             }
