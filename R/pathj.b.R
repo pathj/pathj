@@ -336,10 +336,27 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     nmap[["All"]] <- as.numeric(nobs)
                 }
 
+                # helper to robustly resolve per-group N
+                .getNobs <- function(g) {
+                    # try mapped by group label
+                    v <- suppressWarnings(as.numeric(nmap[[g]]))
+                    if (length(v) == 0 || is.na(v) || !is.finite(v) || v <= 1) {
+                        # fallback by group index based on mg$levels position
+                        if (is.something(mg)) {
+                            pos <- which(as.character(mg$levels) %in% as.character(g))
+                            if (length(pos) == 1 && pos >= 1) {
+                                vv <- suppressWarnings(as.numeric(nobs[[pos]]))
+                                if (length(vv) > 0 && is.finite(vv) && vv > 1)
+                                    v <- vv
+                            }
+                        }
+                    }
+                    v
+                }
                 rows <- list()
                 for (i in seq_len(nrow(tab))) {
                     g <- if ("lgroup" %in% names(tab)) as.character(tab$lgroup[i]) else "All"
-                    Nobs <- suppressWarnings(as.numeric(nmap[[g]]))
+                    Nobs <- .getNobs(g)
                     # Guard against missing/invalid group sizes causing NA in if() condition
                     if (length(Nobs) == 0 || is.na(Nobs) || !is.finite(Nobs) || Nobs <= 1) next
                     z0 <- as.numeric(tab$z[i])
