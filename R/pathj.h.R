@@ -30,10 +30,11 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 list()),
             diagram = FALSE,
             pgraphs = FALSE,
-            pcurve_sizes = '50, 100, 200, 500',
+            pcurve_sizes = "50, 100, 200, 500",
             pcurve_linetype = "solid",
             pcurve_lwd = 1.2,
             pcurve_palette = "default",
+            pcurve_ci = FALSE,
             diag_paths = "est",
             diag_resid = FALSE,
             diag_offset_labs = FALSE,
@@ -238,7 +239,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..pcurve_sizes <- jmvcore::OptionString$new(
                 "pcurve_sizes",
                 pcurve_sizes,
-                default='50, 100, 200, 500')
+                default="50, 100, 200, 500")
             private$..pcurve_linetype <- jmvcore::OptionList$new(
                 "pcurve_linetype",
                 pcurve_linetype,
@@ -250,9 +251,9 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..pcurve_lwd <- jmvcore::OptionNumber$new(
                 "pcurve_lwd",
                 pcurve_lwd,
+                default=1.2,
                 min=0.2,
-                max=5,
-                default=1.2)
+                max=5)
             private$..pcurve_palette <- jmvcore::OptionList$new(
                 "pcurve_palette",
                 pcurve_palette,
@@ -260,6 +261,10 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "default",
                     "okabeito"),
                 default="default")
+            private$..pcurve_ci <- jmvcore::OptionBool$new(
+                "pcurve_ci",
+                pcurve_ci,
+                default=FALSE)
             private$..diag_paths <- jmvcore::OptionList$new(
                 "diag_paths",
                 diag_paths,
@@ -411,6 +416,10 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..endogenousTerms)
             self$.addOption(private$..diagram)
             self$.addOption(private$..pgraphs)
+            self$.addOption(private$..pcurve_sizes)
+            self$.addOption(private$..pcurve_linetype)
+            self$.addOption(private$..pcurve_lwd)
+            self$.addOption(private$..pcurve_palette)
             self$.addOption(private$..diag_paths)
             self$.addOption(private$..diag_resid)
             self$.addOption(private$..diag_offset_labs)
@@ -459,6 +468,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         pcurve_linetype = function() private$..pcurve_linetype$value,
         pcurve_lwd = function() private$..pcurve_lwd$value,
         pcurve_palette = function() private$..pcurve_palette$value,
+        pcurve_ci = function() private$..pcurve_ci$value,
         diag_paths = function() private$..diag_paths$value,
         diag_resid = function() private$..diag_resid$value,
         diag_offset_labs = function() private$..diag_offset_labs$value,
@@ -506,6 +516,7 @@ pathjOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..pcurve_linetype = NA,
         ..pcurve_lwd = NA,
         ..pcurve_palette = NA,
+        ..pcurve_ci = NA,
         ..diag_paths = NA,
         ..diag_resid = NA,
         ..diag_offset_labs = NA,
@@ -1267,7 +1278,12 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     "endogenousTerms",
                                     "data",
                                     "varcov",
-                                    "cov_y"))))}))$new(options=options))
+                                    "cov_y",
+                                    "pgraphs",
+                                    "pcurve_sizes",
+                                    "pcurve_linetype",
+                                    "pcurve_lwd",
+                                    "pcurve_palette"))))}))$new(options=options))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="contraintsnotes",

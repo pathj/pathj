@@ -347,6 +347,11 @@ options:
           title: Colorblind (Okabe-Ito)
       default: default
 
+    - name: pcurve_ci
+      title: Show 95% CI
+      type: Bool
+      default: false
+
     - name: diag_paths
       title: Paths Labels
       type: List
