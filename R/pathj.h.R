@@ -1276,7 +1276,34 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     "pcurve_sizes",
                                     "pcurve_linetype",
                                     "pcurve_lwd",
-                                    "pcurve_palette"))))}))$new(options=options))
+                                     "pcurve_palette"))))
+                        self$add(jmvcore::Array$new(
+                            options=options,
+                            name="betaci",
+                            title="Standardized Effects (β) – 95% CI",
+                            visible="(pgraphs)",
+                            template=jmvcore::Table$new(
+                                options=options,
+                                title="$key",
+                                renderFun=".tableBetaCI",
+                                clearWith=list(
+                                    "endogenous",
+                                    "covs",
+                                    "factors",
+                                    "multigroup",
+                                    "constraints",
+                                    "endogenousTerms",
+                                    "data",
+                                    "varcov",
+                                    "cov_y",
+                                    "pgraphs"),
+                                columns=list(
+                                    list(`name`="group", `type`="text", `title`="Group"),
+                                    list(`name`="lhs", `type`="text", `title`="Dep"),
+                                    list(`name`="rhs", `type`="text", `title`="Pred"),
+                                    list(`name`="beta", `type`="number", `title`="β"),
+                                    list(`name`="lower", `type`="number", `title`="Lower"),
+                                    list(`name`="upper", `type`="number", `title`="Upper"))))))}))$new(options=options))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="contraintsnotes",
@@ -1317,4 +1344,3 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresMissings = FALSE,
                 weightsSupport = 'auto')
         }))
-

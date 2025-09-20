@@ -117,16 +117,23 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ## init p-graphs images per group (separate panels)
             if (self$options$pgraphs) {
                 images <- self$results$pgraphs$pcurves
+                tables <- self$results$pgraphs$betaci
                 if (is.something(data_machine$multigroup))  {
                     for (level in data_machine$multigroup$levels) {
                         images$addItem(level)
                         images$get(key = level)$setTitle(paste(data_machine$multigroup$var, "=", level))
                         images$get(key = level)$setState(list(gkey = level))
+                        tables$addItem(level)
+                        tables$get(key = level)$setTitle(paste(data_machine$multigroup$var, "=", level))
+                        tables$get(key = level)$setState(list(gkey = level))
                     }
                 } else {
                     images$addItem("All")
                     images$get(key = "All")$setTitle("")
                     images$get(key = "All")$setState(list(gkey = NULL))
+                    tables$addItem("All")
+                    tables$get(key = "All")$setTitle("")
+                    tables$get(key = "All")$setState(list(gkey = NULL))
                 }
             }
             
@@ -645,6 +652,63 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             print(p)
+            return(TRUE)
+        },
+
+        .tableBetaCI=function(table, ...) {
+            if (self$options$pgraphs==FALSE)
+                return()
+
+            lavm <- private$.lav_machine
+            dm <- private$.data_machine
+            mg <- dm$multigroup
+
+            ss <- try(lavaan::standardizedSolution(lavm$model, ci=TRUE), silent=TRUE)
+            if (inherits(ss, "try-error") || is.null(ss)) {
+                return()
+            }
+            # keep only regressions
+            if ("op" %in% names(ss))
+                ss <- ss[ss$op == "~", , drop=FALSE]
+            if (nrow(ss) == 0) return()
+
+            # map group index to label
+            if (is.something(mg) && "group" %in% names(ss)) {
+                gi <- suppressWarnings(as.integer(ss$group))
+                glab <- ifelse(is.finite(gi) & gi >= 1 & gi <= length(mg$levels), as.character(mg$levels[gi]), "All")
+            } else {
+                glab <- if ("group" %in% names(ss)) as.character(ss$group) else rep("All", nrow(ss))
+            }
+
+            beta <- NA_real_
+            if ("est.std.all" %in% names(ss)) beta <- suppressWarnings(as.numeric(ss$est.std.all))
+            else if ("est.std" %in% names(ss)) beta <- suppressWarnings(as.numeric(ss$est.std))
+            else if ("std.all" %in% names(ss)) beta <- suppressWarnings(as.numeric(ss$std.all))
+
+            lower <- suppressWarnings(as.numeric(ss$ci.lower))
+            upper <- suppressWarnings(as.numeric(ss$ci.upper))
+
+            lhs <- as.character(ss$lhs)
+            rhs <- as.character(ss$rhs)
+
+            # filter per-item group
+            gkey <- if (!is.null(table$state)) table$state$gkey else NULL
+            keep <- rep(TRUE, length(lhs))
+            if (!is.null(gkey)) keep <- glab == gkey
+
+            idx <- which(keep)
+            if (length(idx) == 0) return()
+
+            for (i in idx) {
+                table$addRow(paste0("r", i), list(
+                    group = glab[i],
+                    lhs = lhs[i],
+                    rhs = rhs[i],
+                    beta = beta[i],
+                    lower = lower[i],
+                    upper = upper[i]
+                ))
+            }
             return(TRUE)
         },
         .marshalFormula= function(formula, data, name) {
