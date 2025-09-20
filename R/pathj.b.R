@@ -319,6 +319,22 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     else
                         tab$beta <- NA_real_
                 }
+                # try to obtain 95% CI for standardized effects (beta) for labelling
+                ss <- try(lavaan::standardizedSolution(lavm$model, ci=TRUE), silent=TRUE)
+                if (inherits(ss, "try-error") || is.null(ss)) {
+                    ss <- NULL
+                } else {
+                    if ("op" %in% names(ss))
+                        ss <- ss[ss$op == "~", , drop=FALSE]
+                    # map to group labels where possible
+                    if (is.something(mg) && "group" %in% names(ss)) {
+                        gi <- suppressWarnings(as.integer(ss$group))
+                        glab <- ifelse(is.finite(gi) & gi >= 1 & gi <= length(mg$levels), as.character(mg$levels[gi]), "All")
+                        ss$lgroup <- glab
+                    } else {
+                        ss$lgroup <- if ("group" %in% names(ss)) as.character(ss$group) else "All"
+                    }
+                }
                 if (!is.something(tab) || nrow(tab)==0) {
                     jmvcore::reject("Model has no regression coefficients to plot")
                     return()
@@ -353,6 +369,14 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     }
                     v
                 }
+                .getBetaCI <- function(g, lhs, rhs) {
+                    if (is.null(ss)) return(c(NA_real_, NA_real_))
+                    need <- c("lgroup","lhs","rhs","ci.lower","ci.upper")
+                    if (!all(need %in% names(ss))) return(c(NA_real_, NA_real_))
+                    hit <- ss[ss$lgroup == g & ss$lhs == lhs & ss$rhs == rhs, , drop=FALSE]
+                    if (nrow(hit) < 1) return(c(NA_real_, NA_real_))
+                    c(suppressWarnings(as.numeric(hit$ci.lower[1])), suppressWarnings(as.numeric(hit$ci.upper[1])))
+                }
                 rows <- list()
                 show_ci <- FALSE
                 for (i in seq_len(nrow(tab))) {
@@ -372,6 +396,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     # Guard against missing/invalid group sizes causing NA in if() condition
                     if (length(Nobs) == 0 || is.na(Nobs) || !is.finite(Nobs) || Nobs <= 1) next
                     z0 <- as.numeric(tab$z[i])
+                    bci <- .getBetaCI(g, as.character(tab$lhs[i]), as.character(tab$rhs[i]))
                     if (show_ci) {
                         zlo0 <- z0 - 1.96
                         zhi0 <- z0 + 1.96
@@ -387,9 +412,11 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             abs_lo <- min(abs(zlo_n), abs(zhi_n))
                             pu <- 2 * stats::pnorm(-abs_lo)
                             pl <- 2 * stats::pnorm(-abs_hi)
-                            rows[[length(rows)+1]] <- list(group=g, lhs=tab$lhs[i], rhs=tab$rhs[i], n=n, p=p, beta=tab$beta[i])
+                            rows[[length(rows)+1]] <- list(group=g, lhs=tab$lhs[i], rhs=tab$rhs[i], n=n, p=p,
+                                                            beta=tab$beta[i], beta_l=bci[1], beta_u=bci[2])
                         } else {
-                            rows[[length(rows)+1]] <- list(group=g, lhs=tab$lhs[i], rhs=tab$rhs[i], n=n, p=p, beta=tab$beta[i])
+                            rows[[length(rows)+1]] <- list(group=g, lhs=tab$lhs[i], rhs=tab$rhs[i], n=n, p=p,
+                                                            beta=tab$beta[i], beta_l=bci[1], beta_u=bci[2])
                         }
                     }
                 }
@@ -401,9 +428,14 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 d$p <- pmin(pmax(as.numeric(d$p), 0), 1)
                 d$n <- as.numeric(d$n)
                 d <- d[order(d$n), , drop=FALSE]
-                # label with beta per path (same within a group)
+                # label with beta and its 95% CI per path (same within a group)
                 fmtb <- function(x) ifelse(is.finite(x), sprintf("%.3f", x), "NA")
-                d$lab <- paste0(d$rhs, " \u2192 ", d$lhs, " (\u03B2=", fmtb(as.numeric(d$beta)), ")")
+                fmtci <- function(lo, up) {
+                    lo <- suppressWarnings(as.numeric(lo)); up <- suppressWarnings(as.numeric(up))
+                    ifelse(is.finite(lo) & is.finite(up), sprintf("[%.3f, %.3f]", lo, up), "[NA, NA]")
+                }
+                d$lab <- paste0(d$rhs, " \u2192 ", d$lhs,
+                                 " (\u03B2=", fmtb(as.numeric(d$beta)), ", 95% CI ", fmtci(d$beta_l, d$beta_u), ")")
                 d$lab <- factor(d$lab, levels = unique(d$lab))
 
                 baseBreaks <- sizes
