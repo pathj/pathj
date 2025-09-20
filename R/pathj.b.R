@@ -385,7 +385,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     c(suppressWarnings(as.numeric(hit$ci.lower[1])), suppressWarnings(as.numeric(hit$ci.upper[1])))
                 }
                 rows <- list()
-                show_ci <- FALSE
+                show_ci <- TRUE
                 for (i in seq_len(nrow(tab))) {
                     # derive group label robustly: prefer lgroup, else map numeric group via mg$levels
                     if ("lgroup" %in% names(tab)) {
@@ -404,14 +404,14 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     if (length(Nobs) == 0 || is.na(Nobs) || !is.finite(Nobs) || Nobs <= 1) next
                     z0 <- as.numeric(tab$z[i])
                     bci <- .getBetaCI(g, as.character(tab$lhs[i]), as.character(tab$rhs[i]))
-                    if (show_ci) {
-                        zlo0 <- z0 - 1.96
-                        zhi0 <- z0 + 1.96
-                    }
-                    for (n in sizes) {
-                        sq <- sqrt(n / Nobs)
-                        zn <- z0 * sq
-                        p  <- 2 * stats::pnorm(-abs(zn))
+                        if (show_ci) {
+                            zlo0 <- z0 - 1.96
+                            zhi0 <- z0 + 1.96
+                        }
+                        for (n in sizes) {
+                            sq <- sqrt(n / Nobs)
+                            zn <- z0 * sq
+                            p  <- 2 * stats::pnorm(-abs(zn))
                         if (show_ci) {
                             zlo_n <- zlo0 * sq
                             zhi_n <- zhi0 * sq
@@ -420,7 +420,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             pu <- 2 * stats::pnorm(-abs_lo)
                             pl <- 2 * stats::pnorm(-abs_hi)
                             rows[[length(rows)+1]] <- list(group=g, lhs=tab$lhs[i], rhs=tab$rhs[i], n=n, p=p,
-                                                            beta=tab$beta[i], beta_l=bci[1], beta_u=bci[2])
+                                                            p_l=pl, p_u=pu, beta=tab$beta[i], beta_l=bci[1], beta_u=bci[2])
                         } else {
                             rows[[length(rows)+1]] <- list(group=g, lhs=tab$lhs[i], rhs=tab$rhs[i], n=n, p=p,
                                                             beta=tab$beta[i], beta_l=bci[1], beta_u=bci[2])
@@ -433,6 +433,8 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     return()
                 }
                 d$p <- pmin(pmax(as.numeric(d$p), 0), 1)
+                if ("p_l" %in% names(d)) d$p_l <- pmin(pmax(as.numeric(d$p_l), 0), 1)
+                if ("p_u" %in% names(d)) d$p_u <- pmin(pmax(as.numeric(d$p_u), 0), 1)
                 d$n <- as.numeric(d$n)
                 d <- d[order(d$n), , drop=FALSE]
                 # label with beta and its 95% CI per path (same within a group)
@@ -468,15 +470,23 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                       ggplot2::scale_linetype_manual(values = c("p = 0.05" = "dashed"), name = "") +
                       ggplot2::labs(x = "Sample size (n)", y = "Mean p-value", color = "Predictor", title = ttl, caption = cap) +
                       ggplot2::theme_minimal(base_size = 12)
-                # palette option
+                # palette + optional ribbons
                 .pal <- try(as.character(self$options$pcurve_palette), silent=TRUE)
-                if (is.character(.pal) && length(.pal) > 0 && .pal[1] == "okabeito") {
-                    okabeito <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-                    labs <- levels(d$lab)
-                    vals <- rep(okabeito, length.out=length(labs))
-                    names(vals) <- labs
-                    p <- p + ggplot2::scale_color_manual(values = vals)
+                labs <- levels(d$lab)
+                if (!is.character(.pal) || length(.pal) == 0) .pal <- "default"
+                if (.pal[1] == "okabeito") {
+                    vals <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+                    vals <- rep(vals, length.out=length(labs))
+                } else {
+                    vals <- try(scales::hue_pal()(length(labs)), silent=TRUE)
+                    if (inherits(vals, "try-error"))
+                        vals <- grDevices::hcl(h=seq(15, 375, length.out=length(labs)+1)[1:length(labs)], c=100, l=65)
                 }
+                names(vals) <- labs
+                p <- p + ggplot2::scale_color_manual(values = vals) + ggplot2::scale_fill_manual(values = vals)
+                if (all(c("p_l","p_u") %in% names(d)))
+                    p <- p + ggplot2::geom_ribbon(data=d, ggplot2::aes(x=n, ymin=p_l, ymax=p_u, fill=lab, group=lab), alpha=0.15, inherit.aes=FALSE) +
+                             ggplot2::guides(fill = "none")
                 
                 p <- p + ggplot2::geom_line(data=d, ggplot2::aes(x = n, y = p, color = lab, group = lab), linetype=.lt, size=.lw) +
                         ggplot2::geom_point(data=d, ggplot2::aes(x = n, y = p, color = lab, group = lab), size = 2)
