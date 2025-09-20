@@ -210,12 +210,12 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 if (is.something(private$.data_machine$multigroup)) {
                     for (level in private$.data_machine$multigroup$levels) {
                         tt <- tables$get(key = level)
-                        try(tt$clear(), silent = TRUE)
+                        
                         self$.tableBetaCI(tt, gkey=level)
                     }
                 } else {
                     tt <- tables$get(key = "All")
-                    try(tt$clear(), silent = TRUE)
+                    
                     self$.tableBetaCI(tt, gkey=NULL)
                 }
             }
@@ -716,7 +716,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (nrow(df) == 0)
                 return()
             # clear and fill
-            try(table$clear(), silent=TRUE)
+            
             j.fill_table(table, df)
             return(TRUE)
         },
