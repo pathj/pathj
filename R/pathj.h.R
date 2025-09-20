@@ -1236,7 +1236,8 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
-                    pcurves = function() private$.items[["pcurves"]]),
+                    pcurves = function() private$.items[["pcurves"]],
+                    betaci = function() private$.items[["betaci"]]),
                 private = list(),
                 public=list(
                     initialize=function(options) {
@@ -1276,16 +1277,15 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     "pcurve_sizes",
                                     "pcurve_linetype",
                                     "pcurve_lwd",
-                                     "pcurve_palette"))))
+                                    "pcurve_palette"))))
                         self$add(jmvcore::Array$new(
                             options=options,
                             name="betaci",
-                            title="Standardized Effects (β) – 95% CI",
+                            title="Standardized Effects (\u03B2) \u2013 95% CI",
                             visible="(pgraphs)",
                             template=jmvcore::Table$new(
                                 options=options,
                                 title="$key",
-                                renderFun=".tableBetaCI",
                                 clearWith=list(
                                     "endogenous",
                                     "covs",
@@ -1298,12 +1298,30 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     "cov_y",
                                     "pgraphs"),
                                 columns=list(
-                                    list(`name`="group", `type`="text", `title`="Group"),
-                                    list(`name`="lhs", `type`="text", `title`="Dep"),
-                                    list(`name`="rhs", `type`="text", `title`="Pred"),
-                                    list(`name`="beta", `type`="number", `title`="β"),
-                                    list(`name`="lower", `type`="number", `title`="Lower"),
-                                    list(`name`="upper", `type`="number", `title`="Upper"))))))}))$new(options=options))
+                                    list(
+                                        `name`="group", 
+                                        `type`="text", 
+                                        `title`="Group"),
+                                    list(
+                                        `name`="lhs", 
+                                        `type`="text", 
+                                        `title`="Dep"),
+                                    list(
+                                        `name`="rhs", 
+                                        `type`="text", 
+                                        `title`="Pred"),
+                                    list(
+                                        `name`="beta", 
+                                        `type`="number", 
+                                        `title`="\u03B2"),
+                                    list(
+                                        `name`="lower", 
+                                        `type`="number", 
+                                        `title`="Lower"),
+                                    list(
+                                        `name`="upper", 
+                                        `type`="number", 
+                                        `title`="Upper")))))}))$new(options=options))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="contraintsnotes",
@@ -1344,3 +1362,4 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresMissings = FALSE,
                 weightsSupport = 'auto')
         }))
+

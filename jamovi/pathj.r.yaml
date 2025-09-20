@@ -665,7 +665,6 @@ items:
              template:
                 title: $key
                 type: Table
-                renderFun: .tableBetaCI
                 clearWith:
                    - endogenous
                    - covs

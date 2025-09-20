@@ -211,12 +211,12 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     for (level in private$.data_machine$multigroup$levels) {
                         tt <- tables$get(key = level)
                         try(tt$clear(), silent = TRUE)
-                        self$.tableBetaCI(tt)
+                        self$.tableBetaCI(tt, gkey=level)
                     }
                 } else {
                     tt <- tables$get(key = "All")
                     try(tt$clear(), silent = TRUE)
-                    self$.tableBetaCI(tt)
+                    self$.tableBetaCI(tt, gkey=NULL)
                 }
             }
 
@@ -680,60 +680,44 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             return(TRUE)
         },
 
-        .tableBetaCI=function(table, ...) {
+        .tableBetaCI=function(table, gkey=NULL, ...) {
             if (self$options$pgraphs==FALSE)
                 return()
-
             lavm <- private$.lav_machine
             dm <- private$.data_machine
             mg <- dm$multigroup
-
-            ss <- try(lavaan::standardizedSolution(lavm$model, ci=TRUE), silent=TRUE)
-            if (inherits(ss, "try-error") || is.null(ss)) {
+            ss <- try(lavaan::standardizedSolution(lavm$model, ci=TRUE, se=TRUE, level=self$options$ciWidth/100), silent=TRUE)
+            if (inherits(ss, "try-error") || is.null(ss))
                 return()
-            }
-            # keep only regressions
             if ("op" %in% names(ss))
                 ss <- ss[ss$op == "~", , drop=FALSE]
-            if (nrow(ss) == 0) return()
-
-            # map group index to label
+            if (nrow(ss) == 0)
+                return()
+            # decode names if they are base64-encoded
+            lhs <- as.character(fromb64(ss$lhs))
+            rhs <- as.character(fromb64(ss$rhs))
+            # groups
             if (is.something(mg) && "group" %in% names(ss)) {
                 gi <- suppressWarnings(as.integer(ss$group))
                 glab <- ifelse(is.finite(gi) & gi >= 1 & gi <= length(mg$levels), as.character(mg$levels[gi]), "All")
             } else {
                 glab <- if ("group" %in% names(ss)) as.character(ss$group) else rep("All", nrow(ss))
             }
-
+            # standardized beta and CI
             beta <- NA_real_
-            if ("est.std.all" %in% names(ss)) beta <- suppressWarnings(as.numeric(ss$est.std.all))
-            else if ("est.std" %in% names(ss)) beta <- suppressWarnings(as.numeric(ss$est.std))
-            else if ("std.all" %in% names(ss)) beta <- suppressWarnings(as.numeric(ss$std.all))
-
+            if ("est.std.all" %in% names(ss)) beta <- suppressWarnings(as.numeric(ss$est.std.all)) else
+            if ("est.std" %in% names(ss)) beta <- suppressWarnings(as.numeric(ss$est.std)) else
+            if ("std.all" %in% names(ss)) beta <- suppressWarnings(as.numeric(ss$std.all))
             lower <- suppressWarnings(as.numeric(ss$ci.lower))
             upper <- suppressWarnings(as.numeric(ss$ci.upper))
-
-            lhs <- as.character(ss$lhs)
-            rhs <- as.character(ss$rhs)
-
-            # filter per-item group
-            gkey <- if (!is.null(table$state)) table$state$gkey else NULL
-            keep <- rep(TRUE, length(lhs))
-            if (!is.null(gkey)) keep <- glab == gkey
-
-            idx <- which(keep)
-            if (length(idx) == 0) return()
-
-            for (i in idx) {
-                table$addRow(paste0("r", i), list(
-                    group = glab[i],
-                    lhs = lhs[i],
-                    rhs = rhs[i],
-                    beta = beta[i],
-                    lower = lower[i],
-                    upper = upper[i]
-                ))
-            }
+            df <- data.frame(group=glab, lhs=lhs, rhs=rhs, beta=beta, lower=lower, upper=upper, stringsAsFactors=FALSE)
+            if (!is.null(gkey))
+                df <- df[df$group == gkey, , drop=FALSE]
+            if (nrow(df) == 0)
+                return()
+            # clear and fill
+            try(table$clear(), silent=TRUE)
+            j.fill_table(table, df)
             return(TRUE)
         },
         .marshalFormula= function(formula, data, name) {
