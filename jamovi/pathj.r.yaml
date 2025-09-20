@@ -656,7 +656,8 @@ items:
                    - pcurve_sizes
                    - pcurve_linetype
                    - pcurve_lwd
-                   - pcurve_palette
+                    - pcurve_palette
+                    - pcurve_ribbons
 
            - name: betaci
              title: Standardized Effects (β) – 95% CI

@@ -400,7 +400,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     c(suppressWarnings(as.numeric(hit$ci.lower[1])), suppressWarnings(as.numeric(hit$ci.upper[1])))
                 }
                 rows <- list()
-                show_ci <- TRUE
+                show_ci <- isTRUE(try(self$options$pcurve_ribbons, silent=TRUE))
                 for (i in seq_len(nrow(tab))) {
                     # derive group label robustly: prefer lgroup, else map numeric group via mg$levels
                     if ("lgroup" %in% names(tab)) {
