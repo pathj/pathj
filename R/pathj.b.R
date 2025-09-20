@@ -203,7 +203,22 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             if (self$options$showintercepts)
                    j.fill_table(self$results$models$intercepts,lav_machine$tab_intercepts)
-            
+
+            # populate per-group standardized beta CI tables under P-Value Graphs
+            if (isTRUE(self$options$pgraphs)) {
+                tables <- self$results$pgraphs$betaci
+                if (is.something(private$.data_machine$multigroup)) {
+                    for (level in private$.data_machine$multigroup$levels) {
+                        tt <- tables$get(key = level)
+                        try(tt$clear(), silent = TRUE)
+                        self$.tableBetaCI(tt)
+                    }
+                } else {
+                    tt <- tables$get(key = "All")
+                    try(tt$clear(), silent = TRUE)
+                    self$.tableBetaCI(tt)
+                }
+            }
 
             ## diagrams
             private$.plot_machine$preparePlots()   
