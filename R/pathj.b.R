@@ -117,23 +117,23 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ## init p-graphs images per group (separate panels)
             if (self$options$pgraphs) {
                 images <- self$results$pgraphs$pcurves
-                tables <- self$results$pgraphs$betaci
+
                 if (is.something(data_machine$multigroup))  {
                     for (level in data_machine$multigroup$levels) {
                         images$addItem(level)
                         images$get(key = level)$setTitle(paste(data_machine$multigroup$var, "=", level))
                         images$get(key = level)$setState(list(gkey = level))
-                        tables$addItem(level)
-                        tables$get(key = level)$setTitle(paste(data_machine$multigroup$var, "=", level))
-                        tables$get(key = level)$setState(list(gkey = level))
+
+)
+)
                     }
                 } else {
                     images$addItem("All")
                     images$get(key = "All")$setTitle("")
                     images$get(key = "All")$setState(list(gkey = NULL))
-                    tables$addItem("All")
-                    tables$get(key = "All")$setTitle("")
-                    tables$get(key = "All")$setState(list(gkey = NULL))
+
+
+)
                 }
             }
             
@@ -206,17 +206,17 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # populate per-group standardized beta CI tables under P-Value Graphs
             if (isTRUE(self$options$pgraphs)) {
-                tables <- self$results$pgraphs$betaci
+
                 if (is.something(private$.data_machine$multigroup)) {
                     for (level in private$.data_machine$multigroup$levels) {
                         tt <- tables$get(key = level)
                         
-                        self$.tableBetaCI(tt, gkey=level)
+                        private$.tableBetaCI(tt, gkey=level)
                     }
                 } else {
                     tt <- tables$get(key = "All")
                     
-                    self$.tableBetaCI(tt, gkey=NULL)
+                    private$.tableBetaCI(tt, gkey=NULL)
                 }
             }
 
@@ -680,46 +680,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             return(TRUE)
         },
 
-        .tableBetaCI=function(table, gkey=NULL, ...) {
-            if (self$options$pgraphs==FALSE)
-                return()
-            lavm <- private$.lav_machine
-            dm <- private$.data_machine
-            mg <- dm$multigroup
-            ss <- try(lavaan::standardizedSolution(lavm$model, ci=TRUE, se=TRUE, level=self$options$ciWidth/100), silent=TRUE)
-            if (inherits(ss, "try-error") || is.null(ss))
-                return()
-            if ("op" %in% names(ss))
-                ss <- ss[ss$op == "~", , drop=FALSE]
-            if (nrow(ss) == 0)
-                return()
-            # decode names if they are base64-encoded
-            lhs <- as.character(fromb64(ss$lhs))
-            rhs <- as.character(fromb64(ss$rhs))
-            # groups
-            if (is.something(mg) && "group" %in% names(ss)) {
-                gi <- suppressWarnings(as.integer(ss$group))
-                glab <- ifelse(is.finite(gi) & gi >= 1 & gi <= length(mg$levels), as.character(mg$levels[gi]), "All")
-            } else {
-                glab <- if ("group" %in% names(ss)) as.character(ss$group) else rep("All", nrow(ss))
-            }
-            # standardized beta and CI
-            beta <- NA_real_
-            if ("est.std.all" %in% names(ss)) beta <- suppressWarnings(as.numeric(ss$est.std.all)) else
-            if ("est.std" %in% names(ss)) beta <- suppressWarnings(as.numeric(ss$est.std)) else
-            if ("std.all" %in% names(ss)) beta <- suppressWarnings(as.numeric(ss$std.all))
-            lower <- suppressWarnings(as.numeric(ss$ci.lower))
-            upper <- suppressWarnings(as.numeric(ss$ci.upper))
-            df <- data.frame(group=glab, lhs=lhs, rhs=rhs, beta=beta, lower=lower, upper=upper, stringsAsFactors=FALSE)
-            if (!is.null(gkey))
-                df <- df[df$group == gkey, , drop=FALSE]
-            if (nrow(df) == 0)
-                return()
-            # clear and fill
-            
-            j.fill_table(table, df)
-            return(TRUE)
-        },
+        
         .marshalFormula= function(formula, data, name) {
             endogenous<-list()
             endogenousTerms<-list()
@@ -798,3 +759,4 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         )
 )
+

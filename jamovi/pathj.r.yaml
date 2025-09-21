@@ -659,43 +659,7 @@ items:
                     - pcurve_palette
                     - pcurve_ribbons
 
-           - name: betaci
-             title: Standardized Effects (β) – 95% CI
-             type: Array
-             visible: (pgraphs)
-             template:
-                title: $key
-                type: Table
-                clearWith:
-                   - endogenous
-                   - covs
-                   - factors
-                   - multigroup
-                   - constraints
-                   - endogenousTerms
-                   - data
-                   - varcov
-                   - cov_y
-                   - pgraphs
-                columns:
-                   - name: group
-                     type: text
-                     title: Group
-                   - name: lhs
-                     type: text
-                     title: Dep
-                   - name: rhs
-                     type: text
-                     title: Pred
-                   - name: beta
-                     type: number
-                     title: β
-                   - name: lower
-                     type: number
-                     title: Lower
-                   - name: upper
-                     type: number
-                     title: Upper
+            
                    
 
   - name: contraintsnotes
