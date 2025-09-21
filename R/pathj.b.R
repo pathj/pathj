@@ -123,17 +123,11 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         images$addItem(level)
                         images$get(key = level)$setTitle(paste(data_machine$multigroup$var, "=", level))
                         images$get(key = level)$setState(list(gkey = level))
-
-)
-)
                     }
                 } else {
                     images$addItem("All")
                     images$get(key = "All")$setTitle("")
                     images$get(key = "All")$setState(list(gkey = NULL))
-
-
-)
                 }
             }
             

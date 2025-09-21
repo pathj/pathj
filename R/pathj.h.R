@@ -1285,7 +1285,7 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                                     "pcurve_linetype",
                                     "pcurve_lwd",
                                     "pcurve_palette",
-                                    "pcurve_ribbons")))))}))$new(options=options))
+                                    "pcurve_ribbons"))))}))$new(options=options))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="contraintsnotes",
