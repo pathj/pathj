@@ -615,9 +615,52 @@ items:
              title: ""
              visible: false
              columns:
-                  - name: message
-                    type: text
-                    title: "Model diagram notes"
+                   - name: message
+                     type: text
+                     title: "Model diagram notes"
+
+  # P-value graphs
+  - name: pgraphs
+    type: Group
+    title: P-Value Graphs
+    visible: (pgraphs)
+    clearWith:
+                  - endogenous
+                  - cov_y
+                  - constraints
+                  - varcov
+                  - data
+                  - multigroup
+    items:
+           - name: pcurves
+             title: P-Value Curves
+             type: Array
+             visible: (pgraphs)
+             template:
+                title: $key
+                type: Image
+                renderFun: .plotPvalues
+                width: 900
+                height: 500
+                clearWith:
+                   - endogenous
+                   - covs
+                   - factors
+                   - multigroup
+                   - constraints
+                   - endogenousTerms
+                   - data
+                   - varcov
+                   - cov_y
+                   - pgraphs
+                   - pcurve_sizes
+                   - pcurve_linetype
+                   - pcurve_lwd
+                    - pcurve_palette
+                    - pcurve_ribbons
+
+            
+                   
 
   - name: contraintsnotes
     type: Table

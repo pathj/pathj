@@ -1,7 +1,7 @@
 Package: pathj
 Type: Package
 Title: Path Analysis
-Version: 1.1.3
+Version: 1.1.4
 Author: Marcello Gallucci
 Maintainer: Marcello Gallucci <mcfanda@gmail.com>
 Description: Path analysis based on lavaan, with jamovi output style and functions. Provides access to lavaan
