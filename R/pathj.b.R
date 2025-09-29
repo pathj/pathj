@@ -436,12 +436,17 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 fmtb <- function(x) ifelse(is.finite(x), sprintf("%.3f", x), "NA")
                 fmtci <- function(lo, up) {
                     lo <- suppressWarnings(as.numeric(lo)); up <- suppressWarnings(as.numeric(up))
-                    ifelse(is.finite(lo) & is.finite(up), sprintf("[%.3f, %.3f]", lo, up), "[NA, NA]")
+                    {both <- is.finite(lo) & is.finite(up); onlyLo <- is.finite(lo) & !is.finite(up); onlyUp <- !is.finite(lo) & is.finite(up); out <- character(length(lo)); out[both] <- sprintf("[%.3f, %.3f]", lo[both], up[both]); out[onlyLo] <- sprintf("[%.3f, ?]", lo[onlyLo]); out[onlyUp] <- sprintf("[?, %.3f]", up[onlyUp]); out[!(both | onlyLo | onlyUp)] <- "[?, ?]"; out}
                 }
-                d$lab <- paste0(d$rhs, " \u2192 ", d$lhs,
-                                 " (\u03B2=", fmtb(as.numeric(d$beta)), ", 95% CI ", fmtci(d$beta_l, d$beta_u), ")")
+                .ci_txt <- fmtci(d$beta_l, d$beta_u)
+                d$lab <- ifelse(
+                    .ci_txt == "[?, ?]",
+                    paste0(d$rhs, " \u2192 ", d$lhs,
+                           " (\u03B2=", fmtb(as.numeric(d$beta)), ")"),
+                    paste0(d$rhs, " \u2192 ", d$lhs,
+                           " (\u03B2=", fmtb(as.numeric(d$beta)), ", 95% CI ", .ci_txt, ")")
+                )
                 d$lab <- factor(d$lab, levels = unique(d$lab))
-
                 baseBreaks <- sizes
                 brks <- baseBreaks
 
@@ -465,7 +470,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                       ggplot2::scale_linetype_manual(values = c("p = 0.05" = "dashed"), name = "") +
                       ggplot2::labs(x = "Sample size (n)", y = "Mean p-value", color = "Predictor", title = ttl, caption = cap) +
                       ggplot2::theme_minimal(base_size = 12)
-                # palette + optional ribbons
+                      # palette + optional ribbons
                 .pal <- try(as.character(self$options$pcurve_palette), silent=TRUE)
                 labs <- levels(d$lab)
                 if (!is.character(.pal) || length(.pal) == 0) .pal <- "default"
@@ -647,8 +652,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                  ggplot2::scale_linetype_manual(values = c("p = 0.05" = "dashed"), name = "") +
                  ggplot2::labs(x = "Sample size (n)", y = "Mean p-value", color = "Predictor", title = ttl) +
                  ggplot2::theme_minimal(base_size = 12)
-
-            if (nrow(d) > 0) {
+                 if (nrow(d) > 0) {
                 # draw mean line (no CI bars)
                 p <- p + ggplot2::geom_line(data=d, ggplot2::aes(x = n, y = p, color = lab, group = lab)) +
                         ggplot2::geom_point(data=d, ggplot2::aes(x = n, y = p, color = lab, group = lab))
@@ -739,4 +743,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         )
 )
+
+
+
 

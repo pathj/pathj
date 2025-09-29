@@ -268,84 +268,75 @@ Estimate <- R6::R6Class("Estimate",
                                                         
                           },
                           
-                          computeR2=function(end) {
-                            
-                            end$var<-end$est/end$std.all
-                            upper<-end$ci.upper
-                            lower<-end$ci.lower
-                            end$ci.upper<-1-(lower/end$var)
-                            end$ci.lower<-1-(upper/end$var)
-                            end$r2<-1-end$std.all
-                             for (i in seq_along(end$r2)) 
-                                    if (end$r2[[i]]>1 | end$r2[[i]]<0)  {
-                                      end$r2[[i]]<-NA
-                                      self$warnings<-list(topic="r2",message="Some R-square index cannot be computed for this model")
-                                    }
-                            
-                            if (self$options$r2ci=="fisher") {
-                              ### https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3821705/
-                              N<-lavaan::lavInspect(self$model,"ntotal")
-                              r<-sqrt(end$r2)
-                              f<-.5 * log((1 + r)/(1 - r))
-                              zr<-f*sqrt((N-3))
-                              z0<-qnorm((1-self$ciwidth)/2,lower.tail = F)
-                              
-                              lower<-zr-z0
-                              upper<-zr+z0
-                              flower<-lower/sqrt(N-3)
-                              fupper<-upper/sqrt(N-3)
-                              rupper<-(exp(2*fupper)-1)/(1+exp(2*fupper))
-                              rupper<-rupper^2
-                              rlower<-(exp(2*flower)-1)/(1+exp(2*flower))
-                              rlower<-rlower^2
-                              end$ci.upper<-rupper
-                              end$ci.lower<-rlower
-                              ####
-                            }
-                            self$tab_r2<-end
-                            if (!self$options$r2test)
-                              return()
-                            
-                                    end$chisq<-0
-                                    end$df<-0
-                                    end$pvalue<-0
-                                    if (!("group" %in% names(end)))
-                                               end$group<-1
-                                    
-                                    .lav_structure<-private$.lav_structure
+                                                    computeR2=function(end) {
 
-                                    sel<-(self$structure$lhs %in% unique(end$lhs) & self$structure$op=="~" & self$structure$group>0)
-                                    .structure<-self$structure[sel,]
-                                      for (i in seq_len(nrow(end))) {
-                                            if (is.na(end$r2[i]))  {
-                                              end$chisq[i]<-NaN   
-                                              end$df[i]<-NaN
-                                              end$pvalue[i]<-NaN
-                                              next()
-                                            }
-                                            
-                                            sel<-(.structure$lhs==end$lhs[i] &  .structure$group==end$group[i])
-                                           ..structure<-.structure[sel,]
-                                            const<-paste(..structure$label,0,sep="==",collapse = " ; ")
-                                            results<-try_hard({tests<-lavaan::lavTestWald(self$model,const)})
-                                            if (results$error!=FALSE) {
-                                                  self$warnings<-list(topic="r2",message="Some inferential tests cannot be computed for this model")
-                                                  self$warnings<-list(topic="r2",message=results$error)
-                                                  end$chisq[i]<-NaN   
-                                                  end$df[i]<-NaN
-                                                  end$pvalue[i]<-NaN
-                                            
-                                            } else {
-                                                end$chisq[i]<-tests$stat   
-                                                end$df[i]<-tests$df
-                                                end$pvalue[i]<-tests$p.value
-                                          }
-                                    }
-                            self$tab_r2<-end
+                            # Guard: if no rows, nothing to compute
+                            if (is.null(end) || nrow(end) == 0) {
+                              self$tab_r2 <- end
+                              return()
+                            }
+
+                            # Compute variance from lavaan outputs; avoid division by zero/NA
+                            end$var <- NA_real_
+                            ok_std <- !is.na(end$std.all) & end$std.all != 0
+                            end$var[ok_std] <- end$est[ok_std] / end$std.all[ok_std]
+
+                            # Preserve original CI bounds from lavaan for fallback
+                            lav_upper <- end$ci.upper
+                            lav_lower <- end$ci.lower
+
+                            # Transform variance CI to R2 CI when possible
+                            tr_ok <- ok_std & !is.na(lav_upper) & !is.na(lav_lower) & !is.na(end$var)
+                            if (any(tr_ok)) {
+                              end$ci.upper[tr_ok] <- 1 - (lav_lower[tr_ok] / end$var[tr_ok])
+                              end$ci.lower[tr_ok] <- 1 - (lav_upper[tr_ok] / end$var[tr_ok])
+                            }
+
+                            # Compute R2 = 1 - std.all; invalid outside [0,1]
+                            end$r2 <- 1 - end$std.all
+                            bad_r2 <- is.na(end$r2) | end$r2 < 0 | end$r2 > 1
+                            if (any(bad_r2)) {
+                              end$r2[bad_r2] <- NA_real_
+                              self$warnings <- list(topic = "r2", message = "Some R-square index cannot be computed for this model")
+                            }
+
+                            # Optional Fisher CI for R2
+                            if (self$options$r2ci == "fisher") {
+                              # Reference: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3821705/
+                              N <- tryCatch(lavaan::lavInspect(self$model, "ntotal"), error = function(e) NA_integer_)
+                              if (!is.na(N) && N > 3) {
+                                r <- sqrt(end$r2)
+                                # clamp r within (eps, 1-eps) to avoid infinities in atanh
+                                eps <- 1e-12
+                                r_clamped <- pmin(pmax(r, eps), 1 - eps)
+                                # rows where we can compute Fisher CI
+                                f_ok <- !is.na(r_clamped)
+                                if (any(f_ok)) {
+                                  f <- 0.5 * log((1 + r_clamped[f_ok]) / (1 - r_clamped[f_ok]))
+                                  zr <- f * sqrt(N - 3)
+                                  z0 <- qnorm((1 - self$ciwidth) / 2, lower.tail = FALSE)
+
+                                  lower <- zr - z0
+                                  upper <- zr + z0
+                                  flower <- lower / sqrt(N - 3)
+                                  fupper <- upper / sqrt(N - 3)
+                                  rupper <- (exp(2 * fupper) - 1) / (1 + exp(2 * fupper))
+                                  rlower <- (exp(2 * flower) - 1) / (1 + exp(2 * flower))
+                                  # square to get R2 bounds
+                                  end$ci.upper[f_ok] <- rupper^2
+                                  end$ci.lower[f_ok] <- rlower^2
+                                }
+                              } else {
+                                # Not enough N to compute Fisher CI; leave previous bounds
+                                self$warnings <- list(topic = "r2", message = "Sample size too small for Fisher CI for R-square")
+                              }
+                            }
+
+                            self$tab_r2 <- end
                             
-                        } ## end of r2
-                        
+                        } ## end of r2                        
 
               ) # end of private
 )  # end of class
+
 
