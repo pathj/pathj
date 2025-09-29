@@ -469,7 +469,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                       ggplot2::geom_hline(ggplot2::aes(yintercept = 0.05, linetype = "p = 0.05"), color = "red", show.legend = TRUE) +
                       ggplot2::scale_linetype_manual(values = c("p = 0.05" = "dashed"), name = "") +
                       ggplot2::labs(x = "Sample size (n)", y = "Mean p-value", color = "Predictor", title = ttl, caption = cap) +
-                      ggplot2::theme_minimal(base_size = 12)
+                      ggplot2::theme_minimal(base_size = 12) + ggplot2::theme(legend.position = "bottom", legend.box = "horizontal")
                       # palette + optional ribbons
                 .pal <- try(as.character(self$options$pcurve_palette), silent=TRUE)
                 labs <- levels(d$lab)
@@ -651,7 +651,7 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                  ggplot2::geom_hline(ggplot2::aes(yintercept = 0.05, linetype = "p = 0.05"), color = "red", show.legend = TRUE) +
                  ggplot2::scale_linetype_manual(values = c("p = 0.05" = "dashed"), name = "") +
                  ggplot2::labs(x = "Sample size (n)", y = "Mean p-value", color = "Predictor", title = ttl) +
-                 ggplot2::theme_minimal(base_size = 12)
+                 ggplot2::theme_minimal(base_size = 12) + ggplot2::theme(legend.position = "bottom", legend.box = "horizontal")
                  if (nrow(d) > 0) {
                 # draw mean line (no CI bars)
                 p <- p + ggplot2::geom_line(data=d, ggplot2::aes(x = n, y = p, color = lab, group = lab)) +
@@ -743,6 +743,8 @@ pathjClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         )
 )
+
+
 
 
 
