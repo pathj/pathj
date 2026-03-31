@@ -1,10 +1,11 @@
 ---
 title: Path Analysis
 name: pathj
-version: 1.1.4
+version: 1.1.5
 jms: '1.0'
 authors:
   - Marcello Gallucci
+  - Chris Higton
 maintainer: Marcello Gallucci <mcfanda@gmail.com>
 date: 2022-1-1
 type: R
