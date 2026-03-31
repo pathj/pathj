@@ -275,6 +275,9 @@ options:
           R: >
              a named vector of the form \code{c(var1='type', var2='type2')} specifying the transformation to apply to covariates,
              one of `'centered'` to the mean, `'standardized'`,`'log'` or  `'none'`. `'none'` leaves the variable as it is.
+          ui: >
+             define the transformation to apply to covariates,
+             one of `'Centered'` to the mean, `'z-scores'` for standardized,`'log'` for natural logarithm,  or  `'None'`. `'None'` leaves the variable as it is.
 
 ######### specs here ##########
 
@@ -298,6 +301,59 @@ options:
       description:
           R: >
             `TRUE` or `FALSE` (default), produce a path diagram
+
+    # P-value graphs across sample sizes
+    - name: pgraphs
+      title: Show p-value graphs
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default). When TRUE, fits the model on
+            varying sample sizes and draws p-value vs sample-size lines for
+            each predictor.
+
+    - name: pcurve_sizes
+      title: Sample sizes
+      type: String
+      default: '50, 100, 200, 500'
+      description:
+          R: >
+            Comma-separated sample sizes to project to (e.g., '50,100,200,500').
+
+    - name: pcurve_linetype
+      title: Line type
+      type: List
+      options:
+        - name: solid
+          title: Solid
+        - name: dashed
+          title: Dashed
+        - name: dotted
+          title: Dotted
+      default: solid
+
+    - name: pcurve_lwd
+      title: Line width
+      type: Number
+      default: 1.2
+      min: 0.2
+      max: 5
+
+    - name: pcurve_palette
+      title: Palette
+      type: List
+      options:
+        - name: default
+          title: Default
+        - name: okabeito
+          title: Colorblind (Okabe-Ito)
+      default: default
+
+    - name: pcurve_ribbons
+      title: Show 95% CI ribbons
+      type: Bool
+      default: true
 
     - name: diag_paths
       title: Paths Labels

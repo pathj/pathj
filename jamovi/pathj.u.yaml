@@ -3,7 +3,7 @@ name: pathj
 jus: '2.0'
 compilerMode: tame
 events:
-  update: './pathj.events::update'
+  update: ./pathj.events::update
 children:
   - type: VariableSupplier
     name: variablesupplier
@@ -20,21 +20,21 @@ children:
             name: endogenous
             isTarget: true
             events:
-              change: './pathj.events::onChange_endogenous'
+              change: ./pathj.events::onChange_endogenous
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
             name: factors
             isTarget: true
             events:
-              change: './pathj.events::onChange_factors'
+              change: ./pathj.events::onChange_factors
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
             name: covs
             isTarget: true
             events:
-              change: './pathj.events::onChange_covariates'
+              change: ./pathj.events::onChange_covariates
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
@@ -57,8 +57,8 @@ children:
             persistentItems: true
             stretchFactor: 1
             events:
-              update: './pathj.events::onChange_endogenousSupplier'
-              change: './pathj.events::onChange_endogenousSupplier'
+              update: ./pathj.events::onChange_endogenousSupplier
+              change: ./pathj.events::onChange_endogenousSupplier
             children:
               - type: TargetLayoutBox
                 transferAction: interactions
@@ -86,7 +86,7 @@ children:
                           height: auto
                           ghostText: drag variables here
                           events:
-                            change: './pathj.events::onChange_endogenousTerms'
+                            change: ./pathj.events::onChange_endogenousTerms
                           template:
                             type: TermLabel
   - type: CollapseBox
@@ -105,8 +105,8 @@ children:
             persistentItems: true
             stretchFactor: 1
             events:
-              change: './pathj.events::onChange_varcovSupplier'
-              update: './pathj.events::onUpdate_varcovSupplier'
+              change: ./pathj.events::onChange_varcovSupplier
+              update: ./pathj.events::onUpdate_varcovSupplier
             children:
               - type: TargetLayoutBox
                 label: Select pairs
@@ -153,7 +153,7 @@ children:
                 name: estimator
               - type: ComboBox
                 name: likelihood
-                enable: '(estimator:ML)'
+                enable: (estimator:ML)
           - type: Label
             label: Inferential Tests
             margin: large
@@ -173,9 +173,6 @@ children:
                 type: CheckBox
                 optionPart: Satterthwaite
                 optionName: tests
-                
-
-
   - type: CollapseBox
     label: Parameters Options
     collapsed: true
@@ -230,26 +227,26 @@ children:
                 name: bootci_bootperc
                 optionName: bootci
                 optionPart: perc
-                enable: '(se:boot)'
+                enable: (se:boot)
               - type: RadioButton
                 name: bootci_bootnorm
                 optionName: bootci
                 optionPart: norm
-                enable: '(se:boot)'
+                enable: (se:boot)
               - name: bootci_bca.simple
                 type: RadioButton
                 optionName: bootci
                 optionPart: bca.simple
-                enable: '(se:boot)'
+                enable: (se:boot)
               - type: RadioButton
                 name: bootci_basic
                 optionName: bootci
                 optionPart: basic
-                enable: '(se:boot)'
+                enable: (se:boot)
               - type: TextBox
                 name: bootN
                 format: number
-                enable: '(se:boot)'
+                enable: (se:boot)
       - type: LayoutBox
         margin: large
         style: inline
@@ -272,7 +269,6 @@ children:
             children:
               - type: CheckBox
                 name: cov_x
-
   - type: CollapseBox
     label: Model Diagnostics
     collapsed: true
@@ -343,7 +339,6 @@ children:
               - type: CheckBox
                 name: diag_offset_labs
                 enable: (diagram)
-                
       - type: LayoutBox
         margin: large
         stretchFactor: 1
@@ -509,3 +504,39 @@ children:
             stretchFactor: 0.5
             template:
               type: ComboBox
+  - type: CollapseBox
+    label: P-Value Graphs
+    collapsed: true
+    stretchFactor: 1
+    style: list
+    children:
+      - type: LayoutBox
+        margin: large
+        stretchFactor: 1
+        children:
+          - type: CheckBox
+            name: pgraphs
+            label: Show p-value graphs
+          - type: TextBox
+            name: pcurve_sizes
+            label: Sample sizes
+            format: string
+            enable: (pgraphs)
+          - type: ComboBox
+            name: pcurve_palette
+            label: Palette
+            enable: (pgraphs)
+          - type: ComboBox
+            name: pcurve_linetype
+            label: Line type
+            enable: (pgraphs)
+          - type: TextBox
+            name: pcurve_lwd
+            label: Line width
+            format: number
+            enable: (pgraphs)
+          - type: CheckBox
+            name: pcurve_ribbons
+            label: Show 95% CI ribbons
+            enable: (pgraphs)
+  

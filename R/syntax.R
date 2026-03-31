@@ -446,7 +446,7 @@ Syntax <- R6::R6Class(
               sel<-tab$op=="~" 
               tab<-tab[sel,]
               tab<-tab[tab$group>0,]
-              
+              mark(tab)
               ## recursive function to extact indirect effects.
               .doit<-function(tab,term,alist=list(),blist=list(),lab=NULL) {
                 alist<-c(alist,term)
@@ -499,7 +499,7 @@ Syntax <- R6::R6Class(
               if (!is.something(pars))
                 return()
               ### we need this for the plotter layout "mediation"
-              mark(termslist)
+  
               self$ieffects<-termslist
               
               ## if not required, get out

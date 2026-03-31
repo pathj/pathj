@@ -199,6 +199,12 @@ Estimate <- R6::R6Class("Estimate",
                               mires <- try_hard({ lavaan::modindices(self$model) })
                               if (isFALSE(mires$error)) {
                                 mi <- mires$obj
+                                if (nrow(mi)==0) {
+                                  self$warnings<-list(topic="modindices",message="No fixed parameter available to compute modification indexes.")
+                                  mi[1,1]<-"-"
+                                  self$tab_mi<-mi
+                                  return()
+                                }
                                 # threshold filter
                                 if (is.something(self$options$miMin))
                                   mi <- mi[!is.na(mi$mi) & mi$mi >= self$options$miMin, , drop=FALSE]
