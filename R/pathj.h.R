@@ -1326,3 +1326,4 @@ pathjBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresMissings = FALSE,
                 weightsSupport = 'auto')
         }))
+

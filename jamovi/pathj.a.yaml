@@ -275,6 +275,9 @@ options:
           R: >
              a named vector of the form \code{c(var1='type', var2='type2')} specifying the transformation to apply to covariates,
              one of `'centered'` to the mean, `'standardized'`,`'log'` or  `'none'`. `'none'` leaves the variable as it is.
+          ui: >
+             define the transformation to apply to covariates,
+             one of `'Centered'` to the mean, `'z-scores'` for standardized,`'log'` for natural logarithm,  or  `'None'`. `'None'` leaves the variable as it is.
 
 ######### specs here ##########
 

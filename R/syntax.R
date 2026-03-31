@@ -446,7 +446,7 @@ Syntax <- R6::R6Class(
               sel<-tab$op=="~" 
               tab<-tab[sel,]
               tab<-tab[tab$group>0,]
-              
+              mark(tab)
               ## recursive function to extact indirect effects.
               .doit<-function(tab,term,alist=list(),blist=list(),lab=NULL) {
                 alist<-c(alist,term)

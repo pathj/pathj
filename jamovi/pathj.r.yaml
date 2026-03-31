@@ -656,8 +656,8 @@ items:
                    - pcurve_sizes
                    - pcurve_linetype
                    - pcurve_lwd
-                    - pcurve_palette
-                    - pcurve_ribbons
+                   - pcurve_palette
+                   - pcurve_ribbons
 
             
                    
