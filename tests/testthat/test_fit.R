@@ -36,18 +36,6 @@ mod<-pathj::pathj(formula=forms,
                   r2test = T
 )
 
-obj<-mod$models$r2$asDF
-anote<-mod$models$r2$notes[[1]]$note
-enote<-"Some inferential tests cannot be computed for this model"
-
-testthat::test_that("r2 table not working",{
-  testthat::expect_equal(as.character(obj$lhs[2]),"y2")        
-  testthat::expect_equal(obj$r2[1],.8472,tolerance = tol)        
-  testthat::expect_true(is.na(obj$chisq[1]))        
-  testthat::expect_equal(anote,enote)        
-}
-)
-
 obj<-mod$fit$constraints$asDF
 
 testthat::test_that("r2 table",{

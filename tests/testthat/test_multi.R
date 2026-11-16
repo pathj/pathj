@@ -1,4 +1,4 @@
-context("fit")
+context("multi")
 tol<-.01
 data("pathjdata")
 pathjdata$groups_a<-factor(pathjdata$groups_a)

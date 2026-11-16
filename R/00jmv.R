@@ -6,7 +6,7 @@
         `type`="software", 
         `author`="Gallucci, M.", 
         `year`=2021, 
-        `title`="PATHj: jamovi Path Analysis (Version 1.1.4)", 
+        `title`="PATHj: jamovi Path Analysis (Version 1.1.5)", 
         `publisher`="[jamovi module]. For help please visit https://pathj.github.io/", 
         `url`="https://pathj.github.io/", 
         `versioning`="PATHj: jamovi Path Analysis"), 

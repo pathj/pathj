@@ -1,4 +1,4 @@
-context("fit")
+context("coefs")
 tol<-.01
 data("pathjdata")
 pathjdata$groups_a<-factor(pathjdata$groups_a)
