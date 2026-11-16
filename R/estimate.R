@@ -77,7 +77,12 @@ Estimate <- R6::R6Class("Estimate",
                             self$tab_covariances$type<-ifelse(self$tab_covariances$endo,"Residuals","Variables")
                             
                             ## collect defined parameters table
-                            self$tab_defined<-.lav_params[.lav_params$op==":=",]
+                            defined_params<-.lav_params[.lav_params$op==":=",]
+                            if (nrow(defined_params)>0) {
+                              defined_params$desc<-self$tab_defined$desc[
+                                match(defined_params$lhs,self$tab_defined$lhs)]
+                            }
+                            self$tab_defined<-defined_params
                             if (nrow(self$tab_defined)==0) self$tab_defined<-NULL
                             
                             # prepare and comput R2 and collect a table for them

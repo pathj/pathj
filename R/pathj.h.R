@@ -1111,6 +1111,8 @@ pathjResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                             title="Defined Parameters",
                             visible=FALSE,
                             clearWith=list(
+                                "endogenousTerms",
+                                "indirect",
                                 "endogenous",
                                 "covs",
                                 "factors",

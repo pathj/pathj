@@ -493,6 +493,8 @@ items:
             type: Table
             visible: false
             clearWith:
+                  - endogenousTerms
+                  - indirect
                   - endogenous
                   - covs
                   - factors
